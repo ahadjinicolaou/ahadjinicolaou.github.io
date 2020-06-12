@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>machine-learning | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/tag/machine-learning/</link>
+      <atom:link href="https://www.remotelycurious.net/tag/machine-learning/index.xml" rel="self" type="application/rss+xml" />
+    <description>machine-learning</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 25 Oct 2020 19:03:33 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>machine-learning</title>
+      <link>https://www.remotelycurious.net/tag/machine-learning/</link>
+    </image>
+    
+    <item>
+      <title>ml.doc (1.1): Learning from data</title>
+      <link>https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/</link>
+      <pubDate>Sun, 25 Oct 2020 19:03:33 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/</guid>
+      <description>&lt;!-- $\newcommand{\norm}[1]{\left\lVert#1\right\rVert}$ --&gt;
+&lt;p&gt;Over the last few weeks I&amp;rsquo;ve been working through MIT&amp;rsquo;s machine learning course 
+&lt;a href=&#34;https://www.edx.org/course/machine-learning-with-python-from-linear-models-to&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;(6.86x)&lt;/a&gt;. The course&amp;rsquo;s emphasis on understanding the core concepts really makes you think about the data and whether a given algorithm is the right tool for the job. This approach would benefit those who are new to machine learning and looking to employ ML algorithms in their own work. On the other hand, the course itself requires some mathematical maturity (not to mention a bucketload of undergraduate algebra and calculus) which can make the material hard to digest. A little exposition in the right places would go a long way towards helping new practitioners use these new tools more effectively in their projects.&lt;/p&gt;
+&lt;p&gt;To address this thought bubble (and reinforce my own understanding), I&amp;rsquo;ve decided to write up some key ideas introduced in MITx 6.86x so as to make them more accessible to a general audience. Think of each writeup as being inspired by the MIT approach, but with some extra material in places to help absorb the ideas.&lt;/p&gt;
+&lt;!-- To help others absorb some of the key ideas underlying ML (but also to reinforce my own understanding), I&#39;ve decided to write up a guide or two. Rather than a comprehensive introduction to machine learning, this series will focus on specific topics, taking occasional detours through related concepts whenever it might help the reader. --&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    To get the most out of these writeups, you should be familiar with basic machine learning concepts, including things such as the difference between supervised and unsupervised learning, and the importance of using separate training and testing datasets. It&amp;rsquo;s also useful to have at least some rusty linear algebra and calculus skills under your belt.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#overview&#34;&gt;Overview&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#measuring-error&#34;&gt;Measuring error&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#sketching-the-goal&#34;&gt;Sketching the goal&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#a-mathematical-translation&#34;&gt;A mathematical translation&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-decision-boundary&#34;&gt;The decision boundary&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-binary-linear-classifier&#34;&gt;The binary linear classifier&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#linear-separability&#34;&gt;Linear separability&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#teaching-the-classifier&#34;&gt;Teaching the classifier&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-perceptron&#34;&gt;The perceptron&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#number-of-iterations&#34;&gt;Number of iterations&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#the-offset-update&#34;&gt;The offset update&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;p&gt;The job of a classifier is to take some input data and figure out how to label it. Many successful applications of machine learning involve classification, ranging from recommender systems to spam and fraud detection to medical diagnosis. This writeup will be focused on classifiers that are both &lt;em&gt;binary&lt;/em&gt; (i.e., two output label choices) and &lt;em&gt;linear&lt;/em&gt;, where the label output is a linear function of the inputs.&lt;/p&gt;
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;A classifier $h$ is a function that maps an input &lt;em&gt;feature vector&lt;/em&gt; $x$ to a discrete output &lt;em&gt;label&lt;/em&gt;, $y = h(x)$. The function is discovered during a training period in which the classifier is exposed to data from a training set $S_{N}$, consisting of $N$ input examples and their labels,&lt;/p&gt;
+&lt;p&gt;$$S_{N} = \{ (x^{(i)}, y^{(i)}), i=1,&amp;hellip;,N \}.$$&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    It&amp;rsquo;s worth paying attention to the notation. The $k$-th component of a vector is indicated using a subscript, $x_{k}$. Subscripts will also be used to indicate a specific piece of information, like a positive training example, $x_+$. The $i$-th member of some collection is indicated by a superscript, e.g. the $i$-th feature vector, $x^{(i)}$. When in doubt, assume you are dealing with a vector.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Imagine you want to build a classifier that can predict whether you will like a brunch dish, based on its ingredients. You might consider a six-item ingredient list:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;🥔 potato&lt;/li&gt;
+&lt;li&gt;🥑 avocado&lt;/li&gt;
+&lt;li&gt;🍅 tomato&lt;/li&gt;
+&lt;li&gt;🥓 bacon&lt;/li&gt;
+&lt;li&gt;🍄 mushroom&lt;/li&gt;
+&lt;li&gt;🥫 baked beans&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We will represent each brunch dish as a 6-dimensional feature vector, $x^{(i)} \in \{0, 1\}^6$, with $x^{(i)}_{k} = 1$ indicating the presence of the $k$-th ingredient in the $i$-th dish. The label $y^{(i)}=1$ is used to indicate that you like the $i$-th dish (and $y^{(i)}=-1$ to encode the opposite).&lt;/p&gt;
+&lt;p&gt;An example training set $S_5$ containing five example brunch dishes is shown below. Each component of $x$ (in other words, each ingredient $x_k$) is known as a &lt;em&gt;feature&lt;/em&gt;.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;$i$&lt;/th&gt;
+&lt;th&gt;dish&lt;/th&gt;
+&lt;th&gt;🥔 $x^{(i)}_{1}$&lt;/th&gt;
+&lt;th&gt;🥑 $x^{(i)}_{2}$&lt;/th&gt;
+&lt;th&gt;🍅 $x^{(i)}_{3}$&lt;/th&gt;
+&lt;th&gt;🥓 $x^{(i)}_{4}$&lt;/th&gt;
+&lt;th&gt;🍄 $x^{(i)}_{5}$&lt;/th&gt;
+&lt;th&gt;🥫 $x^{(i)}_{6}$&lt;/th&gt;
+&lt;th&gt;$y^{(i)}$&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;avocado sandwich&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;huevos rancheros&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;3&lt;/td&gt;
+&lt;td&gt;bacon and eggs&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;english breakfast&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;-1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;5&lt;/td&gt;
+&lt;td&gt;mushroom chowder&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;-1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;After training our brunch classifier $h_{brunch}$ on the training set, it will learn how to map each input vector to its corresponding label. We could then use it to predict whether we would like something new, like breakfast burritos.&lt;/p&gt;
+&lt;p&gt;$$ \textrm{breakfast burrito} = \{🥔, 🥑, 🍅, 🥫\} $$
+$$ h_{brunch}(\{🥔, 🥑, 🍅, 🥫\}) = h_{brunch}([1, 1, 1, 0, 0, 1]) = &amp;hellip; $$&lt;/p&gt;
+&lt;h2 id=&#34;measuring-error&#34;&gt;Measuring error&lt;/h2&gt;
+&lt;p&gt;Classifiers learn from their mistakes with the help of an &lt;em&gt;algorithm&lt;/em&gt;. With each example $(x^{(i)}, y^{(i)})$ considered during training, the algorithm checks to see whether the classifier maps the input to the right label. If $h(x^{(i)}) \neq y^{(i)}$, the classifier has made a mistake. We define the &lt;em&gt;training error&lt;/em&gt; $E_N$ as the average rate of mistakes over the training set,&lt;/p&gt;
+&lt;p&gt;$$ E_N(h) = \frac{1}{N} \sum_{i=1}^{N} [\![ h(x^{(i)}) \neq y^{(i)} ]\!],$$&lt;/p&gt;
+&lt;p&gt;where $ [\![ \textrm{something} ]\!] = 1$ if the thing inside is true, and $0$ otherwise. For example, $ [\![ 2 = 9 ]\!] = 0$ and $ [\![ 2 &amp;lt; 9 ]\!] = 1$. If our brunch classifier gets three of the five training labels wrong, then $E_N(h_{brunch}) = \frac{3}{5}$.&lt;/p&gt;
+&lt;p&gt;Knowing the training error is important, but we are usually more interested in how the classifier would perform in the real world, on data it has not seen before. Since we cannot know how well $h$ would work for every possible feature vector, we settle for knowing the &lt;em&gt;test error&lt;/em&gt; $E(h)$, which is computed in the same way as the training error, but with data that have been set aside for this purpose.&lt;/p&gt;
+&lt;h2 id=&#34;sketching-the-goal&#34;&gt;Sketching the goal&lt;/h2&gt;
+&lt;p&gt;We have talked about the idea of training a classifier to learn from mistakes, but what does that look like? Let&amp;rsquo;s use some sketches to visualize it.&lt;/p&gt;
+&lt;p&gt;Imagine we are midway through training a linear classifier on a set of $N=5$ two-dimensional feature vectors, $x \in \mathbb{R}^2$ (Fig. 1). Their labels, $y \in \{-1, 1\}$ are indicated by the plus/minus symbols. There is also a black line, running through the feature space and dividing it into two halves. This represents our linear classifier.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-a-linear-classifier-that-can-do-better-with-e_nh--15&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/poor-classifier.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; A linear classifier that can do better, with $E_N(h) = 1/5$.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/poor-classifier.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; A linear classifier that can do better, with $E_N(h) = 1/5$.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;On the blue half of the feature space, vectors map to $h(x) = 1$, and on the orange half, $h(x) = -1$. We can see that all but one of the training examples have been mapped correctly. Since we have five examples, the training error $E_N(h) = 1/5$.&lt;/p&gt;
+&lt;p&gt;Not bad, but looking at the plot, you can see some room for improvement. If we just bump the line, this &lt;em&gt;decision boundary&lt;/em&gt; a little bit, we can improve the classifier and achieve zero training error (Fig. 2).&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-after-nudging-the-decision-boundary-we-have-a-better-classifier-with-no-training-error&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/better-classifier.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; After nudging the decision boundary, we have a better classifier, with no training error.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/better-classifier.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; After nudging the decision boundary, we have a better classifier, with no training error.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;This, in a nutshell, is what training a classifier looks like. We start off with a function $h$ that is useless, but with each iteration of the algorithm, the decision boundary dividing each label region gets nudged and the function becomes slightly better at its job.&lt;/p&gt;
+&lt;h1 id=&#34;a-mathematical-translation&#34;&gt;A mathematical translation&lt;/h1&gt;
+&lt;p&gt;If you peer into the black box of a classifier and find out how it &amp;ldquo;learns&amp;rdquo;, you will be unsurprised to find some mathematics. What might surprise you is how little of it you need to know to more fully understand the general problem of classification. In this section we will motivate the use of linear algebra as a language to describe the problem at hand, using it to flesh out the ideas of the previous section.&lt;/p&gt;
+&lt;h2 id=&#34;the-decision-boundary&#34;&gt;The decision boundary&lt;/h2&gt;
+&lt;p&gt;A binary classifier splits the feature space into two, using a decision boundary. Before we can update the classifier, it needs to be described in language that a training algorithm can understand. That is, we need to parameterize the decision boundary. Once we have this, the algorithm can update the decision boundary parameters to improve the classifier.&lt;/p&gt;
+&lt;p&gt;In general, the decision boundary is a function of the inputs. A &lt;em&gt;linear&lt;/em&gt; classifier working in a $d$-dimensional feature space has a decision boundary that is a linear combination of the input features,&lt;/p&gt;
+&lt;p&gt;$$ x_1 \theta_1 + x_2 \theta_2 + &amp;hellip; + x_d \theta_d + \theta_0 = x \cdot \theta + \theta_0 = 0 $$&lt;/p&gt;
+&lt;p&gt;where $\theta = [\theta_1, \theta_2, &amp;hellip;, \theta_d] \in \mathbb{R}^d$ is a $d$-dimensional vector that determines the relative influence of each feature on the classification, and $\theta_0 \in \mathbb{R}$ is a scalar offset.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;Note that the dot in $x \cdot \theta$ denotes the &lt;em&gt;dot product&lt;/em&gt; of two vectors. Geometrically, this operation is defined by
+$\newcommand{\norm}[1]{|| #1 ||}$&lt;/p&gt;
+&lt;p&gt;$$ x \cdot \theta = \norm{x} \norm{\theta} \textrm{cos}\:\alpha, $$&lt;/p&gt;
+&lt;p&gt;where $\norm{x}$ is the &lt;em&gt;norm&lt;/em&gt; of $x$ and $\alpha$ is the angle between the two vectors. If this looks completely foreign to you, it&amp;rsquo;s probably a good idea to stop here and learn the geometric implications of $x \cdot \theta$ before continuing. Make some sketches!&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;To get comfortable with what exactly $\theta$ means here, let&amp;rsquo;s scale the feature space back to two dimensions and play around with the simplest linear classifier: one whose decision boundary passes through the origin, i.e. $\theta_0 = 0$ (Fig. 3). In this case, the decision boundary takes the form of a line,&lt;/p&gt;
+&lt;p&gt;$$ x_1 \theta_1 + x_2 \theta_2 = x \cdot \theta = 0. $$&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-a-linear-classifier-with-decision-boundary-x-cdot-theta--0-going-through-the-origin&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/classifier-thru-origin.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; A linear classifier, with decision boundary $x \cdot \theta = 0$ going through the origin.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/classifier-thru-origin.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; A linear classifier, with decision boundary $x \cdot \theta = 0$ going through the origin.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Let&amp;rsquo;s consider the geometry of our situation. This was not mentioned earlier, but by convention, $\theta = [\theta_1, \theta_2]$ is chosen such that it points towards the (blue) positively-labeled feature space, as indicated in the figure. Keep this in mind.&lt;/p&gt;
+&lt;p&gt;Now, any vector $x = [x_1, x_2]$ that lies exactly on the decision boundary satisfies $x \cdot \theta = 0$. That means $x$ and $\theta$ are perpendicular to each other, which makes sense. The other implication here is that the classifier has no idea what to do with these inputs: should it be unlucky enough to get them, it will map them to the label $y = h(x) = 0$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This means that although we are dealing with a binary classifier whose job is to map inputs to one of two output labels $\{-1, 1\}$, it is still technically possible for the classifier to map an input to a &lt;em&gt;third&lt;/em&gt; output. This is usually avoided in practice by mapping $h(x) = 0$ to one of the labels.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;How about some other options? Say we pick a positively-labeled vector $x = [-1.8, 2.6]$. Since the (smallest) angle between $x$ and $\theta$ is acute, we know that $x \cdot \theta &amp;gt; 0$ (Fig. 4, left). Now try a negatively-labeled one: $x = [-3.1, -1.7]$. This time, the dot product $x \cdot \theta &amp;lt; 0$ (Fig. 4, right). We are starting to see something useful here!&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-left-inputs-that-are-positively-labeled-ie-hx--1-have-a-positive-dot-product-ie-x-cdot-theta--0-right-negatively-labeled-inputs-have-a-negative-dot-product&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/dot-product.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4.&amp;lt;/b&amp;gt; Left: inputs that are positively labeled (i.e. $h(x) = 1$) have a positive dot product, i.e. $x \cdot \theta &amp;amp;gt; 0$. Right: negatively-labeled inputs have a negative dot product.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/dot-product.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4.&lt;/b&gt; Left: inputs that are positively labeled (i.e. $h(x) = 1$) have a positive dot product, i.e. $x \cdot \theta &amp;gt; 0$. Right: negatively-labeled inputs have a negative dot product.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;If we consider the general form of the classifier and add back the scalar offset, such that the decision boundary looks like $x \cdot \theta + \theta_0 = 0$, the key idea stays the same, e.g. if $x \cdot \theta + \theta_0 &amp;gt; 0$, the classifier assigns $x$ a positive label. In other words, $x$ gets mapped to the &lt;em&gt;sign&lt;/em&gt; of the quantity $x \cdot \theta + \theta_0$.&lt;/p&gt;
+&lt;h2 id=&#34;the-binary-linear-classifier&#34;&gt;The binary linear classifier&lt;/h2&gt;
+&lt;p&gt;At last, we are ready for a proper definition. A &lt;em&gt;binary linear classifier&lt;/em&gt; $h$ is a function that maps feature vectors $x$ to $h(x) \in \{-1, 0, 1\}$, where
+$$ h(x) = \textrm{sign}(\theta \cdot x + \theta_0).$$&lt;/p&gt;
+&lt;p&gt;The search for a good classifier now becomes a matter of finding values for the parameter vector $\theta$ and offset parameter $\theta_0,$ such that the classifier output or &lt;em&gt;prediction&lt;/em&gt; $h(x^{(i)})$ is equal to $y^{(i)}$ for a decent proportion of the training set. We will talk about &lt;strong&gt;how&lt;/strong&gt; we find these values very soon.&lt;/p&gt;
+&lt;p&gt;Although we have made use of two-dimensional examples, the same concepts hold in higher dimensions. In general, the decision boundary is a &lt;em&gt;hyperplane&lt;/em&gt; of the feature space. All that fancy word means is that for a $d$-dimensional feature space, the decision boundary is an $(d-1)$-dimensional subset of that space. You have already seen that for a two dimensional feature space, i.e. $x \in \mathbb{R}^2$, the decision boundary is a line. If we move up another dimension and consider features $x \in \mathbb{R}^3$, the decision boundary becomes a plane, as shown below.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-5b-within-a-three-dimensional-feature-space-the-decision-boundary-becomes-a-plane&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/decision-boundary-3d.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 5.&amp;lt;/b&amp;gt; Within a three-dimensional feature space, the decision boundary becomes a plane.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/decision-boundary-3d.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 5.&lt;/b&gt; Within a three-dimensional feature space, the decision boundary becomes a plane.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;linear-separability&#34;&gt;Linear separability&lt;/h2&gt;
+&lt;p&gt;As it turns out, there is a price to pay for this level of simplicity: linear classifiers of this type are quite constrained. Consider the following two-dimensional dataset (Fig. 6). It is an illustration of XOR, the boolean operation that says you can have either one of these two things $(x_1=1 \textrm{ or } x_2=1)$, but not both $(x_1=1 \textrm{ and } x_2=1)$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    XOR comes up often in life. As an example, let $x_1$ and $x_2$ be items on the dessert menu at a restaurant, i.e., $\{x_1, x_2 \} \in \{🍨,🍰,🥧,🍮\}.$
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-6b-a-dataset-that-is-not-linearly-separable&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/xor.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 6.&amp;lt;/b&amp;gt; A dataset that is not linearly separable.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/xor.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 6.&lt;/b&gt; A dataset that is not linearly separable.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;No matter how you slice it, there is no way to draw a line through these training examples to perfectly group them by label. This is an example of a dataset that is not &lt;em&gt;linearly separable&lt;/em&gt;. More formally, the training dataset $S_N = \{(x^{(i)}, y^{(i)}), i=1,&amp;hellip;, N\}$ is said to be linearly separable if there exists a parameter vector $\hat{\theta}$ and offset vector $\hat{\theta_0}$ such that for all training examples $i=1,&amp;hellip;,N$,&lt;/p&gt;
+&lt;p&gt;$$ y^{(i)}(\hat{\theta} \cdot x + \hat{\theta_0}) &amp;gt; 0.$$&lt;/p&gt;
+&lt;p&gt;Take a moment to understand this expression. Imagine we have a pair of these special values $\hat{\theta}$ and $\hat{\theta_0}$ for some dataset. If we look at the above inequality for a positive example $x_+$, we know that $(\hat{\theta} \cdot x_+ + \hat{\theta_0})$ must be positive for it to hold, since $y_+=1$. Similarly, for a negative example $x_-$, the quantity $(\hat{\theta} \cdot x_- + \hat{\theta_0})$ must evaluate to a negative value.&lt;/p&gt;
+&lt;p&gt;What we can see here is that when $y^{(i)}(\theta \cdot x^{(i)} + \theta_0) &amp;gt; 0$, the label and classifier output for the $i$-th training example $x^{(i)}$ are in &lt;em&gt;agreement&lt;/em&gt;. When this equality is not true, the prediction does not match the label and the classifier has made a mistake.&lt;/p&gt;
+&lt;h1 id=&#34;teaching-the-classifier&#34;&gt;Teaching the classifier&lt;/h1&gt;
+&lt;p&gt;It is finally time to talk about how a classifier learns from experience. Until now there have been many mentions of an &amp;ldquo;algorithm&amp;rdquo;, which is vaguely understood to be used for training the classifier. Here we will introduce the &lt;em&gt;perceptron&lt;/em&gt;, a simple and elegant algorithm whose variants have been widely applied to solve all kinds of problems.&lt;/p&gt;
+&lt;p&gt;To train a classifier, an algorithm needs to recognize when the classifier makes a mistake. Recall that the training error for a linear classifier looks like this:&lt;/p&gt;
+&lt;p&gt;$$ E_N(h) = \frac{1}{N} \sum_{i=1}^{N} [\![ h(x^{(i)}) \neq y^{(i)} ]\!],$$&lt;/p&gt;
+&lt;p&gt;where $[\![ h(x^{(i)}) \neq y^{(i)} ]\!]$ equals one for a mistake, and zero otherwise. But thanks to our previous discussion, we know precisely how to express a mistake, i.e,&lt;/p&gt;
+&lt;p&gt;$$y^{(i)}(\theta \cdot x^{(i)} + \theta_0) \leq 0.$$&lt;/p&gt;
+&lt;p&gt;With that in mind, let&amp;rsquo;s take a stroll through the perceptron.&lt;/p&gt;
+&lt;h2 id=&#34;the-perceptron&#34;&gt;The perceptron&lt;/h2&gt;
+&lt;p&gt;The perceptron algorithm takes a training set $S_N$ input, and outputs the classifier parameters $\theta$ and $\theta_0$. The general principle is to find a mistake and then update the parameters to fix the mistake. As long as the training data are linearly separable, doing this for long enough will eventually result in some parameters that do the job.&lt;/p&gt;
+&lt;p&gt;It is typical to initialize $\theta$ to a $d$-dimensional zero vector (where $d$ is the number of features) and $\theta_0$ to a scalar zero. For now we will ignore $\theta_0$ and focus on training a linear classifier whose decision boundary runs through the origin. We begin the proceedings with the following items:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;theta&lt;/code&gt;, a $d$-element array of zeros,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;feature_matrix&lt;/code&gt;, a $d \times N$ feature matrix, with a training example on each row,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;labels&lt;/code&gt;, an array of $N$ labels for each training example.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;An incomplete Python (Numpy) implementation of the algorithm looks like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def incomplete_perceptron(feature_matrix, labels):
+    num_features, num_examples = feature_matrix.shape
+    theta = np.zeros(num_features)
+    
+    for i in range(num_examples):
+        x, y = feature_matrix[i, :], labels[i]
+        # update theta when we have made a mistake
+        if y * np.dot(theta, x) &amp;lt;= 0:
+            theta = theta + y * x
+
+    return theta
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;At the update step, the algorithm tests to see whether &lt;code&gt;theta&lt;/code&gt;, the current iteration of the classifier computes the wrong training label. When that happens, $\theta$ is updated by adding $y^{(i)} x^{(i)}$ to it.&lt;/p&gt;
+&lt;p&gt;To see why that should help things, let&amp;rsquo;s consider the scenario after one update, where $\theta = y^{(i)}x^{(i)}.$ Now imagine if the classifier saw the same training example. If we plugged our updated $\theta$ value into the &amp;ldquo;mistake detector&amp;rdquo;, we would get&lt;/p&gt;
+&lt;p&gt;$$ y^{(i)} (\theta \cdot x^{(i)}) = y^{(i)} ((y^{(i)}x^{(i)}) \cdot x^{(i)}) = x^{(i)} \cdot x^{(i)} = \norm{x^{(i)}}^2$$&lt;/p&gt;
+&lt;p&gt;Now unless you happen to have a row of zeros inside your feature matrix, the squared norm of $x$ is always greater than zero, and so the mistake has been corrected. We can see that the algorithm has somehow improved the situation.&lt;/p&gt;
+&lt;h3 id=&#34;number-of-iterations&#34;&gt;Number of iterations&lt;/h3&gt;
+&lt;p&gt;As we go through the training examples, the parameter vector $\theta$ will change rapidly, sometimes cancelling out the effect of previous examples. It is for this reason that the dataset is typically iterated over multiple times, ideally until the algorithm no longer finds a mistake.&lt;/p&gt;
+&lt;p&gt;To complete the algorithm, we will introduce a new input $T$ that specifies how many times to loop through the dataset, and factor the offset parameter &lt;code&gt;theta_0&lt;/code&gt; into our computation. The last change to make is a practical one: it is tricky to check whether a numerical computation equals an exact value, like zero. To avoid numerical instabilities, we will instead use a tolerance parameter $\epsilon$, such that if some result $|r| &amp;lt; \epsilon$, then $r = 0$.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def perceptron(feature_matrix, labels, T=1, tolerance=1e-6):
+    num_features, num_examples = feature_matrix.shape
+    theta = np.zeros(num_features)
+    theta_0 = 0
+
+    for t in range(T):
+        for i in range(num_examples):
+            x, y = feature_matrix[i, :], labels[i]
+            # update theta, theta_0 when we have made a mistake
+            if y * (np.dot(theta, x) + theta_0) &amp;lt; tolerance:
+                theta = theta + y * x
+                theta_0 = theta_0 + y
+
+    return theta, theta_0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;the-offset-update&#34;&gt;The offset update&lt;/h3&gt;
+&lt;p&gt;It is worth making a quick note about how the update for the offset parameter $\theta_0$ comes about. Consider a dataset that has been &amp;ldquo;extended&amp;rdquo;, such that $\theta_{ext} = [\theta, \theta_0]$ and $x_{ext} = [x, 1],$ where $x \in S_N$. If we want to update $\theta_{ext}$ using our extended training data, we use the same update rule as before,&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\theta_{ext} &amp;amp;= \theta_{ext} + y^{(i)} x_{ext}^{(i)} \\&lt;br&gt;
+\end{align*}
+$$&lt;/p&gt;
+&lt;p&gt;Expanding this out reveals the update for both parameters:&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\begin{bmatrix}
+\theta\\&lt;br&gt;
+\theta_0
+\end{bmatrix}
+&amp;amp;=
+\begin{bmatrix}
+\theta\\&lt;br&gt;
+\theta_0
+\end{bmatrix}
+\end{align*} + y^{(i)}
+\begin{bmatrix}
+x^{(i)}\\&lt;br&gt;
+1
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;p&gt;In other words, handling the extra offset parameter $\theta_0$ is just a matter of considering slightly different training examples.&lt;/p&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;Over the course of this writeup we have peeked behind the curtain and seen that machine learning, for all the hype and buzz, is not something overly mysterious. At heart, machine learning is the practice of identifying patterns in data using some kind of model, with the &amp;ldquo;learning&amp;rdquo; achieved through improving the model parameters.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Beware those bearing linear regression models</title>
+      <link>https://www.remotelycurious.net/post/beware-linear-regression/</link>
+      <pubDate>Sun, 12 Jul 2020 22:06:30 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/beware-linear-regression/</guid>
+      <description>&lt;p&gt;Lift a rock in your garden and you might find a linear regression model. They are everywhere, working hard to predict all sorts of things, like how much further you can drive with this much fuel in the tank, or how much your house might sell for in your neighborhood. Linear regression models owe their success to their ease-of-use as well as their natural interpretability &amp;ndash; most people would probably find it a lot harder to predict the output of a neural network, compared with that of $y=2x$.&lt;/p&gt;
+&lt;p&gt;Unfortunately, it is this ease-of-use and interpretability that make linear regression models especially prone to misuse, even by people who should know better&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. Before rushing to apply a model (any model), we need to ask ourselves two questions:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;What does this model assume?&lt;/li&gt;
+&lt;li&gt;Do these assumptions make sense for our data?&lt;/li&gt;
+&lt;/ol&gt;
+&lt;!--[^1]: Highly-educated scientists and medical professionals are human and therefore perfectly capable of [bad judgement](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1297101/). --&gt;
+&lt;p&gt;As it turns out, the linear regression model makes some pretty strong assumptions that don&amp;rsquo;t always hold up in reality. This writeup takes a look at these assumptions, what happens when they don&amp;rsquo;t hold, and which ones we can bend.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#simple-linear-regression&#34;&gt;Simple linear regression&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#meet-the-residual&#34;&gt;Meet the residual&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#out-with-the-assumptions&#34;&gt;Out with the assumptions&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#normality&#34;&gt;Normality&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#independent-errors&#34;&gt;Independent errors&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#normally-distributed-errors&#34;&gt;Normally-distributed errors&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#homoscedasticity&#34;&gt;Homoscedasticity&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#all-too-human&#34;&gt;All too human&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;simple-linear-regression&#34;&gt;Simple linear regression&lt;/h1&gt;
+&lt;p&gt;The goal of a linear regression model is to model $k$ &lt;em&gt;response&lt;/em&gt; variables, $Y_{1},Y_{2},&amp;hellip;,Y_{k}$ using $p$ &lt;em&gt;predictor&lt;/em&gt; variables, $X_{1},X_{2},&amp;hellip;,X_{p}$. In this article we will focus on &amp;ldquo;simple linear regression&amp;rdquo;, or SLR $(k=1)$ to avoid getting bogged down in notation. To model our response $Y$ using $p=3$ predictor variables, for example, we assume a relationship of the form&lt;/p&gt;
+&lt;p&gt;$$
+Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3},
+$$&lt;/p&gt;
+&lt;p&gt;where $\beta_{i}$ are predictor coefficients that have been found by the end of the fitting process.&lt;/p&gt;
+&lt;p&gt;Most of the core assumptions underlying linear regression have to do with the &lt;em&gt;residuals&lt;/em&gt;, which are used to estimate prediction errors. Since they play such an important role in the modeling process, it&amp;rsquo;s worth taking some time to formally introduce them.&lt;/p&gt;
+&lt;h2 id=&#34;meet-the-residual&#34;&gt;Meet the residual&lt;/h2&gt;
+&lt;p&gt;To train a model, you need data. More specifically, you need a set of $N &amp;gt; p$ response &lt;em&gt;observations&lt;/em&gt; and predictor &lt;em&gt;measurements&lt;/em&gt;, ${(\hat{y_{i}}, x_{i1},x_{i2},x_{i3}  )}_{i=1}^{N}$. Note the little hat sitting on $\hat{y_i}$. Our model formulation assumes that each of our responses is corrupted by some error $\epsilon$ such that for our $i$th observation, $\hat{y_i} = y_i + \epsilon_i$. The hat indicates that the observations $\hat{y_i}$ are actually &lt;em&gt;estimates&lt;/em&gt; of the true responses $y_i$ that we can never observe.&lt;/p&gt;
+&lt;p&gt;Our SLR model relates the predictor measurements to the observations by&lt;/p&gt;
+&lt;p&gt;$$
+\hat{y_i} = \hat{\beta_{0}} + \hat{\beta_{1}}x_{i1} + \hat{\beta_{2}}x_{i2} + \hat{\beta_{3}}x_{i3} + \epsilon_{i},
+$$&lt;/p&gt;
+&lt;p&gt;with our fitting process giving us estimates $\hat{\beta_i}$ of the true, hidden coefficients $\beta_i$. Our model thus consists of a &lt;em&gt;deterministic&lt;/em&gt; component (i.e., the equation for $Y$ in terms of the $X_i$s) and a &lt;em&gt;random&lt;/em&gt; component, represented by the error $\epsilon$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Unlike the response and the coefficients, the predictor measurements are hatless, meaning that they are assumed to be measured with no error.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Since there is no way to know the true response, we can never know the error terms $\epsilon_i$. So we estimate them using &lt;em&gt;residuals&lt;/em&gt;. Compared directly,&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the error $\epsilon_i$ is the difference between the measured value and the (unobservable) &lt;em&gt;true&lt;/em&gt; value,&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;$$\epsilon_i = y_i - y,$$&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the residual $r_i$ is the difference between the measured value and the &lt;em&gt;predicted&lt;/em&gt; value computed from the model,&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;$$r_i = y_i - \hat{y_i}.$$&lt;/p&gt;
+&lt;p&gt;Now that we have some measure of prediction error in the residuals, we can use them to build a &lt;em&gt;loss function&lt;/em&gt; that describes the overall model error. Linear regression then works to find the coefficient values that minimize this loss function. The &lt;em&gt;L2-norm&lt;/em&gt; loss function $L = \sum_{i=1}^{N}r_i ^2$ is popular because it punishes outliers and makes finding the optimal coefficients a matter of 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Ordinary_least_squares#Estimation&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;plugging values into a formula&lt;/a&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;out-with-the-assumptions&#34;&gt;Out with the assumptions&lt;/h1&gt;
+&lt;p&gt;Although you will see all sorts of assumptions scattered throughout this article, there are four major ones (each with their own subsection) that rule them all. That is, these four alone are sufficient for linear regression analysis. Some are less demanding than others. Ultimately, you can probably get away with bending all of them in some way (as long as the statisticians aren&amp;rsquo;t looking), with the caveat that your model may become unreliable and therefore unsuitable for inference. Let&amp;rsquo;s see what can happen.&lt;/p&gt;
+&lt;h2 id=&#34;normality&#34;&gt;Normality&lt;/h2&gt;
+&lt;p&gt;Our first assumption is inherent in the name of the model: the response is a linear combination of the predictors. This supposedly fundamental assumption is arguably the one that gets overlooked most of the time. Why? In a nutshell, when you&amp;rsquo;re close enough to a curve, it looks like a straight line.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Note that &amp;ldquo;linear&amp;rdquo; is in the sense of the coefficients, not the predictors. This means that relations like $Y = \beta X^{2}$ are fine but ones like $Y = \beta ^{2}X$ are not.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-any-curve-can-look-like-a-straight-line-at-close-range&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/beware-linear-regression/close-up.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Any curve can look like a straight line at close range.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/beware-linear-regression/close-up.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Any curve can look like a straight line at close range.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;There&amp;rsquo;s a reason the &amp;ldquo;flat Earth&amp;rdquo; theory was so compelling before NASA.&lt;/p&gt;
+&lt;p&gt;In practice, we have some wiggle room with this one. As long as our response data $y_{i}$ are far away from any theoretical limit, we can generally draw a straight line through the data and that will be enough for all sorts of applications. CEOs can project their yearly sales, consumers can work out their monthly electricity consumption, and life goes on.&lt;/p&gt;
+&lt;!-- Linear regression also tends to be fast, which can be useful if you&#39;re fitting models on embedded devices or portable hardware. --&gt;
+&lt;p&gt;On the other hand, if we are looking to describe phenomena more generally, then we need to take the idea of linearity more seriously. Let&amp;rsquo;s say you want to build an SLR model to describe height $H = \beta_{0} + \beta_{1}W$ as a function of weight $W$, using data from your coworkers. As long as you have enough coworkers (and enough of them agree to give you that data), you will end up with coefficients $\hat{\beta_{i}}$ that capture this relationship for adults that more or less resemble your coworkers. That last point is crucial. If you are a professional wrestler (presumably learning statistical analysis in your own time) and each of your coworkers resembles 
+&lt;a href=&#34;https://www.remotelycurious.net/beware-linear-regression/thanos.jpg&#34;&gt;Thanos&lt;/a&gt;, your coefficients will be useless for predicting the height of an average human being. If your coworkers are a regular group of men and women, your coefficients won&amp;rsquo;t help you to predict the height of a child. In general, the more useful you want your model to be, the less likely you&amp;rsquo;ll be using linear regression.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    An important side-effect of the model&amp;rsquo;s formulation has to do with the effect of each predictor on the response. By assuming a response of the form $Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3}$, we are also assuming that the effect of one predictor variable is independent of the others. If this holds, one unit of change in $X_{1}$ will have the same effect on the response, &lt;em&gt;no matter what values the other predictors have&lt;/em&gt;. That is a strong assumption!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The bottom line is that under certain circumstances, an SLR model might be enough to describe non-linear phenomena. If you scatter your data and it looks like they will conform to a straight line without excluding too many outliers, it might be all you need. Just be wary about using the model to extrapolate data beyond your current range of responses.&lt;/p&gt;
+&lt;h2 id=&#34;independent-errors&#34;&gt;Independent errors&lt;/h2&gt;
+&lt;p&gt;To assess how good our model is, and to do it &lt;em&gt;correctly&lt;/em&gt;, we need the residuals to have properties that are like the actual errors they are supposed to estimate: independent and normally distributed, with zero mean and fixed variance. Each of the remaining core assumptions behind linear regression is right there in that last sentence.&lt;/p&gt;
+&lt;p&gt;What does it mean for the residuals to be independent? This means that they should not have a relationship with any of the predictors, or each other. When we plot the residuals as a function of a predictor variable (or as a function of time, for time-series data), we don&amp;rsquo;t want to see any kind of pattern. Nothing except some random-looking points centered on zero. Anything else means that the residuals have some kind of &lt;em&gt;structure&lt;/em&gt;, suggesting that the model might not be a great fit for the data.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If the residuals are orders of magnitude smaller than the responses, some residual dependence might be tolerable. But it&amp;rsquo;s usually a good idea to work out how they arise, and how to control for them.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;To see what it means when we don&amp;rsquo;t have independent residuals, we&amp;rsquo;ll use the 
+&lt;a href=&#34;http://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Boston Housing dataset&lt;/a&gt; to build a (naive) SLR model of the median house value $V$ based on a single predictor, the mean number of rooms in a house $RM$, related by $V = \beta_0 + \beta_1 RM$. We fit our model and sure enough, the more rooms in your house, the greater its predicted value (Fig. 2, left panel). No surprises there.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-median-house-value-v-spanspan1000s-regressed-onto-mean-room-number-rm-for-the-boston-housing-dataset-left-scatterplot-of-v-against-rm-with-a-linear-fit-red-trace-95-ci-right-the-corresponding-residual-plot-with-a-lowess-smoother-fit-indicated-by-the-orange-trace-data-entries-whose-observations-appeared-to-be-capped-at-the-maximum-value-50000-were-excluded-from-the-analysis&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/beware-linear-regression/dependent-residuals.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Median house value $V$ (&amp;lt;span&amp;gt;$&amp;lt;/span&amp;gt;1,000s) regressed onto mean room number $RM$ for the Boston Housing dataset. Left: Scatterplot of $V$ against $RM$ with a linear fit (red trace; 95% CI). Right: the corresponding residual plot, with a lowess smoother fit indicated by the orange trace. Data entries whose observations appeared to be capped at the maximum value ($50,000) were excluded from the analysis.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/beware-linear-regression/dependent-residuals.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Median house value $V$ (&lt;span&gt;$&lt;/span&gt;1,000s) regressed onto mean room number $RM$ for the Boston Housing dataset. Left: Scatterplot of $V$ against $RM$ with a linear fit (red trace; 95% CI). Right: the corresponding residual plot, with a lowess smoother fit indicated by the orange trace. Data entries whose observations appeared to be capped at the maximum value ($50,000) were excluded from the analysis.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Taking a look at the residual plot in Fig. 2B (right panel), we see that the residuals start off with a positive bias, sagging in the middle of our response range, before increasing again for large room counts. We are underestimating value for houses that don&amp;rsquo;t have an &amp;ldquo;average&amp;rdquo; number of rooms.&lt;/p&gt;
+&lt;p&gt;This residual plot is telling us that our model&amp;rsquo;s deterministic component (i.e., the formula $V = \beta_0 + \beta_1 RM$) is missing something important. But before we try adding other predictors, let&amp;rsquo;s make a small change to our single predictor and use its square $RM^2$, as suggested by the authors of the study that initially made use of this dataset&lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;. This cheap modification gets us a slightly better r-squared value (from 0.47 to 0.50) as well as a residual plot that bends a bit closer to zero (Fig. 3). Transforming the predictors (or the response) can improve the distribution of our residuals and the model&amp;rsquo;s fit quality.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-median-house-value-v-spanspan1000s-regressed-onto-the-square-of-mean-room-number-rm2-for-the-boston-housing-dataset&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/beware-linear-regression/less-dependent-residuals.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Median house value $V$ (&amp;lt;span&amp;gt;$&amp;lt;/span&amp;gt;1,000s) regressed onto the square of mean room number $RM^2$ for the Boston Housing dataset.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/beware-linear-regression/less-dependent-residuals.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Median house value $V$ (&lt;span&gt;$&lt;/span&gt;1,000s) regressed onto the square of mean room number $RM^2$ for the Boston Housing dataset.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Of course, it&amp;rsquo;s unlikely that we can model something as complex as house value with a single predictor. By including two more predictors (house age and per-capita crime), we easily improve the model fit ($R^2=0.65$) and our residuals tend closer to zero. Generally, additional predictors should be considered if (a) they are informative for the response variable, and (b) they are (at most) weakly correlated with any of the existing predictors.&lt;/p&gt;
+&lt;p&gt;Correlation, whether among the residuals or among the predictors, can cause all sorts of problems in regression analysis. As an extreme example, consider what would happen if we fit a model of house value with two perfectly correlated predictors, $RM$ and $RM^2$. Compared with the model that only includes $RM^2$, we net ourselves an artificial boost in $R^2$ (from 0.50 to 0.53) and our $RM^2$ coefficient estimate ends up being an order of magnitude larger (from 0.67 to 2.23). Not only do we not gain any meaningful insight with our extra predictor, we actually &lt;em&gt;lose&lt;/em&gt; insight &amp;ndash; we have made it harder to understand the true effect of room count on house value.&lt;/p&gt;
+&lt;p&gt;Linear regression has a couple more things to say about the distribution of our residuals.&lt;/p&gt;
+&lt;h2 id=&#34;normally-distributed-errors&#34;&gt;Normally-distributed errors&lt;/h2&gt;
+&lt;p&gt;The errors (and the residuals) should not only have a mean of zero, they should also be normally distributed with constant variance $\sigma^2$. We can write this as&lt;/p&gt;
+&lt;p&gt;$$ \epsilon_i \sim \textrm{Normal}(0,\sigma^2). $$&lt;/p&gt;
+&lt;p&gt;If the errors are not normally distributed, you can still go ahead and compute coefficients, but your measures of uncertainty and significance testing may be compromised if you don&amp;rsquo;t have enough observations. For instance, the standard error terms for the predictor coefficients and the model itself, and by extension, their associated confidence intervals, are all computed under the assumption of residual normality. If you do find evidence of non-normality (preferrably through statistical measures like the Kolmogorov-Smirnov test, rather than by visual inspection), but you&amp;rsquo;ve decided that it&amp;rsquo;s acceptable, it might be best to use wider confidence intervals to indicate this additional uncertainty, documenting your rationale.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    How much non-normality is acceptable? That&amp;rsquo;s a tricky question that usually depends on your experience. Probably best to ask a statistician!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Your ears might have detected a loophole earlier, in that we might not need normally-distributed residuals if our observation count is high enough. Thanks to the &lt;em&gt;central limit theorem&lt;/em&gt;, it turns out that with a moderate observation count (let&amp;rsquo;s say $N&amp;gt;20$), linear regression will be perfectly capable of handling your non-normal response data&lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;. The specific number of observations you need will vary depending on whether your response variable is &amp;ldquo;well-behaved&amp;rdquo; or not. If you are dealing with extremely skewed response distributions or large outlier counts, for instance, you will likely need (many) more observations.&lt;/p&gt;
+&lt;h2 id=&#34;homoscedasticity&#34;&gt;Homoscedasticity&lt;/h2&gt;
+&lt;p&gt;In the last section we described the errors as being normally distributed, but we didn&amp;rsquo;t talk about their &lt;em&gt;variance&lt;/em&gt;. When we write $ \epsilon_i \sim \textrm{Normal}(0,\sigma^2),$ we are saying that the errors are &lt;em&gt;identically distributed&lt;/em&gt; for every observation $i$, as if each is being drawn from the same normal distribution with zero mean and variance $\sigma^2$. The errors are said to be &lt;em&gt;homoscedastic&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;(Which is a bit of a mouthful. I&amp;rsquo;d rather just say they have constant variance.)&lt;/p&gt;
+&lt;p&gt;We can test for constant variance using most modern statistical libraries (e.g. 
+&lt;a href=&#34;https://www.statsmodels.org/stable/diagnostic.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;statsmodels&lt;/code&gt;&lt;/a&gt;) but a quick visual indication can be found in the residual plots. If the spread of residuals appears to vary with a given predictor, you should probably run a test to confirm its severity and whether you can tolerate it in your analysis. Too much variability will compromise any measures of uncertainty or significance.&lt;/p&gt;
+&lt;h1 id=&#34;all-too-human&#34;&gt;All too human&lt;/h1&gt;
+&lt;p&gt;So with all these statistical landmines, why are linear regression models so pervasive? &lt;em&gt;Probably because we can understand them&lt;/em&gt;. It is difficult to wrap our minds around nonlinear phenomena because the mental models we use to make sense of our world 
+&lt;a href=&#34;https://hbr.org/2017/05/linear-thinking-in-a-nonlinear-world&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;tend to be linear!&lt;/a&gt;&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Porter, 
+&lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1297101/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Misuse of correlation and regression in three medical journals&lt;/em&gt;&lt;/a&gt;. Journal of the Royal Society of Medicine (1999). &lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Harrison Jr &amp;amp; Rubinfeld, 
+&lt;a href=&#34;https://www.sciencedirect.com/science/article/abs/pii/0095069678900062&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Hedonic housing prices and the demand for clean air&lt;/em&gt;&lt;/a&gt;. Journal of Environmental Economics and Management (1978). &lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Lumley et al., 
+&lt;a href=&#34;https://doi.org/10.1146/annurev.publhealth.23.100901.140546&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;The importance of the normality assumption in large public health datasets&lt;/em&gt;&lt;/a&gt;. Annual Reviews (2002) &lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

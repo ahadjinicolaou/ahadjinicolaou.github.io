@@ -1,0 +1,1269 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Look left and right before using these naive creatures.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/beware-linear-regression/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.f72481ea6518a9efe938e95819339e7a.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/beware-linear-regression/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/beware-linear-regression/">
+  <meta property="og:title" content="Beware those bearing linear regression models | Remotely Curious">
+  <meta property="og:description" content="Look left and right before using these naive creatures."><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-07-12T22:06:30-04:00">
+    
+    <meta property="article:modified_time" content="2020-07-12T22:06:30-04:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/beware-linear-regression/"
+  },
+  "headline": "Beware those bearing linear regression models",
+  
+  "datePublished": "2020-07-12T22:06:30-04:00",
+  "dateModified": "2020-07-12T22:06:30-04:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Look left and right before using these naive creatures."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Beware those bearing linear regression models | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Beware those bearing linear regression models</h1>
+
+  
+  <p class="page-subtitle">Look left and right before using these naive creatures.</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Jul 12, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    12 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/analysis/">analysis</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>Lift a rock in your garden and you might find a linear regression model. They are everywhere, working hard to predict all sorts of things, like how much further you can drive with this much fuel in the tank, or how much your house might sell for in your neighborhood. Linear regression models owe their success to their ease-of-use as well as their natural interpretability &ndash; most people would probably find it a lot harder to predict the output of a neural network, compared with that of $y=2x$.</p>
+<p>Unfortunately, it is this ease-of-use and interpretability that make linear regression models especially prone to misuse, even by people who should know better<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>. Before rushing to apply a model (any model), we need to ask ourselves two questions:</p>
+<ol>
+<li>What does this model assume?</li>
+<li>Do these assumptions make sense for our data?</li>
+</ol>
+<!--[^1]: Highly-educated scientists and medical professionals are human and therefore perfectly capable of [bad judgement](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1297101/). -->
+<p>As it turns out, the linear regression model makes some pretty strong assumptions that don&rsquo;t always hold up in reality. This writeup takes a look at these assumptions, what happens when they don&rsquo;t hold, and which ones we can bend.</p>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#simple-linear-regression">Simple linear regression</a>
+      <ul>
+        <li><a href="#meet-the-residual">Meet the residual</a></li>
+      </ul>
+    </li>
+    <li><a href="#out-with-the-assumptions">Out with the assumptions</a>
+      <ul>
+        <li><a href="#normality">Normality</a></li>
+        <li><a href="#independent-errors">Independent errors</a></li>
+        <li><a href="#normally-distributed-errors">Normally-distributed errors</a></li>
+        <li><a href="#homoscedasticity">Homoscedasticity</a></li>
+      </ul>
+    </li>
+    <li><a href="#all-too-human">All too human</a></li>
+  </ul>
+</nav>
+<h1 id="simple-linear-regression">Simple linear regression</h1>
+<p>The goal of a linear regression model is to model $k$ <em>response</em> variables, $Y_{1},Y_{2},&hellip;,Y_{k}$ using $p$ <em>predictor</em> variables, $X_{1},X_{2},&hellip;,X_{p}$. In this article we will focus on &ldquo;simple linear regression&rdquo;, or SLR $(k=1)$ to avoid getting bogged down in notation. To model our response $Y$ using $p=3$ predictor variables, for example, we assume a relationship of the form</p>
+<p>$$
+Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3},
+$$</p>
+<p>where $\beta_{i}$ are predictor coefficients that have been found by the end of the fitting process.</p>
+<p>Most of the core assumptions underlying linear regression have to do with the <em>residuals</em>, which are used to estimate prediction errors. Since they play such an important role in the modeling process, it&rsquo;s worth taking some time to formally introduce them.</p>
+<h2 id="meet-the-residual">Meet the residual</h2>
+<p>To train a model, you need data. More specifically, you need a set of $N &gt; p$ response <em>observations</em> and predictor <em>measurements</em>, ${(\hat{y_{i}}, x_{i1},x_{i2},x_{i3}  )}_{i=1}^{N}$. Note the little hat sitting on $\hat{y_i}$. Our model formulation assumes that each of our responses is corrupted by some error $\epsilon$ such that for our $i$th observation, $\hat{y_i} = y_i + \epsilon_i$. The hat indicates that the observations $\hat{y_i}$ are actually <em>estimates</em> of the true responses $y_i$ that we can never observe.</p>
+<p>Our SLR model relates the predictor measurements to the observations by</p>
+<p>$$
+\hat{y_i} = \hat{\beta_{0}} + \hat{\beta_{1}}x_{i1} + \hat{\beta_{2}}x_{i2} + \hat{\beta_{3}}x_{i3} + \epsilon_{i},
+$$</p>
+<p>with our fitting process giving us estimates $\hat{\beta_i}$ of the true, hidden coefficients $\beta_i$. Our model thus consists of a <em>deterministic</em> component (i.e., the equation for $Y$ in terms of the $X_i$s) and a <em>random</em> component, represented by the error $\epsilon$.</p>
+<div class="alert alert-note">
+  <div>
+    Unlike the response and the coefficients, the predictor measurements are hatless, meaning that they are assumed to be measured with no error.
+  </div>
+</div>
+<p>Since there is no way to know the true response, we can never know the error terms $\epsilon_i$. So we estimate them using <em>residuals</em>. Compared directly,</p>
+<ul>
+<li>the error $\epsilon_i$ is the difference between the measured value and the (unobservable) <em>true</em> value,</li>
+</ul>
+<p>$$\epsilon_i = y_i - y,$$</p>
+<ul>
+<li>the residual $r_i$ is the difference between the measured value and the <em>predicted</em> value computed from the model,</li>
+</ul>
+<p>$$r_i = y_i - \hat{y_i}.$$</p>
+<p>Now that we have some measure of prediction error in the residuals, we can use them to build a <em>loss function</em> that describes the overall model error. Linear regression then works to find the coefficient values that minimize this loss function. The <em>L2-norm</em> loss function $L = \sum_{i=1}^{N}r_i ^2$ is popular because it punishes outliers and makes finding the optimal coefficients a matter of 
+<a href="https://en.wikipedia.org/wiki/Ordinary_least_squares#Estimation" target="_blank" rel="noopener">plugging values into a formula</a>.</p>
+<h1 id="out-with-the-assumptions">Out with the assumptions</h1>
+<p>Although you will see all sorts of assumptions scattered throughout this article, there are four major ones (each with their own subsection) that rule them all. That is, these four alone are sufficient for linear regression analysis. Some are less demanding than others. Ultimately, you can probably get away with bending all of them in some way (as long as the statisticians aren&rsquo;t looking), with the caveat that your model may become unreliable and therefore unsuitable for inference. Let&rsquo;s see what can happen.</p>
+<h2 id="normality">Normality</h2>
+<p>Our first assumption is inherent in the name of the model: the response is a linear combination of the predictors. This supposedly fundamental assumption is arguably the one that gets overlooked most of the time. Why? In a nutshell, when you&rsquo;re close enough to a curve, it looks like a straight line.</p>
+<div class="alert alert-note">
+  <div>
+    Note that &ldquo;linear&rdquo; is in the sense of the coefficients, not the predictors. This means that relations like $Y = \beta X^{2}$ are fine but ones like $Y = \beta ^{2}X$ are not.
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-any-curve-can-look-like-a-straight-line-at-close-range">
+
+
+  <a data-fancybox="" href="/beware-linear-regression/close-up.png" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; Any curve can look like a straight line at close range.">
+
+
+  <img src="/beware-linear-regression/close-up.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> Any curve can look like a straight line at close range.
+  </figcaption>
+
+
+</figure>
+
+<p>There&rsquo;s a reason the &ldquo;flat Earth&rdquo; theory was so compelling before NASA.</p>
+<p>In practice, we have some wiggle room with this one. As long as our response data $y_{i}$ are far away from any theoretical limit, we can generally draw a straight line through the data and that will be enough for all sorts of applications. CEOs can project their yearly sales, consumers can work out their monthly electricity consumption, and life goes on.</p>
+<!-- Linear regression also tends to be fast, which can be useful if you're fitting models on embedded devices or portable hardware. -->
+<p>On the other hand, if we are looking to describe phenomena more generally, then we need to take the idea of linearity more seriously. Let&rsquo;s say you want to build an SLR model to describe height $H = \beta_{0} + \beta_{1}W$ as a function of weight $W$, using data from your coworkers. As long as you have enough coworkers (and enough of them agree to give you that data), you will end up with coefficients $\hat{\beta_{i}}$ that capture this relationship for adults that more or less resemble your coworkers. That last point is crucial. If you are a professional wrestler (presumably learning statistical analysis in your own time) and each of your coworkers resembles 
+<a href="/beware-linear-regression/thanos.jpg">Thanos</a>, your coefficients will be useless for predicting the height of an average human being. If your coworkers are a regular group of men and women, your coefficients won&rsquo;t help you to predict the height of a child. In general, the more useful you want your model to be, the less likely you&rsquo;ll be using linear regression.</p>
+<div class="alert alert-note">
+  <div>
+    An important side-effect of the model&rsquo;s formulation has to do with the effect of each predictor on the response. By assuming a response of the form $Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3}$, we are also assuming that the effect of one predictor variable is independent of the others. If this holds, one unit of change in $X_{1}$ will have the same effect on the response, <em>no matter what values the other predictors have</em>. That is a strong assumption!
+  </div>
+</div>
+<p>The bottom line is that under certain circumstances, an SLR model might be enough to describe non-linear phenomena. If you scatter your data and it looks like they will conform to a straight line without excluding too many outliers, it might be all you need. Just be wary about using the model to extrapolate data beyond your current range of responses.</p>
+<h2 id="independent-errors">Independent errors</h2>
+<p>To assess how good our model is, and to do it <em>correctly</em>, we need the residuals to have properties that are like the actual errors they are supposed to estimate: independent and normally distributed, with zero mean and fixed variance. Each of the remaining core assumptions behind linear regression is right there in that last sentence.</p>
+<p>What does it mean for the residuals to be independent? This means that they should not have a relationship with any of the predictors, or each other. When we plot the residuals as a function of a predictor variable (or as a function of time, for time-series data), we don&rsquo;t want to see any kind of pattern. Nothing except some random-looking points centered on zero. Anything else means that the residuals have some kind of <em>structure</em>, suggesting that the model might not be a great fit for the data.</p>
+<div class="alert alert-note">
+  <div>
+    If the residuals are orders of magnitude smaller than the responses, some residual dependence might be tolerable. But it&rsquo;s usually a good idea to work out how they arise, and how to control for them.
+  </div>
+</div>
+<p>To see what it means when we don&rsquo;t have independent residuals, we&rsquo;ll use the 
+<a href="http://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html" target="_blank" rel="noopener">Boston Housing dataset</a> to build a (naive) SLR model of the median house value $V$ based on a single predictor, the mean number of rooms in a house $RM$, related by $V = \beta_0 + \beta_1 RM$. We fit our model and sure enough, the more rooms in your house, the greater its predicted value (Fig. 2, left panel). No surprises there.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-median-house-value-v-spanspan1000s-regressed-onto-mean-room-number-rm-for-the-boston-housing-dataset-left-scatterplot-of-v-against-rm-with-a-linear-fit-red-trace-95-ci-right-the-corresponding-residual-plot-with-a-lowess-smoother-fit-indicated-by-the-orange-trace-data-entries-whose-observations-appeared-to-be-capped-at-the-maximum-value-50000-were-excluded-from-the-analysis">
+
+
+  <a data-fancybox="" href="/beware-linear-regression/dependent-residuals.png" data-caption="&lt;b&gt;Fig. 2.&lt;/b&gt; Median house value $V$ (&lt;span&gt;$&lt;/span&gt;1,000s) regressed onto mean room number $RM$ for the Boston Housing dataset. Left: Scatterplot of $V$ against $RM$ with a linear fit (red trace; 95% CI). Right: the corresponding residual plot, with a lowess smoother fit indicated by the orange trace. Data entries whose observations appeared to be capped at the maximum value ($50,000) were excluded from the analysis.">
+
+
+  <img src="/beware-linear-regression/dependent-residuals.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2.</b> Median house value $V$ (<span>$</span>1,000s) regressed onto mean room number $RM$ for the Boston Housing dataset. Left: Scatterplot of $V$ against $RM$ with a linear fit (red trace; 95% CI). Right: the corresponding residual plot, with a lowess smoother fit indicated by the orange trace. Data entries whose observations appeared to be capped at the maximum value ($50,000) were excluded from the analysis.
+  </figcaption>
+
+
+</figure>
+
+<p>Taking a look at the residual plot in Fig. 2B (right panel), we see that the residuals start off with a positive bias, sagging in the middle of our response range, before increasing again for large room counts. We are underestimating value for houses that don&rsquo;t have an &ldquo;average&rdquo; number of rooms.</p>
+<p>This residual plot is telling us that our model&rsquo;s deterministic component (i.e., the formula $V = \beta_0 + \beta_1 RM$) is missing something important. But before we try adding other predictors, let&rsquo;s make a small change to our single predictor and use its square $RM^2$, as suggested by the authors of the study that initially made use of this dataset<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>. This cheap modification gets us a slightly better r-squared value (from 0.47 to 0.50) as well as a residual plot that bends a bit closer to zero (Fig. 3). Transforming the predictors (or the response) can improve the distribution of our residuals and the model&rsquo;s fit quality.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-median-house-value-v-spanspan1000s-regressed-onto-the-square-of-mean-room-number-rm2-for-the-boston-housing-dataset">
+
+
+  <a data-fancybox="" href="/beware-linear-regression/less-dependent-residuals.png" data-caption="&lt;b&gt;Fig. 3.&lt;/b&gt; Median house value $V$ (&lt;span&gt;$&lt;/span&gt;1,000s) regressed onto the square of mean room number $RM^2$ for the Boston Housing dataset.">
+
+
+  <img src="/beware-linear-regression/less-dependent-residuals.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3.</b> Median house value $V$ (<span>$</span>1,000s) regressed onto the square of mean room number $RM^2$ for the Boston Housing dataset.
+  </figcaption>
+
+
+</figure>
+
+<p>Of course, it&rsquo;s unlikely that we can model something as complex as house value with a single predictor. By including two more predictors (house age and per-capita crime), we easily improve the model fit ($R^2=0.65$) and our residuals tend closer to zero. Generally, additional predictors should be considered if (a) they are informative for the response variable, and (b) they are (at most) weakly correlated with any of the existing predictors.</p>
+<p>Correlation, whether among the residuals or among the predictors, can cause all sorts of problems in regression analysis. As an extreme example, consider what would happen if we fit a model of house value with two perfectly correlated predictors, $RM$ and $RM^2$. Compared with the model that only includes $RM^2$, we net ourselves an artificial boost in $R^2$ (from 0.50 to 0.53) and our $RM^2$ coefficient estimate ends up being an order of magnitude larger (from 0.67 to 2.23). Not only do we not gain any meaningful insight with our extra predictor, we actually <em>lose</em> insight &ndash; we have made it harder to understand the true effect of room count on house value.</p>
+<p>Linear regression has a couple more things to say about the distribution of our residuals.</p>
+<h2 id="normally-distributed-errors">Normally-distributed errors</h2>
+<p>The errors (and the residuals) should not only have a mean of zero, they should also be normally distributed with constant variance $\sigma^2$. We can write this as</p>
+<p>$$ \epsilon_i \sim \textrm{Normal}(0,\sigma^2). $$</p>
+<p>If the errors are not normally distributed, you can still go ahead and compute coefficients, but your measures of uncertainty and significance testing may be compromised if you don&rsquo;t have enough observations. For instance, the standard error terms for the predictor coefficients and the model itself, and by extension, their associated confidence intervals, are all computed under the assumption of residual normality. If you do find evidence of non-normality (preferrably through statistical measures like the Kolmogorov-Smirnov test, rather than by visual inspection), but you&rsquo;ve decided that it&rsquo;s acceptable, it might be best to use wider confidence intervals to indicate this additional uncertainty, documenting your rationale.</p>
+<div class="alert alert-note">
+  <div>
+    How much non-normality is acceptable? That&rsquo;s a tricky question that usually depends on your experience. Probably best to ask a statistician!
+  </div>
+</div>
+<p>Your ears might have detected a loophole earlier, in that we might not need normally-distributed residuals if our observation count is high enough. Thanks to the <em>central limit theorem</em>, it turns out that with a moderate observation count (let&rsquo;s say $N&gt;20$), linear regression will be perfectly capable of handling your non-normal response data<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>. The specific number of observations you need will vary depending on whether your response variable is &ldquo;well-behaved&rdquo; or not. If you are dealing with extremely skewed response distributions or large outlier counts, for instance, you will likely need (many) more observations.</p>
+<h2 id="homoscedasticity">Homoscedasticity</h2>
+<p>In the last section we described the errors as being normally distributed, but we didn&rsquo;t talk about their <em>variance</em>. When we write $ \epsilon_i \sim \textrm{Normal}(0,\sigma^2),$ we are saying that the errors are <em>identically distributed</em> for every observation $i$, as if each is being drawn from the same normal distribution with zero mean and variance $\sigma^2$. The errors are said to be <em>homoscedastic</em>.</p>
+<p>(Which is a bit of a mouthful. I&rsquo;d rather just say they have constant variance.)</p>
+<p>We can test for constant variance using most modern statistical libraries (e.g. 
+<a href="https://www.statsmodels.org/stable/diagnostic.html" target="_blank" rel="noopener"><code>statsmodels</code></a>) but a quick visual indication can be found in the residual plots. If the spread of residuals appears to vary with a given predictor, you should probably run a test to confirm its severity and whether you can tolerate it in your analysis. Too much variability will compromise any measures of uncertainty or significance.</p>
+<h1 id="all-too-human">All too human</h1>
+<p>So with all these statistical landmines, why are linear regression models so pervasive? <em>Probably because we can understand them</em>. It is difficult to wrap our minds around nonlinear phenomena because the mental models we use to make sense of our world 
+<a href="https://hbr.org/2017/05/linear-thinking-in-a-nonlinear-world" target="_blank" rel="noopener">tend to be linear!</a></p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>Porter, 
+<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1297101/" target="_blank" rel="noopener"><em>Misuse of correlation and regression in three medical journals</em></a>. Journal of the Royal Society of Medicine (1999). <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>Harrison Jr &amp; Rubinfeld, 
+<a href="https://www.sciencedirect.com/science/article/abs/pii/0095069678900062" target="_blank" rel="noopener"><em>Hedonic housing prices and the demand for clean air</em></a>. Journal of Environmental Economics and Management (1978). <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3" role="doc-endnote">
+<p>Lumley et al., 
+<a href="https://doi.org/10.1146/annurev.publhealth.23.100901.140546" target="_blank" rel="noopener"><em>The importance of the normality assumption in large public health datasets</em></a>. Annual Reviews (2002) <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/machine-learning/">machine-learning</a>
+  
+  <a class="badge badge-light" href="/tag/statistics/">statistics</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/beware-linear-regression/&amp;text=Beware%20those%20bearing%20linear%20regression%20models" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/beware-linear-regression/&amp;t=Beware%20those%20bearing%20linear%20regression%20models" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Beware%20those%20bearing%20linear%20regression%20models&amp;body=https://www.remotelycurious.net/post/beware-linear-regression/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/beware-linear-regression/&amp;title=Beware%20those%20bearing%20linear%20regression%20models" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=Beware%20those%20bearing%20linear%20regression%20models%20https://www.remotelycurious.net/post/beware-linear-regression/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/beware-linear-regression/&amp;title=Beware%20those%20bearing%20linear%20regression%20models" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/ml-doc-01-1-learning-from-data/">ml.doc (1.1): Learning from data</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

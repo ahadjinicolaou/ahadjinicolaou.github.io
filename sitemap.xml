@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/algorithm/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/category/analysis/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/categories/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/classification/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/edx/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/machine-learning/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/category/ml.doc/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/perceptron/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tags/</loc>
+    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/category/development/</loc>
+    <lastmod>2020-09-25T18:34:18-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/category/issues.app/</loc>
+    <lastmod>2020-09-25T18:34:18-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/issues-app-03-blueprints/</loc>
+    <lastmod>2020-09-25T18:34:18-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/bootstrap/</loc>
+    <lastmod>2020-09-13T20:21:12-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/flask/</loc>
+    <lastmod>2020-09-13T20:21:12-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/issues-app-02-templates/</loc>
+    <lastmod>2020-09-13T20:21:12-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/jinja/</loc>
+    <lastmod>2020-09-13T20:21:12-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/python/</loc>
+    <lastmod>2020-09-13T20:21:12-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/templates/</loc>
+    <lastmod>2020-09-13T20:21:12-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/issues-app-01-intro/</loc>
+    <lastmod>2020-08-30T15:28:38-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/pytest/</loc>
+    <lastmod>2020-08-30T15:28:38-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/tdd/</loc>
+    <lastmod>2020-08-30T15:28:38-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/publication-type/1/</loc>
+    <lastmod>2020-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/ae-hadjinicolaou/</loc>
+    <lastmod>2020-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/authors/</loc>
+    <lastmod>2020-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/publication/embc-2020/</loc>
+    <lastmod>2020-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/j-i-lee/</loc>
+    <lastmod>2020-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/p-werginz/</loc>
+    <lastmod>2020-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/publication_types/</loc>
+    <lastmod>2020-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/publication/</loc>
+    <lastmod>2020-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/si-fried/</loc>
+    <lastmod>2020-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/beware-linear-regression/</loc>
+    <lastmod>2020-07-12T22:06:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/statistics/</loc>
+    <lastmod>2020-07-12T22:06:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/project/intent-decoder/</loc>
+    <lastmod>2020-06-10T11:14:09-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/project/</loc>
+    <lastmod>2020-06-10T11:14:09-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/homelab/</loc>
+    <lastmod>2020-06-05T23:13:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/homelab/</loc>
+    <lastmod>2020-06-05T23:13:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/category/homelab/</loc>
+    <lastmod>2020-06-05T23:13:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/pfsense/</loc>
+    <lastmod>2020-06-05T23:13:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/proxmox/</loc>
+    <lastmod>2020-06-05T23:13:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/sysadmin/</loc>
+    <lastmod>2020-06-05T23:13:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/publication-type/2/</loc>
+    <lastmod>2016-06-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/publication/plos-one-2016/</loc>
+    <lastmod>2016-06-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/mr-ibbotson/</loc>
+    <lastmod>2016-06-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/sl-cloherty/</loc>
+    <lastmod>2016-06-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/t-kameneva/</loc>
+    <lastmod>2016-06-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/ys-hung/</loc>
+    <lastmod>2016-06-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/h-meffin/</loc>
+    <lastmod>2015-09-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/mi-maturana/</loc>
+    <lastmod>2015-09-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/publication/clin-exp-optom-2015/</loc>
+    <lastmod>2015-09-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/bj-obrien/</loc>
+    <lastmod>2014-10-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/co-savage/</loc>
+    <lastmod>2014-10-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/dj-garrett/</loc>
+    <lastmod>2014-10-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/nv-apollo/</loc>
+    <lastmod>2014-10-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/publication/tnsre-2014/</loc>
+    <lastmod>2014-10-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/dax-nayagam/</loc>
+    <lastmod>2012-05-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/publication/biomaterials-2012/</loc>
+    <lastmod>2012-05-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/k-fox/</loc>
+    <lastmod>2012-05-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/k-ganesan/</loc>
+    <lastmod>2012-05-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/mn-shivdasani/</loc>
+    <lastmod>2012-05-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/rt-leung/</loc>
+    <lastmod>2012-05-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/s-prawer/</loc>
+    <lastmod>2012-05-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/author/alex-hadjinicolaou/</loc>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/talk/</loc>
+  </url>
+  
+</urlset>

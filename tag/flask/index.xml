@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>flask | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/tag/flask/</link>
+      <atom:link href="https://www.remotelycurious.net/tag/flask/index.xml" rel="self" type="application/rss+xml" />
+    <description>flask</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 13 Sep 2020 20:21:12 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>flask</title>
+      <link>https://www.remotelycurious.net/tag/flask/</link>
+    </image>
+    
+    <item>
+      <title>issues.app (2): Making templates with Bootstrap</title>
+      <link>https://www.remotelycurious.net/post/issues-app-02-templates/</link>
+      <pubDate>Sun, 13 Sep 2020 20:21:12 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-02-templates/</guid>
+      <description>&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find &lt;a href=&#34;https://www.remotelycurious.net/post/issues-app-01-intro/&#34;&gt;here&lt;/a&gt;. Any code documented here may change significantly in the future. &lt;strong&gt;Be warned!&lt;/strong&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The last article ended with a quick mention about how Python functions can be assigned to handle browser requests in a Flask application. It&amp;rsquo;s a topic that is definitely worth more of our time. We are going to talk about &lt;em&gt;templates&lt;/em&gt;: what they are, how they work, and how they can integrate with Bootstrap to make life easier for developers.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#view-decorators&#34;&gt;View decorators&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#static-routes&#34;&gt;Static routes&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#dynamic-routes&#34;&gt;Dynamic routes&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#error-handlers&#34;&gt;Error handlers&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#templates&#34;&gt;Templates&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#jinja-templates&#34;&gt;Jinja templates&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#variables-and-expressions&#34;&gt;Variables and expressions&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#filters&#34;&gt;Filters&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#statements&#34;&gt;Statements&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#template-inheritance&#34;&gt;Template inheritance&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#using-templates&#34;&gt;Using templates&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#templates-with-bootstrap&#34;&gt;Templates with Bootstrap&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#plugging-bootstrap-into-flask&#34;&gt;Plugging Bootstrap into Flask&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#making-nicer-templates&#34;&gt;Making nicer templates&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;view-decorators&#34;&gt;View decorators&lt;/h1&gt;
+&lt;p&gt;In general, decorators are Python constructs that allow you to inject functions with additional capabilities. Flask provides a number of 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;view decorators&lt;/em&gt;&lt;/a&gt; that can be used to conveniently enable web-specific functionality, making it easy to get things done with minimal code. What follows is a quick tour of some of the most common view decorators you will find in a Flask application.&lt;/p&gt;
+&lt;h2 id=&#34;static-routes&#34;&gt;Static routes&lt;/h2&gt;
+&lt;p&gt;We&amp;rsquo;ve already seen one of these. A static route can be implemented with the &lt;code&gt;app.route&lt;/code&gt; decorator to handle a browser request for a single URL. Here&amp;rsquo;s what that looks like:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&#39;/&#39;)
+def index():
+    return &#39;&amp;lt;h1&amp;gt;Show me the money!&amp;lt;/h1&amp;gt;&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Officially, functions that respond to requests are called &lt;em&gt;view functions&lt;/em&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;dynamic-routes&#34;&gt;Dynamic routes&lt;/h2&gt;
+&lt;p&gt;We can write another function that uses a &lt;em&gt;dynamic route&lt;/em&gt; to serve a customized greeting to the user, using the &lt;code&gt;name&lt;/code&gt; argument. Angle brackets are used in the decorator argument to indicate how the function argument should be parsed from the requested URL.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&#39;/greeting/&amp;lt;name&amp;gt;&#39;)
+def greeting(name):
+    return f&amp;quot;&amp;lt;h1&amp;gt;Hi {name.capitalize()}!&amp;lt;/h1&amp;gt;&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After adding this to &lt;code&gt;src/main/__init__.py&lt;/code&gt; and running the server, a trip to &lt;code&gt;/greeting/fred&lt;/code&gt; would serve you with the following:&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-a-personalized-greeting&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-02-templates/greeting.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; A personalized greeting.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-02-templates/greeting.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; A personalized greeting.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;error-handlers&#34;&gt;Error handlers&lt;/h2&gt;
+&lt;p&gt;Sometimes it&amp;rsquo;s nice to provide a customized error page. This can be achieved using the &lt;code&gt;app.errorhandler&lt;/code&gt; decorator. The decorated function must have an error object argument. It&amp;rsquo;s good practice to return the matching error code together with the response.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.errorhandler(404)
+def not_found(e):
+    return &amp;quot;&amp;lt;h1&amp;gt;Looks like I can&#39;t find that page...&amp;lt;/h1&amp;gt;&amp;quot;, 404
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;templates&#34;&gt;Templates&lt;/h1&gt;
+&lt;p&gt;Handling chunks of web code amid our Python source feels a bit dirty. It&amp;rsquo;s probably not a big deal if our view function is returning a one-line response, but imagine the kind of content that Facebook is serving. We&amp;rsquo;re talking reams of HTML, stitched together from different sources that need to be filtered and processed according to the user&amp;rsquo;s data. Sorting this out with a little string interpolation isn&amp;rsquo;t going to cut it. We need a bigger gun.&lt;/p&gt;
+&lt;p&gt;This is where &lt;em&gt;templates&lt;/em&gt; come in. A template is a like a mold that is used to mass produce web pages. The mold is made out of standard HTML elements like &lt;code&gt;body&lt;/code&gt; and &lt;code&gt;div&lt;/code&gt; and has slots reserved for data that will become available in the future. When the data is ready, a template engine can take a template, fill the data slots, and &lt;em&gt;render&lt;/em&gt; the complete page. This allows for presentation logic to be isolated from the rest of the code, simplifying application maintenance and making debugging a bit less painful.&lt;/p&gt;
+&lt;h2 id=&#34;jinja-templates&#34;&gt;Jinja templates&lt;/h2&gt;
+&lt;p&gt;Flask uses a template engine called 
+&lt;a href=&#34;https://palletsprojects.com/p/jinja/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Jinja2&lt;/a&gt; to &lt;em&gt;render&lt;/em&gt; templates with data. Jinja templates are usually just HTML files (although 
+&lt;a href=&#34;https://jinja.palletsprojects.com/en/2.11.x/templates/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;other file formats&lt;/a&gt; are supported). They will typically contain HTML as well as &lt;em&gt;variables&lt;/em&gt; and &lt;em&gt;expressions&lt;/em&gt; that are recognized by Jinja and replaced when rendered.&lt;/p&gt;
+&lt;p&gt;We will now explore some basic Jinja template constructs, with an eye towards making better (or at least more flexible) versions of our greeting functions.&lt;/p&gt;
+&lt;h3 id=&#34;variables-and-expressions&#34;&gt;Variables and expressions&lt;/h3&gt;
+&lt;p&gt;Let&amp;rsquo;s say Jinja is told to render the template below using a &lt;code&gt;name&lt;/code&gt; variable equal to &lt;code&gt;&#39;fred&#39;&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;h1&amp;gt;Hi {{ name }}!&amp;lt;/h1&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;{{ ... }}&lt;/code&gt; delimiters indicate an &lt;em&gt;expression&lt;/em&gt; that Jinja will replace with some kind of output, which in this case is a string literal. Jinja will output &lt;strong&gt;Hi fred!&lt;/strong&gt; after rendering this template.&lt;/p&gt;
+&lt;p&gt;Variables can also be more complex objects like lists and dictionaries. We&amp;rsquo;ll see an example of this very soon when we introduce &lt;em&gt;statements&lt;/em&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;filters&#34;&gt;Filters&lt;/h3&gt;
+&lt;p&gt;Jinja has &lt;em&gt;filters&lt;/em&gt; that can be applied to modify variables using the pipe (&lt;code&gt;|&lt;/code&gt;) operator. Below are a few examples of templates with their rendered output:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Variable&lt;/th&gt;
+&lt;th&gt;Template&lt;/th&gt;
+&lt;th&gt;Output&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;name=&#39;fred&#39;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Hi {{ name | upper }}!&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Hi FRED!&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;name=&#39;emma&#39;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Hi {{ name | capitalize }}!&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Hi Emma!&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;name=None&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Hi {{ name | default(&#39;Stranger&#39;)}}!&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Hi Stranger!&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;price=7.283&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;That is ${{ price | round(2, &#39;floor&#39;) }}.&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;That is $7.28.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Multiple filters can also be chained together, but keep in mind the order of operations. As a contrived example, consider the effect of &lt;code&gt;{{ name | default(&#39;stranger&#39;) | upper }}&lt;/code&gt; versus that of &lt;code&gt;{{ name | upper | default(&#39;stranger&#39;) }}&lt;/code&gt; when &lt;code&gt;name=None&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h3 id=&#34;statements&#34;&gt;Statements&lt;/h3&gt;
+&lt;p&gt;Jinja becomes considerably more powerful when using &lt;em&gt;statements&lt;/em&gt; to control the specific elements that are rendered. Statements are indicated by &lt;code&gt;{% ... %}&lt;/code&gt; delimiters.&lt;/p&gt;
+&lt;p&gt;Imagine we have some kind of shopping list. We can use Jinja to create a bulleted list of our items with the following code:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;ul&amp;gt;
+{% for item in shopping_list %}
+    &amp;lt;li&amp;gt;{{ item }}&amp;lt;/li&amp;gt;
+{% endfor %}
+&amp;lt;/ul&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now if the shopping list contains &lt;code&gt;[&amp;quot;bread&amp;quot;, &amp;quot;milk&amp;quot;, &amp;quot;eggs&amp;quot;, &amp;quot;toy dinosaur&amp;quot;]&lt;/code&gt;, Jinja will render it as a nice bulleted list (simulated with Markdown):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;bread&lt;/li&gt;
+&lt;li&gt;milk&lt;/li&gt;
+&lt;li&gt;eggs&lt;/li&gt;
+&lt;li&gt;toy dinosaur&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Think about our app for a second. Suppose we want to offer up a VIP version of our greeting to users that know the right URL. We can get fancy with our template and have it render a greeting that is sensitive to the time of day, using Jinja to temporarily store different greetings inside variables.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{% if hour &amp;gt;= 0 and hour &amp;lt; 12 %}
+    {% set greeting = &#39;Good morning&#39; %}
+{% elif hour &amp;gt;= 12 and hour &amp;lt; 17 %}
+    {% set greeting = &#39;Good afternoon&#39; %}
+{% else %}
+    {% set greeting = &#39;Good evening&#39; %}
+{% endif %}
+
+&amp;lt;h1&amp;gt;{{ greeting }}, {{ name | capitalize }}.&amp;lt;/h1&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this case the template engine would be dealing with three variables:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;name&lt;/code&gt; and &lt;code&gt;hour&lt;/code&gt;, supplied by the application, and&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;greeting&lt;/code&gt;, set within the template.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;template-inheritance&#34;&gt;Template inheritance&lt;/h3&gt;
+&lt;p&gt;Before we get our hands on some templates, we should talk about &lt;em&gt;template inheritance&lt;/em&gt;. As plain and unexciting as that sounds, you should know that this is the most powerful part of Jinja&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. Template inheritance allows you to create a &amp;ldquo;master template&amp;rdquo; that holds all of the common web elements of your site as well as &lt;em&gt;blocks&lt;/em&gt; that child templates can either build on or completely replace.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;re following the project, note that the templates in this section are just provided to illustrate the concepts. They will not be included in the codebase.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;To get a better understanding of what we&amp;rsquo;re talking about, let&amp;rsquo;s use an example pair of templates: one base, one child. Below is &lt;code&gt;base.html&lt;/code&gt;.&lt;/p&gt;
+&lt;h4 id=&#34;basehtml&#34;&gt;base.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+    {% block head %}
+    &amp;lt;style type=&amp;quot;text/css&amp;quot;&amp;gt;
+        .important { color: #FF0000; }
+    &amp;lt;/style&amp;gt;
+    &amp;lt;title&amp;gt;{% block title %}{% endblock %} :: ACME LLC&amp;lt;/title&amp;gt;
+    {% endblock %}
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+    {% block content %}{% endblock %}
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It looks like a regular HTML page seasoned with some Jinja statements. The base template defines three blocks: &lt;code&gt;head&lt;/code&gt;, &lt;code&gt;title&lt;/code&gt; and &lt;code&gt;content&lt;/code&gt;. Each of these can be overridden by a derived template, like the one below:&lt;/p&gt;
+&lt;h4 id=&#34;childhtml&#34;&gt;child.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{% extends &amp;quot;base.html&amp;quot; %}
+{% block title %}Goods and Services{% endblock %}
+{% block head %}
+    {{ super() }}
+    &amp;lt;style type=&amp;quot;text/css&amp;quot;&amp;gt;
+        .special { color: #0000FF; }
+    &amp;lt;/style&amp;gt;
+{% endblock %}
+{% block content %}
+    &amp;lt;h1&amp;gt;Goods and Services&amp;lt;/h1&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;Bread&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;Milk&amp;lt;/li&amp;gt;
+        &amp;lt;li class=&amp;quot;important&amp;quot;&amp;gt;Eggs&amp;lt;/li&amp;gt;
+        &amp;lt;li class=&amp;quot;special&amp;quot;&amp;gt;Toy dinosaur&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The line that makes it a child template is the very first one. With the &lt;code&gt;{% extends &amp;quot;base.html&amp;quot; %}&lt;/code&gt; statement, we are telling Jinja that the current template is inheriting from &lt;code&gt;base.html&lt;/code&gt;. When the base and derived templates both contain a nonempty block, the content in the derived block takes precedence.&lt;/p&gt;
+&lt;p&gt;Note the use of &lt;code&gt;super()&lt;/code&gt; within the head block. This tells Jinja to append the block&amp;rsquo;s content to the corresponding block content in the base template. Without the &lt;code&gt;super()&lt;/code&gt; call, the child template would completely replace the base template block and we would lose the &lt;code&gt;important&lt;/code&gt; CSS class defined in the base template.&lt;/p&gt;
+&lt;p&gt;Jinja is capable of a lot more. We will cover more of its features in later articles, but for now let&amp;rsquo;s make some templates and refactor the codebase to make use of them.&lt;/p&gt;
+&lt;h2 id=&#34;using-templates&#34;&gt;Using templates&lt;/h2&gt;
+&lt;p&gt;First we should designate a folder to keep our templates. This will be &lt;code&gt;src/templates&lt;/code&gt;. We are going to make two templates: one for the plain greeting and another for the VIP greeting (we&amp;rsquo;ll leave the 404 and index view functions &amp;ldquo;template-less&amp;rdquo; for now). The plain template is shown below.&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesgreetinghtml&#34;&gt;src/templates/greeting.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;h1&amp;gt;Hi {{ name | capitalize }}!&amp;lt;/h1&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And here&amp;rsquo;s the fancy one.&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesfancy-greetinghtml&#34;&gt;src/templates/fancy-greeting.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;{# time-sensitive greeting #}
+{% if hour &amp;gt;= 0 and hour &amp;lt; 12 %}
+    {% set greeting = &#39;Good morning&#39; %}
+{% elif hour &amp;gt;= 12 and hour &amp;lt; 17 %}
+    {% set greeting = &#39;Good afternoon&#39; %}
+{% else %}
+    {% set greeting = &#39;Good evening&#39; %}
+{% endif %}
+
+&amp;lt;h1&amp;gt;{{ greeting }}, {{ name | capitalize }}.&amp;lt;/h1&amp;gt;
+&amp;lt;p&amp;gt;GreetMaster™: delivering you the finest of greetings.&amp;lt;/p&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we need a way to engage the template engine in our app. This is done using &lt;code&gt;render_template()&lt;/code&gt;, which comes from the &lt;code&gt;flask&lt;/code&gt; package. Each view function supplies &lt;code&gt;render_template()&lt;/code&gt; with the appropriate template filename and any keyword arguments that Jinja needs to populate the corresponding variables in the template.&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py&#34;&gt;src/main/&lt;strong&gt;init&lt;/strong&gt;.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# ...
+from flask import render_template
+from datetime import datetime
+
+def create_app(config_name):
+    # ...
+    @app.route(&#39;/greeting/&amp;lt;name&amp;gt;&#39;)
+    def greeting(name):
+        return render_template(&#39;greeting.html&#39;, name=name)
+
+    @app.route(&#39;/fancy-greeting/&amp;lt;name&amp;gt;&#39;)
+    def fancy_greeting(name):
+        return render_template(&#39;fancy_greeting.html&#39;,
+                name=name,
+                hour=datetime.now().hour)
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return &amp;quot;&amp;lt;h1&amp;gt;Looks like I can&#39;t find that page...&amp;lt;/h1&amp;gt;&amp;quot;, 404
+    
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, Flask needs to be told where we are keeping the templates (otherwise, Flask will assume they are in a &lt;code&gt;templates&lt;/code&gt; folder that sits in the same directory as the app&amp;rsquo;s instantiating file). The &lt;code&gt;create_app()&lt;/code&gt; function is changed like this:&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py-1&#34;&gt;src/main/&lt;strong&gt;init&lt;/strong&gt;.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def create_app(config_name):
+    app = Flask(__name__, template_folder=&#39;../templates&#39;)
+    # ...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can fire up the server and serve ourselves with a magnificent greeting page. Since I&amp;rsquo;m typing this up at ~10 PM, I am treated with an evening salutation.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-a-greetmaster-greeting&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-02-templates/fancy-greeting.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; A GreetMaster™ greeting.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-02-templates/fancy-greeting.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; A GreetMaster™ greeting.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h1 id=&#34;templates-with-bootstrap&#34;&gt;Templates with Bootstrap&lt;/h1&gt;
+&lt;p&gt;Our templates are handy but they&amp;rsquo;re ugly. Fortunately, a bunch of people at Twitter came up with 
+&lt;a href=&#34;https://getbootstrap.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Bootstrap&lt;/a&gt;, an open-source front-end framework that can integrate with Flask and style our templates. We can plug it into our app as a Flask extension with minimal fuss. That&amp;rsquo;s a big reason you&amp;rsquo;re reading about it right now.&lt;/p&gt;
+&lt;h2 id=&#34;plugging-bootstrap-into-flask&#34;&gt;Plugging Bootstrap into Flask&lt;/h2&gt;
+&lt;p&gt;Adding support for Bootstrap within Flask is easy, thanks to the 
+&lt;a href=&#34;https://pythonhosted.org/Flask-Bootstrap/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Flask-Bootstrap&lt;/a&gt; extension. Below we&amp;rsquo;ll add &lt;code&gt;flask-bootstrap&lt;/code&gt; as a project dependency. Make sure to install it in your virtual environment.&lt;/p&gt;
+&lt;h4 id=&#34;setuppy&#34;&gt;setup.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from setuptools import setup, find_packages
+
+setup(
+    name=&#39;issues&#39;,
+    version=&#39;0.2&#39;,
+    packages=find_packages(),
+    install_requires=[&amp;quot;flask&amp;quot;, &amp;quot;pytest&amp;quot;, &amp;quot;pytest-flask&amp;quot;, &amp;quot;flask-bootstrap&amp;quot;],
+)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Bootstrap can now be installed as an app extension using the &lt;code&gt;init_app()&lt;/code&gt; instance method within the main package constructor.&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py-2&#34;&gt;src/main/&lt;strong&gt;init&lt;/strong&gt;.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# ...
+from flask import Flask
+from flask_bootstrap import Bootstrap
+
+bootstrap = Bootstrap()
+
+def create_app(config_name):
+    app = Flask(__name__, template_folder=&#39;../templates&#39;)
+    app.config.from_object(config[config_name])
+
+    bootstrap.init_app(app)
+    # ...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It turns out that 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/extensiondev/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;all approved Flask extensions&lt;/a&gt; will implement the &lt;code&gt;init_app()&lt;/code&gt; method. The major upshot of this (application factory) pattern is to allow multiple instances of our application to use a single extension instance. That&amp;rsquo;s good news for people like us who are interested in using a test framework during development.&lt;/p&gt;
+&lt;h2 id=&#34;making-nicer-templates&#34;&gt;Making nicer templates&lt;/h2&gt;
+&lt;p&gt;With the help of Bootstrap, we are going to drag our templates out of the 90s and into the modern age. This is done by having our templates inherit from Flask-Bootstrap&amp;rsquo;s base template. Let&amp;rsquo;s see how this works with our fancy greeting template.&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesfancy_greetinghtml&#34;&gt;src/templates/fancy_greeting.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;{% extends &amp;quot;bootstrap/base.html&amp;quot; %}
+
+{# time-sensitive greeting #}
+{% if hour &amp;gt;= 0 and hour &amp;lt; 12 %}
+    {% set greeting = &#39;Good morning&#39; %}
+{% elif hour &amp;gt;= 12 and hour &amp;lt; 17 %}
+    {% set greeting = &#39;Good afternoon&#39; %}
+{% else %}
+    {% set greeting = &#39;Good evening&#39; %}
+{% endif %}
+
+{% block title %}GreetMaster{% endblock %}
+
+{% block content %}
+&amp;lt;div class=&amp;quot;jumbotron jumbotron-fluid&amp;quot;&amp;gt;
+    &amp;lt;div class=&amp;quot;container&amp;quot;&amp;gt;
+        &amp;lt;h1 class=&amp;quot;display-4&amp;quot;&amp;gt;{{ greeting }}, {{ name | capitalize }}.&amp;lt;/h1&amp;gt;
+        &amp;lt;p class=&amp;quot;lead&amp;quot;&amp;gt;GreetMaster™: delivering you the finest of greetings.&amp;lt;/p&amp;gt;
+    &amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Flask-Bootstrap&amp;rsquo;s base template provides access to all of Bootstrap&amp;rsquo;s gadgets, like the &lt;strong&gt;jumbotron&lt;/strong&gt;. If you pull back the curtain and take a look at 
+&lt;a href=&#34;https://github.com/mbr/flask-bootstrap/blob/master/flask_bootstrap/templates/bootstrap/base.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;the base template&lt;/a&gt;, you&amp;rsquo;ll see that Bootstrap&amp;rsquo;s files are sourced within the template blocks. After relaunching the server and visiting &lt;code&gt;localhost/fancy-greeting/fred&lt;/code&gt;, we will now be greeted with a much nicer page.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-our-greetmaster-greeting-spruced-up-with-bootstrap&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-02-templates/bootstrap-template.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4.&amp;lt;/b&amp;gt; Our GreetMaster™ greeting, spruced up with Bootstrap.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-02-templates/bootstrap-template.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4.&lt;/b&gt; Our GreetMaster™ greeting, spruced up with Bootstrap.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Alright, fine. It&amp;rsquo;s still pretty plain. But moving away from Times New Roman has to count for something! Take it as one small step towards a modern interface for our app, which we will build up to as we move through the series.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;ve cloned the &lt;a href=&#34;https://github.com/ahadjinicolaou/issues.app&#34;&gt;project repository&lt;/a&gt;, you can run &lt;code&gt;git checkout ff8887e&lt;/code&gt; to get the current version of the source code.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;At this stage you might already appreciate the convenience that templates have to offer us. If not, then that&amp;rsquo;s entirely understandable. After all, we have been putting together some pretty simple pages up until now. Their convenience will be better appreciated once we start sinking our teeth into the prototype interface for the app, which I hope to cover in the next article.&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Don&amp;rsquo;t take it from me. The developers say it 
+&lt;a href=&#34;https://jinja.palletsprojects.com/en/2.11.x/templates/#template-inheritance&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;right here&lt;/a&gt; in their documentation! &lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>issues.app (1): Getting started with Flask and Pytest</title>
+      <link>https://www.remotelycurious.net/post/issues-app-01-intro/</link>
+      <pubDate>Sun, 30 Aug 2020 15:28:38 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-01-intro/</guid>
+      <description>&lt;p&gt;My biggest regret is not studying software design as an undergraduate.&lt;/p&gt;
+&lt;p&gt;Although I&amp;rsquo;ve been writing code for more than a decade, most of the code behind my programs tends to be stuffed into one or two files. This is fine when the programs are small, but a few months ago I had to fix a bug in one of my more complicated apps, which allows a user to load an audio file and manually annotate speech through a graphical interface. Having forgotten entirely about how my app is structured, I had no choice but to trace through the 3300+ lines of code just to reorient myself, before making what turned out to be a simple change. I have since decided that investing time into becoming a good software engineer will pay massive dividends and do wonders for my future sanity.&lt;/p&gt;
+&lt;p&gt;This is the start of what will become a series about web app development using Flask and Pytest. After some research, I singled out these frameworks because they are extensible, well-designed and don&amp;rsquo;t require loads of boilerplate code, which gets in the way of understanding. My main drive is to learn more about application architecture and test-driven development. Along the way I will distill what I learn into this guide, so that it can help other software engineering novices who have similar goals and working knowledge.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Speaking of knowledge, you should be comfortable with Python to get the most out of this guide. You should also be familiar with relational databases, client-server interactions, and the basics of web development (e.g., writing simple pages in HTTP/CSS/JavaScript).
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#resources&#34;&gt;Resources&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#overview&#34;&gt;Overview&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#codebase&#34;&gt;Codebase&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#project-structure&#34;&gt;Project structure&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#configuration&#34;&gt;Configuration&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#protecting-your-cookies&#34;&gt;Protecting your cookies&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#application&#34;&gt;Application&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#test-code&#34;&gt;Test code&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#execution&#34;&gt;Execution&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#virtual-environment&#34;&gt;Virtual environment&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#environment-variables&#34;&gt;Environment variables&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#launching-the-app&#34;&gt;Launching the app&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#running-some-tests&#34;&gt;Running some tests&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#test-driven-development&#34;&gt;Test-driven development&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#handling-route-requests&#34;&gt;Handling route requests&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;resources&#34;&gt;Resources&lt;/h1&gt;
+&lt;p&gt;I&amp;rsquo;m not a coding novice but there are a lot of uncharted waters here. Throughout the writeup I&amp;rsquo;ll reference docpages from both 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Flask&lt;/a&gt; and 
+&lt;a href=&#34;https://docs.pytest.org/en/stable/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Pytest&lt;/a&gt; as they are well presented and unusually helpful for those getting started. Aside from the documentation and the odd forum post, my primary resources are these two excellent books:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://www.amazon.com/Flask-Web-Development-Developing-Applications-dp-1491991739/dp/1491991739&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Flask Web Development&lt;/em&gt;&lt;/a&gt; by Miguel Grinberg,&lt;/li&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://www.amazon.com/Python-Testing-pytest-Effective-Scalable/dp/1680502409&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Python Testing with Pytest&lt;/em&gt;&lt;/a&gt; by Brian Okken.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let&amp;rsquo;s get this show started.&lt;/p&gt;
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;My target application is a fully operational 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Issue_tracking_system&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;issue tracker&lt;/a&gt; (see 
+&lt;a href=&#34;https://www.youtube.com/watch?v=PQa3NFB_LRg&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;here&lt;/a&gt; for a slick tour through an established product). Sure, it&amp;rsquo;s not the most exciting idea, but getting an app like this up and running calls for a lot of design decisions. There&amp;rsquo;s also enough complexity to make test-driven development worth the effort. To get a feel for what we&amp;rsquo;re talking about, consider just two aspects of the final product:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;a clean and functional &lt;strong&gt;user interface&lt;/strong&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;data storage&lt;/strong&gt; to keep track of users, issues, projects, and their relationships.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The implementation of each of these will heavily depend on how we want to use the issue tracker. We also want some way to &lt;strong&gt;authenticate&lt;/strong&gt; users and securely handle their passwords. Basic account management (e.g. validating new accounts, resetting passwords) will be handled by &lt;strong&gt;email&lt;/strong&gt;. Each of these aspects will be the topic of a separate writeup that builds on the codebase from the previous writeup.&lt;/p&gt;
+&lt;h1 id=&#34;codebase&#34;&gt;Codebase&lt;/h1&gt;
+&lt;p&gt;It&amp;rsquo;s now time to introduce the initial codebase. The rest of this article goes over the details of how it works as well as the rationale behind its structure.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;re looking for a good IDE, I highly recommend &lt;a href=&#34;https://code.visualstudio.com/&#34;&gt;Visual Studio Code&lt;/a&gt;. It&amp;rsquo;s free, widely supported by an extensive list of add-ons, and easy to work with. It is truly a thing of beauty.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;project-structure&#34;&gt;Project structure&lt;/h2&gt;
+&lt;p&gt;Our starting codebase is held in the root directory &lt;code&gt;issues-project&lt;/code&gt; (Fig. 1). Inside we have the &lt;code&gt;src/main&lt;/code&gt; folder, containing three Python files that comprise our app&amp;rsquo;s source code. The &lt;code&gt;tests&lt;/code&gt; folder on the same level holds code that will be used to test the application. We also have &lt;code&gt;setup.py&lt;/code&gt;, which will be invoked to setup the virtual environment.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-directory-listing-for-issues-project&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-01-intro/filetree.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Directory listing for &amp;lt;code&amp;gt;issues-project&amp;lt;/code&amp;gt;.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-01-intro/filetree.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Directory listing for &lt;code&gt;issues-project&lt;/code&gt;.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;There are of course many ways to structure a project. This particular layout allows us to play nice with Pytest and build on the codebase without too much difficulty, but there are other advantages that you can read about in 
+&lt;a href=&#34;https://blog.ionelmc.ro/2014/05/25/python-packaging&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;this comprehensive post&lt;/a&gt;. As the application grows I will likely bundle unit tests and functional tests into separate folders, but for now this structure will do just fine.&lt;/p&gt;
+&lt;h2 id=&#34;configuration&#34;&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;Most large applications need some 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/config/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;configuration&lt;/a&gt;. Each instance of a Flask application comes with a &lt;code&gt;config&lt;/code&gt; attribute that can be modified as if it were a dictionary:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;app = Flask(__name__)
+app.config[&#39;TESTING&#39;] = True
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A few &lt;code&gt;config&lt;/code&gt; values that we use are listed below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;SECRET_KEY&lt;/code&gt;, used to encrypt session cookies (discussed later),&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;DEBUG&lt;/code&gt;, toggles debug mode, which shows an interactive debugger for unhandled exceptions and reloads the development server for code changes,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;TESTING&lt;/code&gt;, toggles testing mode, which tells the app to allow exceptions to propagate, such that they can be handled by a testing framework.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The configuration file is shown below. We have three different configuration structures: one for development, another for testing, and yet another for production. This is useful because often a developer will want to use separate resources for each of these activities. You probably don&amp;rsquo;t want to test CRUD operations on your production database!&lt;/p&gt;
+&lt;p&gt;Each configuration inherits from the base &lt;code&gt;Config&lt;/code&gt; class, which contains settings that are shared across all configuration types. The secret key is assumed to be stored as an environment variable.&lt;/p&gt;
+&lt;h4 id=&#34;srcmainconfigpy&#34;&gt;src/main/config.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import os
+
+class Config:
+    SECRET_KEY = os.environ.get(&#39;SECRET_KEY&#39;)
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+class TestingConfig(Config):
+    TESTING = True
+
+class ProductionConfig(Config):
+    PLACEHOLDER = True
+
+config = {
+    &#39;development&#39;: DevelopmentConfig,
+    &#39;testing&#39;: TestingConfig,
+    &#39;production&#39;: ProductionConfig,
+    &#39;default&#39;: DevelopmentConfig
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can now use the global &lt;code&gt;config&lt;/code&gt; dictionary to easily configure an instance of our application to suit our purpose, whether it be for testing or development:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;app = Flask(__name__)
+app.config.from_object(config[&#39;testing&#39;])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;protecting-your-cookies&#34;&gt;Protecting your cookies&lt;/h3&gt;
+&lt;p&gt;It&amp;rsquo;s worth talking a bit more about that secret key and how it affects the 
+&lt;a href=&#34;https://machinesaredigging.com/2013/10/29/how-does-a-web-session-work/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;user session&lt;/em&gt;&lt;/a&gt;. Most web applications need to maintain some kind of &lt;em&gt;state&lt;/em&gt; with each user without having to dive into (slower) persistent storage. While handling an HTTP request, Flask makes the user session available to the application using the 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/api/#flask.session&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;session&lt;/code&gt;&lt;/a&gt; object. This allows the application to keep track of information across multiple requests using key-value pairs called &lt;em&gt;cookies&lt;/em&gt;. We will see how these can be useful later when we start to use them.&lt;/p&gt;
+&lt;p&gt;For now, just know that Flask will not allow you to use user sessions without defining the secret key. This key should be a long string of text that is not easily guessable and sufficiently random. Flask will use this key to cryptographically sign each cookie, such that a bad actor cannot impersonate you (or the application server) by forging your signature.&lt;/p&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Do not store secrets in cookies. Although your signature cannot be (easily) forged, the cookie payload can be &lt;a href=&#34;https://blog.miguelgrinberg.com/post/how-secure-is-the-flask-user-session&#34;&gt;very easily decrypted&lt;/a&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Make sure that your secrets (including things like API keys) are securely stored outside of source code. Never commit your secrets to version control!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;application&#34;&gt;Application&lt;/h2&gt;
+&lt;p&gt;Here we have our application code. If you&amp;rsquo;re looking at this code and thinking there&amp;rsquo;s something missing, well&amp;hellip; alright. It&amp;rsquo;s quite spartan. What we &lt;em&gt;do&lt;/em&gt; have in our package constructor (&lt;code&gt;__init__.py&lt;/code&gt;) is a 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;factory function&lt;/em&gt;&lt;/a&gt;. We can use &lt;code&gt;create_app()&lt;/code&gt; to create multiple instances of our app and import different configuration sets for each one using &lt;code&gt;app.config.from_object()&lt;/code&gt;. This is great for unit testing, as you will soon see.&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py&#34;&gt;src/main/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import Flask
+from src.main.config import config
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;issues.py&lt;/code&gt; file is used to instantiate the application. It first looks for the &lt;code&gt;ISSUES_CONFIG&lt;/code&gt; environment variable to see which configuration to use, but if that fails, the application is configured with the default (development) settings.&lt;/p&gt;
+&lt;p&gt;Note that the &lt;code&gt;create_app()&lt;/code&gt; function has significance to Flask&amp;rsquo;s command line utility, which we will use to launch the app. We will discuss this shortly.&lt;/p&gt;
+&lt;h4 id=&#34;srcmainissuespy&#34;&gt;src/main/issues.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import os
+from . import create_app
+
+app = create_app(os.getenv(&#39;ISSUES_CONFIG&#39;) or &#39;default&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And there we have it. That&amp;rsquo;s the app. Take a moment to appreciate just how lean it is. It won&amp;rsquo;t always be this way!&lt;/p&gt;
+&lt;h2 id=&#34;test-code&#34;&gt;Test code&lt;/h2&gt;
+&lt;p&gt;We now turn our attention to Pytest and what it will do for us. Taking a look at &lt;code&gt;test_suite.py&lt;/code&gt;, we find a rag-tag collection of unit tests. The first test is not particularly useful, but Pytest doesn&amp;rsquo;t care. All it cares about is whether the logic after any &lt;code&gt;assert&lt;/code&gt; keyword evaluates to &lt;code&gt;True&lt;/code&gt;. If it doesn&amp;rsquo;t, any remaining code in that function is skipped, the function is failed, and Pytest moves on to the next function. If all assertions in the test function are true, the function is passed.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you have used other testing frameworks you will appreciate that this is an incredibly beautiful programming construct. You don&amp;rsquo;t need to use things like &lt;code&gt;assertLess(a, b)&lt;/code&gt;: just write &lt;code&gt;assert a &amp;lt; b&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h4 id=&#34;teststest_suitepy&#34;&gt;tests/test_suite.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def test_sanity():
+    assert 1 + 1 == 2
+
+def test_config(app):
+    assert app.config[&#39;TESTING&#39;]
+
+def test_response(client):
+    response = client.get(&#39;/&#39;)
+    assert response.status_code == 200
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The remaining two test functions have arguments that sound more relevant. Where do &lt;code&gt;app&lt;/code&gt; and &lt;code&gt;client&lt;/code&gt; come from? That brings us to our next file.&lt;/p&gt;
+&lt;p&gt;Within the &lt;code&gt;conftest.py&lt;/code&gt; file, Pytest expects to find 
+&lt;a href=&#34;https://docs.pytest.org/en/latest/fixture.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;fixtures&lt;/em&gt;&lt;/a&gt;. These are functions that can be used to prepare &lt;em&gt;something&lt;/em&gt; (data, initialization, teardown, etc.) for a test function. In the code below, the &lt;code&gt;pytest.fixture&lt;/code&gt; decorator is used to tell Pytest that the function &lt;code&gt;app()&lt;/code&gt; is a fixture. Now Pytest knows to run the function whenever it encounters &lt;code&gt;app&lt;/code&gt; in the argument list of a test function. The &lt;code&gt;test_config()&lt;/code&gt; function in our test suite, for example, gets a fresh instance of our application that has been configured for testing.&lt;/p&gt;
+&lt;h4 id=&#34;testsconftestpy&#34;&gt;tests/conftest.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from src.main import create_app
+import pytest
+
+@pytest.fixture
+def app():
+    # initializes the app with the testing config
+    app = create_app(&#39;testing&#39;)
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that there is another fixture called &lt;code&gt;client&lt;/code&gt; that hasn&amp;rsquo;t been defined. This fixture is automatically made available to us courtesy of the &lt;code&gt;pyflask-test&lt;/code&gt; package (installed in our upcoming virtual environment), which looks for an &lt;code&gt;app&lt;/code&gt; fixture and uses it to create a test client. We will use the test client to generate browser requests and see whether we are getting back an expected response from our application.&lt;/p&gt;
+&lt;h1 id=&#34;execution&#34;&gt;Execution&lt;/h1&gt;
+&lt;p&gt;Now that we have introduced the codebase, it&amp;rsquo;s time to fire it up. We will run &lt;code&gt;issues&lt;/code&gt; within a virtual environment that is managed by 
+&lt;a href=&#34;https://docs.conda.io/en/latest/miniconda.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Miniconda&lt;/a&gt;, a lightweight version of the Anaconda package management system.&lt;/p&gt;
+&lt;h2 id=&#34;virtual-environment&#34;&gt;Virtual environment&lt;/h2&gt;
+&lt;p&gt;We&amp;rsquo;ll go ahead and use Miniconda to create our Python 3.7 environment. Once it&amp;rsquo;s ready, activate and use &lt;code&gt;pip&lt;/code&gt; to install our requisite packages. Don&amp;rsquo;t forget that trailing period.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;ROOTDIR&amp;gt; conda create -n issues python=3.7
+ROOTDIR&amp;gt; conda activate issues
+(issues) ROOTDIR&amp;gt; pip install -e .
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;When invoked by the command above, pip will search the current directory for the &lt;code&gt;setup.py&lt;/code&gt; file, which includes a list of dependencies needed for &lt;code&gt;issues&lt;/code&gt; to run properly. Each package listed in &lt;code&gt;install_requires&lt;/code&gt; will be installed into the virtual environment.&lt;/p&gt;
+&lt;h4 id=&#34;setuppy&#34;&gt;setup.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from setuptools import setup, find_packages
+
+setup(
+    name=&#39;issues&#39;,
+    version=&#39;0.1&#39;,
+    packages=find_packages(),
+    install_requires=[&amp;quot;flask&amp;quot;, &amp;quot;pytest&amp;quot;, &amp;quot;pytest-flask&amp;quot;],
+)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;What about that &lt;code&gt;-e&lt;/code&gt;? Running &lt;code&gt;pip install&lt;/code&gt; with the &lt;em&gt;editable&lt;/em&gt; option installs a link within the virtual environment to each local package discovered by 
+&lt;a href=&#34;https://setuptools.readthedocs.io/en/latest/setuptools.html#using-find-packages&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;find_packages()&lt;/code&gt;&lt;/a&gt; (i.e., &lt;code&gt;main&lt;/code&gt;). One of the major benefits of installing our project packages in this way is that our test files can now import them without resorting to hacky system path workarounds. Even better, the editable option means that we can continue to change the source code without having to reinstall the packages.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    At first glance importing a package from a neighboring directory doesn&amp;rsquo;t seem to be such a big problem, but take a look at the age of &lt;a href=&#34;https://stackoverflow.com/questions/6323860/sibling-package-imports&#34;&gt;this Stack Overflow post&lt;/a&gt;. People have been dealing with this issue for a very long time&amp;hellip;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;environment-variables&#34;&gt;Environment variables&lt;/h2&gt;
+&lt;p&gt;Remember that we need to set up a couple of environment variables. The syntax used to do this will vary depending on your shell (see 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/tutorial/factory/#run-the-application&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;this link&lt;/a&gt; for some examples). I&amp;rsquo;m using Visual Studio Code on Windows, whose terminal uses PowerShell. Note that your secret key should be more complex than this random headline I took from the New York Times.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$env:FLASK_APP=&#39;src/main/issues.py&#39;
+$env:ISSUES_CONFIG=&#39;development&#39;
+$env:SECRET_KEY=&#39;Are you overpraising your child?&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There&amp;rsquo;s a variable here that has not yet been introduced to us. As you might suspect, &lt;code&gt;FLASK_APP&lt;/code&gt; holds the location of our app. We&amp;rsquo;ll see how Flask uses this variable in the next section.&lt;/p&gt;
+&lt;h2 id=&#34;launching-the-app&#34;&gt;Launching the app&lt;/h2&gt;
+&lt;p&gt;Once installed inside the virtual environment, Flask gives us access to 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/cli/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;flask&lt;/code&gt;&lt;/a&gt;, a command line utility. Entering &lt;code&gt;flask run&lt;/code&gt; will first query the &lt;code&gt;FLASK_APP&lt;/code&gt; variable to discover our application. Since we have specified a path to a Python file, Flask will look for the &lt;code&gt;create_app()&lt;/code&gt; factory function in this file and use it to instantiate the application. Flask will then start up a development server and host the app on &lt;code&gt;http://localhost:5000/&lt;/code&gt;. You can find other ways to configure &lt;code&gt;FLASK_APP&lt;/code&gt; 
+&lt;a href=&#34;https://www.twilio.com/blog/how-run-flask-application&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;in this writeup&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If you visit the server right now, you will be greeted with a &lt;strong&gt;404 Not Found&lt;/strong&gt; error. That&amp;rsquo;s expected, since we haven&amp;rsquo;t yet told Flask how to handle any request. We&amp;rsquo;ll get to that shortly but for now let&amp;rsquo;s kill the server and see how to run our test suite.&lt;/p&gt;
+&lt;h2 id=&#34;running-some-tests&#34;&gt;Running some tests&lt;/h2&gt;
+&lt;p&gt;We are going to invoke Pytest through &lt;code&gt;pytest-flask&lt;/code&gt;, which gives us access to the test client, as described earlier. We can run the test suite with this command:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;(issues) ROOTDIR&amp;gt; py.test
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Pytest will now go off and search through any test code (i.e. files that look like &lt;code&gt;test_*.py&lt;/code&gt; or &lt;code&gt;*_test.py&lt;/code&gt;) within your current directory and all subdirectories. Test functions should start with &amp;ldquo;test&amp;rdquo;, like &lt;code&gt;test_response()&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Running &lt;code&gt;py.test&lt;/code&gt; results in a big chunk of text that starts with the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;============================= test session starts =============================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+plugins: flask-1.0.0
+collected 3 items
+
+tests\test_suite.py ..F   
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The last line tells the story: Pytest found three tests in &lt;code&gt;test_suite.py&lt;/code&gt;, of which two tests passed (indicated with a &lt;code&gt;.&lt;/code&gt;) and one test failed (&lt;code&gt;F&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;At the end of the test output, we see the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;=========================== short test summary info ===========================
+FAILED tests/test_suite.py::test_response - AssertionError: assert 404 == 200
+========================= 1 failed, 2 passed in 0.08s =========================
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Seems like &lt;code&gt;test_response()&lt;/code&gt; failed. Let&amp;rsquo;s take another look at the function:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def test_response(client):
+    response = client.get(&#39;/&#39;)
+    assert response.status_code == 200
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Pytest is telling us that after our test client made a GET request for the server&amp;rsquo;s root URL, the server did not return with a successful (&lt;strong&gt;200 OK&lt;/strong&gt;) response. We were expecting this since the server gave our browser a &lt;strong&gt;404 Not Found&lt;/strong&gt; response earlier. Since the returned status code was not equal to 200, the assertion failed and caused our test function to fail.&lt;/p&gt;
+&lt;h1 id=&#34;test-driven-development&#34;&gt;Test-driven development&lt;/h1&gt;
+&lt;p&gt;We have now set ourselves up to do some 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Test-driven_development&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;test-driven development&lt;/em&gt;&lt;/a&gt;. Under this methodology, each new feature in our application begins life as a test. The goal is then to implement the feature by writing as little code as possible so as to pass the test. This extremely short development cycle of writing and passing tests is repeated many times until you have yourself an application.&lt;/p&gt;
+&lt;p&gt;Our first &amp;ldquo;feature&amp;rdquo; is very simple: deliver a successful response to the client that requests the root URL.&lt;/p&gt;
+&lt;h2 id=&#34;handling-route-requests&#34;&gt;Handling route requests&lt;/h2&gt;
+&lt;p&gt;While the web server is running, it passes all received requests to &lt;code&gt;app&lt;/code&gt;, the Flask application instance. The app needs to know how to respond to each requested URL. More specifically, Flask needs to know what function to use to create the response. This is achieved using &lt;em&gt;routes&lt;/em&gt;, which associate a URL with a response function. We can use the &lt;code&gt;app.route&lt;/code&gt; decorator to specify a route for the root URL:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&#39;/&#39;)
+def index():
+    return &#39;&amp;lt;h1&amp;gt;Show me the money!&amp;lt;/h1&amp;gt;&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this way, the &lt;code&gt;index()&lt;/code&gt; function has now been assigned to handle the response for the root URL. We will add this code to the &lt;code&gt;create_app()&lt;/code&gt; function within the &lt;code&gt;issues&lt;/code&gt; package constructor:&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py-1&#34;&gt;src/main/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import Flask
+from src.main.config import config
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+
+    @app.route(&#39;/&#39;)
+    def index():
+       return &#39;&amp;lt;h1&amp;gt;Show me the money!&amp;lt;/h1&amp;gt;&#39;
+
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After revising the code and launching the app with &lt;code&gt;flask run&lt;/code&gt;, you will find that a trip to the server root no longer results in a 404 Not Found.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-success&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-01-intro/200-OK.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Success!&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-01-intro/200-OK.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Success!
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Let&amp;rsquo;s run pytest once more.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;(issues) ROOTDIR&amp;gt; py.test
+============================= test session starts =============================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+plugins: flask-1.0.0
+collected 3 items
+
+tests\test_suite.py ...                                                  [100%]
+
+============================== 3 passed in 0.06s ==============================
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As expected, we have passed the tests and restored order to the universe.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;ve cloned the &lt;a href=&#34;https://github.com/ahadjinicolaou/issues.app&#34;&gt;project repository&lt;/a&gt;, you can run &lt;code&gt;git checkout fe2b7ce&lt;/code&gt; to get the current version of the source code.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;That concludes the initialization of the issue tracker project. Although it takes a bit more work to distribute a Flask application over several source files, this modular design should allow for a more streamlined development and testing experience.&lt;/p&gt;
+&lt;p&gt;There is a lot of code between what we have and a working issue tracker. In the next article I&amp;rsquo;ll create a basic user interface for the app and motivate the use of &lt;em&gt;templates&lt;/em&gt;, which allow for the clean separation of presentation logic and application data.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

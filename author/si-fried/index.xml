@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SI Fried | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/author/si-fried/</link>
+      <atom:link href="https://www.remotelycurious.net/author/si-fried/index.xml" rel="self" type="application/rss+xml" />
+    <description>SI Fried</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Thu, 27 Aug 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>SI Fried</title>
+      <link>https://www.remotelycurious.net/author/si-fried/</link>
+    </image>
+    
+    <item>
+      <title>Differential responses to high-frequency electrical stimulation in brisk-transient and delta retinal ganglion cells</title>
+      <link>https://www.remotelycurious.net/publication/embc-2020/</link>
+      <pubDate>Thu, 27 Aug 2020 00:00:00 +0000</pubDate>
+      <guid>https://www.remotelycurious.net/publication/embc-2020/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

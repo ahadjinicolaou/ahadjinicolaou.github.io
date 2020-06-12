@@ -1,0 +1,1519 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="How does a computer learn from experience?">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.f72481ea6518a9efe938e95819339e7a.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/">
+  <meta property="og:title" content="ml.doc (1.1): Learning from data | Remotely Curious">
+  <meta property="og:description" content="How does a computer learn from experience?"><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-10-25T19:03:33-04:00">
+    
+    <meta property="article:modified_time" content="2020-10-25T19:03:33-04:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/"
+  },
+  "headline": "ml.doc (1.1): Learning from data",
+  
+  "datePublished": "2020-10-25T19:03:33-04:00",
+  "dateModified": "2020-10-25T19:03:33-04:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "How does a computer learn from experience?"
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>ml.doc (1.1): Learning from data | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>ml.doc (1.1): Learning from data</h1>
+
+  
+  <p class="page-subtitle">How does a computer learn from experience?</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Oct 25, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    15 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/analysis/">analysis</a>, <a href="/category/ml.doc/">ml.doc</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <!-- $\newcommand{\norm}[1]{\left\lVert#1\right\rVert}$ -->
+<p>Over the last few weeks I&rsquo;ve been working through MIT&rsquo;s machine learning course 
+<a href="https://www.edx.org/course/machine-learning-with-python-from-linear-models-to" target="_blank" rel="noopener">(6.86x)</a>. The course&rsquo;s emphasis on understanding the core concepts really makes you think about the data and whether a given algorithm is the right tool for the job. This approach would benefit those who are new to machine learning and looking to employ ML algorithms in their own work. On the other hand, the course itself requires some mathematical maturity (not to mention a bucketload of undergraduate algebra and calculus) which can make the material hard to digest. A little exposition in the right places would go a long way towards helping new practitioners use these new tools more effectively in their projects.</p>
+<p>To address this thought bubble (and reinforce my own understanding), I&rsquo;ve decided to write up some key ideas introduced in MITx 6.86x so as to make them more accessible to a general audience. Think of each writeup as being inspired by the MIT approach, but with some extra material in places to help absorb the ideas.</p>
+<!-- To help others absorb some of the key ideas underlying ML (but also to reinforce my own understanding), I've decided to write up a guide or two. Rather than a comprehensive introduction to machine learning, this series will focus on specific topics, taking occasional detours through related concepts whenever it might help the reader. -->
+<div class="alert alert-note">
+  <div>
+    To get the most out of these writeups, you should be familiar with basic machine learning concepts, including things such as the difference between supervised and unsupervised learning, and the importance of using separate training and testing datasets. It&rsquo;s also useful to have at least some rusty linear algebra and calculus skills under your belt.
+  </div>
+</div>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#overview">Overview</a>
+      <ul>
+        <li><a href="#measuring-error">Measuring error</a></li>
+        <li><a href="#sketching-the-goal">Sketching the goal</a></li>
+      </ul>
+    </li>
+    <li><a href="#a-mathematical-translation">A mathematical translation</a>
+      <ul>
+        <li><a href="#the-decision-boundary">The decision boundary</a></li>
+        <li><a href="#the-binary-linear-classifier">The binary linear classifier</a></li>
+        <li><a href="#linear-separability">Linear separability</a></li>
+      </ul>
+    </li>
+    <li><a href="#teaching-the-classifier">Teaching the classifier</a>
+      <ul>
+        <li><a href="#the-perceptron">The perceptron</a>
+          <ul>
+            <li><a href="#number-of-iterations">Number of iterations</a></li>
+            <li><a href="#the-offset-update">The offset update</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<p>The job of a classifier is to take some input data and figure out how to label it. Many successful applications of machine learning involve classification, ranging from recommender systems to spam and fraud detection to medical diagnosis. This writeup will be focused on classifiers that are both <em>binary</em> (i.e., two output label choices) and <em>linear</em>, where the label output is a linear function of the inputs.</p>
+<h1 id="overview">Overview</h1>
+<p>A classifier $h$ is a function that maps an input <em>feature vector</em> $x$ to a discrete output <em>label</em>, $y = h(x)$. The function is discovered during a training period in which the classifier is exposed to data from a training set $S_{N}$, consisting of $N$ input examples and their labels,</p>
+<p>$$S_{N} = \{ (x^{(i)}, y^{(i)}), i=1,&hellip;,N \}.$$</p>
+<div class="alert alert-note">
+  <div>
+    It&rsquo;s worth paying attention to the notation. The $k$-th component of a vector is indicated using a subscript, $x_{k}$. Subscripts will also be used to indicate a specific piece of information, like a positive training example, $x_+$. The $i$-th member of some collection is indicated by a superscript, e.g. the $i$-th feature vector, $x^{(i)}$. When in doubt, assume you are dealing with a vector.
+  </div>
+</div>
+<p>Imagine you want to build a classifier that can predict whether you will like a brunch dish, based on its ingredients. You might consider a six-item ingredient list:</p>
+<ul>
+<li>🥔 potato</li>
+<li>🥑 avocado</li>
+<li>🍅 tomato</li>
+<li>🥓 bacon</li>
+<li>🍄 mushroom</li>
+<li>🥫 baked beans</li>
+</ul>
+<p>We will represent each brunch dish as a 6-dimensional feature vector, $x^{(i)} \in \{0, 1\}^6$, with $x^{(i)}_{k} = 1$ indicating the presence of the $k$-th ingredient in the $i$-th dish. The label $y^{(i)}=1$ is used to indicate that you like the $i$-th dish (and $y^{(i)}=-1$ to encode the opposite).</p>
+<p>An example training set $S_5$ containing five example brunch dishes is shown below. Each component of $x$ (in other words, each ingredient $x_k$) is known as a <em>feature</em>.</p>
+<table>
+<thead>
+<tr>
+<th>$i$</th>
+<th>dish</th>
+<th>🥔 $x^{(i)}_{1}$</th>
+<th>🥑 $x^{(i)}_{2}$</th>
+<th>🍅 $x^{(i)}_{3}$</th>
+<th>🥓 $x^{(i)}_{4}$</th>
+<th>🍄 $x^{(i)}_{5}$</th>
+<th>🥫 $x^{(i)}_{6}$</th>
+<th>$y^{(i)}$</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>avocado sandwich</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td><strong>1</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>huevos rancheros</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td><strong>1</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>bacon and eggs</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td><strong>1</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>english breakfast</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td><strong>-1</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>mushroom chowder</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td><strong>-1</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>After training our brunch classifier $h_{brunch}$ on the training set, it will learn how to map each input vector to its corresponding label. We could then use it to predict whether we would like something new, like breakfast burritos.</p>
+<p>$$ \textrm{breakfast burrito} = \{🥔, 🥑, 🍅, 🥫\} $$
+$$ h_{brunch}(\{🥔, 🥑, 🍅, 🥫\}) = h_{brunch}([1, 1, 1, 0, 0, 1]) = &hellip; $$</p>
+<h2 id="measuring-error">Measuring error</h2>
+<p>Classifiers learn from their mistakes with the help of an <em>algorithm</em>. With each example $(x^{(i)}, y^{(i)})$ considered during training, the algorithm checks to see whether the classifier maps the input to the right label. If $h(x^{(i)}) \neq y^{(i)}$, the classifier has made a mistake. We define the <em>training error</em> $E_N$ as the average rate of mistakes over the training set,</p>
+<p>$$ E_N(h) = \frac{1}{N} \sum_{i=1}^{N} [\![ h(x^{(i)}) \neq y^{(i)} ]\!],$$</p>
+<p>where $ [\![ \textrm{something} ]\!] = 1$ if the thing inside is true, and $0$ otherwise. For example, $ [\![ 2 = 9 ]\!] = 0$ and $ [\![ 2 &lt; 9 ]\!] = 1$. If our brunch classifier gets three of the five training labels wrong, then $E_N(h_{brunch}) = \frac{3}{5}$.</p>
+<p>Knowing the training error is important, but we are usually more interested in how the classifier would perform in the real world, on data it has not seen before. Since we cannot know how well $h$ would work for every possible feature vector, we settle for knowing the <em>test error</em> $E(h)$, which is computed in the same way as the training error, but with data that have been set aside for this purpose.</p>
+<h2 id="sketching-the-goal">Sketching the goal</h2>
+<p>We have talked about the idea of training a classifier to learn from mistakes, but what does that look like? Let&rsquo;s use some sketches to visualize it.</p>
+<p>Imagine we are midway through training a linear classifier on a set of $N=5$ two-dimensional feature vectors, $x \in \mathbb{R}^2$ (Fig. 1). Their labels, $y \in \{-1, 1\}$ are indicated by the plus/minus symbols. There is also a black line, running through the feature space and dividing it into two halves. This represents our linear classifier.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-a-linear-classifier-that-can-do-better-with-e_nh--15">
+
+
+  <a data-fancybox="" href="/ml-doc-01-1-learning-from-data/poor-classifier.png" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; A linear classifier that can do better, with $E_N(h) = 1/5$.">
+
+
+  <img src="/ml-doc-01-1-learning-from-data/poor-classifier.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> A linear classifier that can do better, with $E_N(h) = 1/5$.
+  </figcaption>
+
+
+</figure>
+
+<p>On the blue half of the feature space, vectors map to $h(x) = 1$, and on the orange half, $h(x) = -1$. We can see that all but one of the training examples have been mapped correctly. Since we have five examples, the training error $E_N(h) = 1/5$.</p>
+<p>Not bad, but looking at the plot, you can see some room for improvement. If we just bump the line, this <em>decision boundary</em> a little bit, we can improve the classifier and achieve zero training error (Fig. 2).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-after-nudging-the-decision-boundary-we-have-a-better-classifier-with-no-training-error">
+
+
+  <a data-fancybox="" href="/ml-doc-01-1-learning-from-data/better-classifier.png" data-caption="&lt;b&gt;Fig. 2.&lt;/b&gt; After nudging the decision boundary, we have a better classifier, with no training error.">
+
+
+  <img src="/ml-doc-01-1-learning-from-data/better-classifier.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2.</b> After nudging the decision boundary, we have a better classifier, with no training error.
+  </figcaption>
+
+
+</figure>
+
+<p>This, in a nutshell, is what training a classifier looks like. We start off with a function $h$ that is useless, but with each iteration of the algorithm, the decision boundary dividing each label region gets nudged and the function becomes slightly better at its job.</p>
+<h1 id="a-mathematical-translation">A mathematical translation</h1>
+<p>If you peer into the black box of a classifier and find out how it &ldquo;learns&rdquo;, you will be unsurprised to find some mathematics. What might surprise you is how little of it you need to know to more fully understand the general problem of classification. In this section we will motivate the use of linear algebra as a language to describe the problem at hand, using it to flesh out the ideas of the previous section.</p>
+<h2 id="the-decision-boundary">The decision boundary</h2>
+<p>A binary classifier splits the feature space into two, using a decision boundary. Before we can update the classifier, it needs to be described in language that a training algorithm can understand. That is, we need to parameterize the decision boundary. Once we have this, the algorithm can update the decision boundary parameters to improve the classifier.</p>
+<p>In general, the decision boundary is a function of the inputs. A <em>linear</em> classifier working in a $d$-dimensional feature space has a decision boundary that is a linear combination of the input features,</p>
+<p>$$ x_1 \theta_1 + x_2 \theta_2 + &hellip; + x_d \theta_d + \theta_0 = x \cdot \theta + \theta_0 = 0 $$</p>
+<p>where $\theta = [\theta_1, \theta_2, &hellip;, \theta_d] \in \mathbb{R}^d$ is a $d$-dimensional vector that determines the relative influence of each feature on the classification, and $\theta_0 \in \mathbb{R}$ is a scalar offset.</p>
+<div class="alert alert-note">
+  <div>
+    <p>Note that the dot in $x \cdot \theta$ denotes the <em>dot product</em> of two vectors. Geometrically, this operation is defined by
+$\newcommand{\norm}[1]{|| #1 ||}$</p>
+<p>$$ x \cdot \theta = \norm{x} \norm{\theta} \textrm{cos}\:\alpha, $$</p>
+<p>where $\norm{x}$ is the <em>norm</em> of $x$ and $\alpha$ is the angle between the two vectors. If this looks completely foreign to you, it&rsquo;s probably a good idea to stop here and learn the geometric implications of $x \cdot \theta$ before continuing. Make some sketches!</p>
+  </div>
+</div>
+<p>To get comfortable with what exactly $\theta$ means here, let&rsquo;s scale the feature space back to two dimensions and play around with the simplest linear classifier: one whose decision boundary passes through the origin, i.e. $\theta_0 = 0$ (Fig. 3). In this case, the decision boundary takes the form of a line,</p>
+<p>$$ x_1 \theta_1 + x_2 \theta_2 = x \cdot \theta = 0. $$</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-a-linear-classifier-with-decision-boundary-x-cdot-theta--0-going-through-the-origin">
+
+
+  <a data-fancybox="" href="/ml-doc-01-1-learning-from-data/classifier-thru-origin.png" data-caption="&lt;b&gt;Fig. 3.&lt;/b&gt; A linear classifier, with decision boundary $x \cdot \theta = 0$ going through the origin.">
+
+
+  <img src="/ml-doc-01-1-learning-from-data/classifier-thru-origin.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3.</b> A linear classifier, with decision boundary $x \cdot \theta = 0$ going through the origin.
+  </figcaption>
+
+
+</figure>
+
+<p>Let&rsquo;s consider the geometry of our situation. This was not mentioned earlier, but by convention, $\theta = [\theta_1, \theta_2]$ is chosen such that it points towards the (blue) positively-labeled feature space, as indicated in the figure. Keep this in mind.</p>
+<p>Now, any vector $x = [x_1, x_2]$ that lies exactly on the decision boundary satisfies $x \cdot \theta = 0$. That means $x$ and $\theta$ are perpendicular to each other, which makes sense. The other implication here is that the classifier has no idea what to do with these inputs: should it be unlucky enough to get them, it will map them to the label $y = h(x) = 0$.</p>
+<div class="alert alert-note">
+  <div>
+    This means that although we are dealing with a binary classifier whose job is to map inputs to one of two output labels $\{-1, 1\}$, it is still technically possible for the classifier to map an input to a <em>third</em> output. This is usually avoided in practice by mapping $h(x) = 0$ to one of the labels.
+  </div>
+</div>
+<p>How about some other options? Say we pick a positively-labeled vector $x = [-1.8, 2.6]$. Since the (smallest) angle between $x$ and $\theta$ is acute, we know that $x \cdot \theta &gt; 0$ (Fig. 4, left). Now try a negatively-labeled one: $x = [-3.1, -1.7]$. This time, the dot product $x \cdot \theta &lt; 0$ (Fig. 4, right). We are starting to see something useful here!</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-4b-left-inputs-that-are-positively-labeled-ie-hx--1-have-a-positive-dot-product-ie-x-cdot-theta--0-right-negatively-labeled-inputs-have-a-negative-dot-product">
+
+
+  <a data-fancybox="" href="/ml-doc-01-1-learning-from-data/dot-product.png" data-caption="&lt;b&gt;Fig. 4.&lt;/b&gt; Left: inputs that are positively labeled (i.e. $h(x) = 1$) have a positive dot product, i.e. $x \cdot \theta &amp;gt; 0$. Right: negatively-labeled inputs have a negative dot product.">
+
+
+  <img src="/ml-doc-01-1-learning-from-data/dot-product.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 4.</b> Left: inputs that are positively labeled (i.e. $h(x) = 1$) have a positive dot product, i.e. $x \cdot \theta &gt; 0$. Right: negatively-labeled inputs have a negative dot product.
+  </figcaption>
+
+
+</figure>
+
+<p>If we consider the general form of the classifier and add back the scalar offset, such that the decision boundary looks like $x \cdot \theta + \theta_0 = 0$, the key idea stays the same, e.g. if $x \cdot \theta + \theta_0 &gt; 0$, the classifier assigns $x$ a positive label. In other words, $x$ gets mapped to the <em>sign</em> of the quantity $x \cdot \theta + \theta_0$.</p>
+<h2 id="the-binary-linear-classifier">The binary linear classifier</h2>
+<p>At last, we are ready for a proper definition. A <em>binary linear classifier</em> $h$ is a function that maps feature vectors $x$ to $h(x) \in \{-1, 0, 1\}$, where
+$$ h(x) = \textrm{sign}(\theta \cdot x + \theta_0).$$</p>
+<p>The search for a good classifier now becomes a matter of finding values for the parameter vector $\theta$ and offset parameter $\theta_0,$ such that the classifier output or <em>prediction</em> $h(x^{(i)})$ is equal to $y^{(i)}$ for a decent proportion of the training set. We will talk about <strong>how</strong> we find these values very soon.</p>
+<p>Although we have made use of two-dimensional examples, the same concepts hold in higher dimensions. In general, the decision boundary is a <em>hyperplane</em> of the feature space. All that fancy word means is that for a $d$-dimensional feature space, the decision boundary is an $(d-1)$-dimensional subset of that space. You have already seen that for a two dimensional feature space, i.e. $x \in \mathbb{R}^2$, the decision boundary is a line. If we move up another dimension and consider features $x \in \mathbb{R}^3$, the decision boundary becomes a plane, as shown below.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-5b-within-a-three-dimensional-feature-space-the-decision-boundary-becomes-a-plane">
+
+
+  <a data-fancybox="" href="/ml-doc-01-1-learning-from-data/decision-boundary-3d.png" data-caption="&lt;b&gt;Fig. 5.&lt;/b&gt; Within a three-dimensional feature space, the decision boundary becomes a plane.">
+
+
+  <img src="/ml-doc-01-1-learning-from-data/decision-boundary-3d.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 5.</b> Within a three-dimensional feature space, the decision boundary becomes a plane.
+  </figcaption>
+
+
+</figure>
+
+<h2 id="linear-separability">Linear separability</h2>
+<p>As it turns out, there is a price to pay for this level of simplicity: linear classifiers of this type are quite constrained. Consider the following two-dimensional dataset (Fig. 6). It is an illustration of XOR, the boolean operation that says you can have either one of these two things $(x_1=1 \textrm{ or } x_2=1)$, but not both $(x_1=1 \textrm{ and } x_2=1)$.</p>
+<div class="alert alert-note">
+  <div>
+    XOR comes up often in life. As an example, let $x_1$ and $x_2$ be items on the dessert menu at a restaurant, i.e., $\{x_1, x_2 \} \in \{🍨,🍰,🥧,🍮\}.$
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-6b-a-dataset-that-is-not-linearly-separable">
+
+
+  <a data-fancybox="" href="/ml-doc-01-1-learning-from-data/xor.png" data-caption="&lt;b&gt;Fig. 6.&lt;/b&gt; A dataset that is not linearly separable.">
+
+
+  <img src="/ml-doc-01-1-learning-from-data/xor.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 6.</b> A dataset that is not linearly separable.
+  </figcaption>
+
+
+</figure>
+
+<p>No matter how you slice it, there is no way to draw a line through these training examples to perfectly group them by label. This is an example of a dataset that is not <em>linearly separable</em>. More formally, the training dataset $S_N = \{(x^{(i)}, y^{(i)}), i=1,&hellip;, N\}$ is said to be linearly separable if there exists a parameter vector $\hat{\theta}$ and offset vector $\hat{\theta_0}$ such that for all training examples $i=1,&hellip;,N$,</p>
+<p>$$ y^{(i)}(\hat{\theta} \cdot x + \hat{\theta_0}) &gt; 0.$$</p>
+<p>Take a moment to understand this expression. Imagine we have a pair of these special values $\hat{\theta}$ and $\hat{\theta_0}$ for some dataset. If we look at the above inequality for a positive example $x_+$, we know that $(\hat{\theta} \cdot x_+ + \hat{\theta_0})$ must be positive for it to hold, since $y_+=1$. Similarly, for a negative example $x_-$, the quantity $(\hat{\theta} \cdot x_- + \hat{\theta_0})$ must evaluate to a negative value.</p>
+<p>What we can see here is that when $y^{(i)}(\theta \cdot x^{(i)} + \theta_0) &gt; 0$, the label and classifier output for the $i$-th training example $x^{(i)}$ are in <em>agreement</em>. When this equality is not true, the prediction does not match the label and the classifier has made a mistake.</p>
+<h1 id="teaching-the-classifier">Teaching the classifier</h1>
+<p>It is finally time to talk about how a classifier learns from experience. Until now there have been many mentions of an &ldquo;algorithm&rdquo;, which is vaguely understood to be used for training the classifier. Here we will introduce the <em>perceptron</em>, a simple and elegant algorithm whose variants have been widely applied to solve all kinds of problems.</p>
+<p>To train a classifier, an algorithm needs to recognize when the classifier makes a mistake. Recall that the training error for a linear classifier looks like this:</p>
+<p>$$ E_N(h) = \frac{1}{N} \sum_{i=1}^{N} [\![ h(x^{(i)}) \neq y^{(i)} ]\!],$$</p>
+<p>where $[\![ h(x^{(i)}) \neq y^{(i)} ]\!]$ equals one for a mistake, and zero otherwise. But thanks to our previous discussion, we know precisely how to express a mistake, i.e,</p>
+<p>$$y^{(i)}(\theta \cdot x^{(i)} + \theta_0) \leq 0.$$</p>
+<p>With that in mind, let&rsquo;s take a stroll through the perceptron.</p>
+<h2 id="the-perceptron">The perceptron</h2>
+<p>The perceptron algorithm takes a training set $S_N$ input, and outputs the classifier parameters $\theta$ and $\theta_0$. The general principle is to find a mistake and then update the parameters to fix the mistake. As long as the training data are linearly separable, doing this for long enough will eventually result in some parameters that do the job.</p>
+<p>It is typical to initialize $\theta$ to a $d$-dimensional zero vector (where $d$ is the number of features) and $\theta_0$ to a scalar zero. For now we will ignore $\theta_0$ and focus on training a linear classifier whose decision boundary runs through the origin. We begin the proceedings with the following items:</p>
+<ul>
+<li><code>theta</code>, a $d$-element array of zeros,</li>
+<li><code>feature_matrix</code>, a $d \times N$ feature matrix, with a training example on each row,</li>
+<li><code>labels</code>, an array of $N$ labels for each training example.</li>
+</ul>
+<p>An incomplete Python (Numpy) implementation of the algorithm looks like this:</p>
+<pre><code class="language-python">def incomplete_perceptron(feature_matrix, labels):
+    num_features, num_examples = feature_matrix.shape
+    theta = np.zeros(num_features)
+    
+    for i in range(num_examples):
+        x, y = feature_matrix[i, :], labels[i]
+        # update theta when we have made a mistake
+        if y * np.dot(theta, x) &lt;= 0:
+            theta = theta + y * x
+
+    return theta
+</code></pre>
+<p>At the update step, the algorithm tests to see whether <code>theta</code>, the current iteration of the classifier computes the wrong training label. When that happens, $\theta$ is updated by adding $y^{(i)} x^{(i)}$ to it.</p>
+<p>To see why that should help things, let&rsquo;s consider the scenario after one update, where $\theta = y^{(i)}x^{(i)}.$ Now imagine if the classifier saw the same training example. If we plugged our updated $\theta$ value into the &ldquo;mistake detector&rdquo;, we would get</p>
+<p>$$ y^{(i)} (\theta \cdot x^{(i)}) = y^{(i)} ((y^{(i)}x^{(i)}) \cdot x^{(i)}) = x^{(i)} \cdot x^{(i)} = \norm{x^{(i)}}^2$$</p>
+<p>Now unless you happen to have a row of zeros inside your feature matrix, the squared norm of $x$ is always greater than zero, and so the mistake has been corrected. We can see that the algorithm has somehow improved the situation.</p>
+<h3 id="number-of-iterations">Number of iterations</h3>
+<p>As we go through the training examples, the parameter vector $\theta$ will change rapidly, sometimes cancelling out the effect of previous examples. It is for this reason that the dataset is typically iterated over multiple times, ideally until the algorithm no longer finds a mistake.</p>
+<p>To complete the algorithm, we will introduce a new input $T$ that specifies how many times to loop through the dataset, and factor the offset parameter <code>theta_0</code> into our computation. The last change to make is a practical one: it is tricky to check whether a numerical computation equals an exact value, like zero. To avoid numerical instabilities, we will instead use a tolerance parameter $\epsilon$, such that if some result $|r| &lt; \epsilon$, then $r = 0$.</p>
+<pre><code class="language-python">def perceptron(feature_matrix, labels, T=1, tolerance=1e-6):
+    num_features, num_examples = feature_matrix.shape
+    theta = np.zeros(num_features)
+    theta_0 = 0
+
+    for t in range(T):
+        for i in range(num_examples):
+            x, y = feature_matrix[i, :], labels[i]
+            # update theta, theta_0 when we have made a mistake
+            if y * (np.dot(theta, x) + theta_0) &lt; tolerance:
+                theta = theta + y * x
+                theta_0 = theta_0 + y
+
+    return theta, theta_0
+</code></pre>
+<h3 id="the-offset-update">The offset update</h3>
+<p>It is worth making a quick note about how the update for the offset parameter $\theta_0$ comes about. Consider a dataset that has been &ldquo;extended&rdquo;, such that $\theta_{ext} = [\theta, \theta_0]$ and $x_{ext} = [x, 1],$ where $x \in S_N$. If we want to update $\theta_{ext}$ using our extended training data, we use the same update rule as before,</p>
+<p>$$\begin{align*}
+\theta_{ext} &amp;= \theta_{ext} + y^{(i)} x_{ext}^{(i)} \\<br>
+\end{align*}
+$$</p>
+<p>Expanding this out reveals the update for both parameters:</p>
+<p>$$\begin{align*}
+\begin{bmatrix}
+\theta\\<br>
+\theta_0
+\end{bmatrix}
+&amp;=
+\begin{bmatrix}
+\theta\\<br>
+\theta_0
+\end{bmatrix}
+\end{align*} + y^{(i)}
+\begin{bmatrix}
+x^{(i)}\\<br>
+1
+\end{bmatrix}
+$$</p>
+<p>In other words, handling the extra offset parameter $\theta_0$ is just a matter of considering slightly different training examples.</p>
+<h1 id="summary">Summary</h1>
+<p>Over the course of this writeup we have peeked behind the curtain and seen that machine learning, for all the hype and buzz, is not something overly mysterious. At heart, machine learning is the practice of identifying patterns in data using some kind of model, with the &ldquo;learning&rdquo; achieved through improving the model parameters.</p>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/algorithm/">algorithm</a>
+  
+  <a class="badge badge-light" href="/tag/classification/">classification</a>
+  
+  <a class="badge badge-light" href="/tag/edx/">edx</a>
+  
+  <a class="badge badge-light" href="/tag/machine-learning/">machine-learning</a>
+  
+  <a class="badge badge-light" href="/tag/perceptron/">perceptron</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/&amp;text=ml.doc%20%281.1%29:%20Learning%20from%20data" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/&amp;t=ml.doc%20%281.1%29:%20Learning%20from%20data" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=ml.doc%20%281.1%29:%20Learning%20from%20data&amp;body=https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/&amp;title=ml.doc%20%281.1%29:%20Learning%20from%20data" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=ml.doc%20%281.1%29:%20Learning%20from%20data%20https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/&amp;title=ml.doc%20%281.1%29:%20Learning%20from%20data" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/beware-linear-regression/">Beware those bearing linear regression models</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

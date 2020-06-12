@@ -1,0 +1,1415 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Now featuring a prototype interface and better project structure!">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/issues-app-03-blueprints/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.f72481ea6518a9efe938e95819339e7a.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/issues-app-03-blueprints/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/issues-app-03-blueprints/">
+  <meta property="og:title" content="issues.app (3): Modularity with Blueprints | Remotely Curious">
+  <meta property="og:description" content="Now featuring a prototype interface and better project structure!"><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-09-25T18:34:18-04:00">
+    
+    <meta property="article:modified_time" content="2020-09-25T18:34:18-04:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/issues-app-03-blueprints/"
+  },
+  "headline": "issues.app (3): Modularity with Blueprints",
+  
+  "datePublished": "2020-09-25T18:34:18-04:00",
+  "dateModified": "2020-09-25T18:34:18-04:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Now featuring a prototype interface and better project structure!"
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>issues.app (3): Modularity with Blueprints | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>issues.app (3): Modularity with Blueprints</h1>
+
+  
+  <p class="page-subtitle">Now featuring a prototype interface and better project structure!</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Sep 25, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    11 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/development/">development</a>, <a href="/category/issues.app/">issues.app</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <div class="alert alert-note">
+  <div>
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find <a href="/post/issues-app-02-templates/">here</a>. Any code documented here may change significantly in the future. <strong>Be warned!</strong>
+  </div>
+</div>
+<p>Today I&rsquo;ll be documenting several structure-related changes that collectively represent a significant change to the codebase. In order of appearance, these changes are as follows:</p>
+<ul>
+<li>switching from Flask-Bootstrap to Bootstrap-Flask (i.e. Bootstrap v3 to v4)</li>
+<li>relocating several source files for more meaningful project structure</li>
+<li>implementation of <em>blueprints</em> for better code modularity.</li>
+</ul>
+<p>These are not sexy changes, so to sweeten the deal, I&rsquo;ve also gone ahead and cooked up the beginnings of a user interface for the project. You&rsquo;ll get a glimpse of it as I detail the migration of the codebase to Bootstrap-Flask.</p>
+<p>Let&rsquo;s get started!</p>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#using-better-templates">Using better templates</a>
+      <ul>
+        <li><a href="#switching-to-bootstrap-flask">Switching to Bootstrap-Flask</a></li>
+        <li><a href="#the-proto-interface">The proto-interface</a>
+          <ul>
+            <li></li>
+            <li><a href="#the-base-template">The base template</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#project-restructure">Project restructure</a></li>
+    <li><a href="#blueprints">Blueprints</a>
+      <ul>
+        <li><a href="#the-main-blueprint">The main blueprint</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="using-better-templates">Using better templates</h1>
+<p>The first order of business is to make a base template for the issue tracker. By defining page components and using template blocks (e.g., <code>{% block content %}</code>), a base template can make page components available to a child template, such that the derived page can use or modify the base template&rsquo;s content. I will use the base template to hold a <em>navbar</em>, a horizontal component on the top of each app page that contains links to other pages, as well as other non-view-specific information (e.g., number of issues assigned to the logged-in user).</p>
+<h2 id="switching-to-bootstrap-flask">Switching to Bootstrap-Flask</h2>
+<p>One of the issues I discovered with Flask-Bootstrap is that the package uses Bootstrap 3. At first I didn&rsquo;t see this as an issue, but the more I wanted to play around with the layout, the more time I was sinking into custom CSS changes and fighting the defaults. It&rsquo;s worth noting that even though I am definitely <strong>not</strong> an interface designer, nor a master of CSS, I am fussy when it comes to design. By the time I was satisfied with my navbar, more than <em>three hours</em> had passed through a rapid cycle of Google searches, browser element inspection and minute CSS changes. And that&rsquo;s just a single navbar!</p>
+<p>After reading so many Stack Overflow posts containing some variant of &ldquo;this is resolved in v4&rdquo;, I pulled the plug on Flask-Bootstrap and replaced it with 
+<a href="https://bootstrap-flask.readthedocs.io/en/stable/" target="_blank" rel="noopener">Bootstrap-Flask</a>, which uses Bootstrap 4. If you are in any doubt about which version to use, take it from me: use v4.</p>
+<h2 id="the-proto-interface">The proto-interface</h2>
+<p>The first version of our issue tracker interface can be seen below. At this stage it&rsquo;s really just the navbar with a very plain content page. Most of the what you&rsquo;re looking at is described by a base template, with the content underneath the navbar filled out by each child template. We have four child templates, one for each major component in the app:</p>
+<ul>
+<li>the dashboard,</li>
+<li>the projects page,</li>
+<li>the issues page,</li>
+<li>the message page.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-the-proto-interface-for-the-app">
+
+
+  <a data-fancybox="" href="/issues-app-03-blueprints/interface.png" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; The proto-interface for the app.">
+
+
+  <img src="/issues-app-03-blueprints/interface.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> The proto-interface for the app.
+  </figcaption>
+
+
+</figure>
+
+<p>Aside from some links to different application views, the navbar contains some other information. We have a couple of <em>badges</em>: little numerical indicators that hold the number of active issues and unread messages for the user. There&rsquo;s also a user dropdown menu that lists the username and their role. We will save a proper description of the major data entities underlying this project (users, projects, issues, messages, etc.) for when we get to implementing the project&rsquo;s database. That will definitely warrant a separate writeup.</p>
+<p>Currently, each child template looks almost identical and pretty boring. This is what the dashboard template looks like:</p>
+<h4 id="srctemplatesdashboardhtml">src/templates/dashboard.html</h4>
+<pre><code class="language-html">{% extends &quot;base.html&quot; %}
+
+{% block content %}
+&lt;div class=&quot;container&quot;&gt;
+    &lt;div class=&quot;row&quot;&gt;
+        &lt;div class=&quot;col&quot;&gt;
+            &lt;h1&gt;Dashboard&lt;/h1&gt;
+            &lt;p&gt;This test content comes from the dashboard template.&lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+{% endblock %}
+</code></pre>
+<p>Unlike Flask-Bootstrap, Bootstrap-Flask does not come with its own base template, so 
+<a href="https://bootstrap-flask.readthedocs.io/en/stable/basic.html" target="_blank" rel="noopener">you have to make one</a>. The next section provides an overview of this project&rsquo;s base template, as well as some important aspects of its design.</p>
+<h3 id="the-base-template">The base template</h3>
+<p>After leading with the <code>DOCTYPE</code> tag, the base template includes some meta tags in the <code>head</code> element that allow for the view to be 
+<a href="https://learn.shayhowe.com/advanced-html-css/responsive-web-design/" target="_blank" rel="noopener">responsive</a>, the effects of which will be shown soon. We also have some code that sets the favicon and loads CSS files, including Bootstrap and a custom CSS file for small design tweaks.</p>
+<h4 id="srctemplatesbasehtml--head">src/templates/base.html &raquo; <code>&lt;head&gt;</code></h4>
+<pre><code class="language-html">{% block head %}
+&lt;!-- required meta tags --&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, shrink-to-fit=no&quot;&gt;
+
+&lt;!-- favicon resources --&gt;
+&lt;link rel=&quot;shortcut icon&quot; href=&quot;{{ url_for('static', filename='favicon-16.png') }}&quot; type=&quot;image/png&quot;&gt;
+&lt;link rel=&quot;icon&quot; href=&quot;{{ url_for('static', filename='favicon-16.png') }}&quot; type=&quot;image/png&quot;&gt;
+
+{% block styles %}
+&lt;!-- bootstrap CSS --&gt;
+{{ bootstrap.load_css() }}
+&lt;link rel=&quot;stylesheet&quot; href=&quot;{{ url_for('static', filename='custom.css') }}&quot;&gt;
+{% endblock %}
+
+&lt;title&gt;issues.app&lt;/title&gt;
+{% endblock %}
+</code></pre>
+<p>Most of the remaining code is within the <code>body</code> element and is used to define the navbar. Bootstrap is a mobile-first framework, so it&rsquo;s worth putting a bit of thought into the navbar&rsquo;s layout for different window sizes. After deciding which components to include in the navbar, we can then choose which components to hide or <em>collapse</em> when the display size is small enough.</p>
+<div class="alert alert-note">
+  <div>
+    A <em>mobile-first</em> design philosophy is geared at making content look good on small displays (e.g., those of phones and tablets), before considering larger displays like laptop screens. This compels you to consider content before everything else, saving your screen real estate for what actually matters.
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-a-collapsed-navbar-shows-a-hamburger-menu">
+
+
+  <a data-fancybox="" href="/issues-app-03-blueprints/collapsed.png" data-caption="&lt;b&gt;Fig. 2.&lt;/b&gt; A collapsed navbar shows a hamburger menu.">
+
+
+  <img src="/issues-app-03-blueprints/collapsed.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2.</b> A collapsed navbar shows a hamburger menu.
+  </figcaption>
+
+
+</figure>
+
+<p>Components can be collapsed by nesting the components within a <code>div.collapse.navbar-collapse</code> element. The <code>.navbar-toggler</code> class is used to bundle collapsed components into a hamburger menu that references the components using the <code>#navbarNavDropdown</code> ID. The <code>navbar-brand</code> element, used to access the dashboard, will always be shown.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-opening-up-the-menu">
+
+
+  <a data-fancybox="" href="/issues-app-03-blueprints/collapsed-menu.png" data-caption="&lt;b&gt;Fig. 3.&lt;/b&gt; Opening up the menu.">
+
+
+  <img src="/issues-app-03-blueprints/collapsed-menu.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3.</b> Opening up the menu.
+  </figcaption>
+
+
+</figure>
+
+<h4 id="srctemplatesbasehtml--body">src/templates/base.html &raquo; <code>&lt;body&gt;</code></h4>
+<pre><code class="language-html">&lt;div class=&quot;navbar navbar-fixed-top navbar-expand-md navbar-light bg-light&quot;&gt;
+    &lt;!-- app brand --&gt;
+    &lt;a class=&quot;navbar-brand&quot; href=&quot;{{ url_for('index') }}&quot;&gt;
+        &lt;img class=&quot;d-inline-block align-top&quot; src=&quot;{{ url_for('static', filename='favicon-32.png') }}&quot; &gt;
+        issues.app
+    &lt;/a&gt;
+
+    &lt;!-- hamburger menu --&gt;
+    &lt;button class=&quot;navbar-toggler&quot; type=&quot;button&quot; data-toggle=&quot;collapse&quot; data-target=&quot;#navbarNavDropdown&quot; aria-controls=&quot;navbarNavDropdown&quot; aria-expanded=&quot;false&quot; aria-label=&quot;Toggle navigation&quot;&gt;
+        &lt;span class=&quot;navbar-toggler-icon&quot;&gt;&lt;/span&gt;
+    &lt;/button&gt;
+    
+    &lt;!-- items below collapse into the menu above--&gt;
+    &lt;div class=&quot;collapse navbar-collapse&quot; id=&quot;navbarNavDropdown&quot;&gt;
+        &lt;!-- logged-in user dropdown --&gt;
+        &lt;ul class=&quot;navbar-nav ml-auto order-1&quot;&gt;
+            &lt;li class=&quot;nav-item dropdown&quot;&gt;
+                &lt;a class=&quot;nav-link dropdown-toggle&quot; href=&quot;#&quot; id=&quot;navbarUserDropdown&quot; role=&quot;button&quot; data-toggle=&quot;dropdown&quot; aria-haspopup=&quot;true&quot; aria-expanded=&quot;false&quot;&gt;
+                    &amp;nbsp;{{ user_data['user'] }}&lt;span class=&quot;badge badge-secondary&quot;&gt;{{ user_data['role'] }}&lt;/span&gt;&lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;
+                &lt;/a&gt;
+
+                &lt;div class=&quot;dropdown-menu&quot; aria-labelledby=&quot;navbarUserDropdown&quot;&gt;
+                    &lt;a class=&quot;dropdown-item&quot; href=&quot;#&quot;&gt;Profile&lt;/a&gt;
+                    &lt;a class=&quot;dropdown-item&quot; href=&quot;#&quot;&gt;Settings&lt;/a&gt;
+                    &lt;div class=&quot;dropdown-divider&quot;&gt;&lt;/div&gt;
+                    &lt;a class=&quot;dropdown-item&quot; href=&quot;#&quot;&gt;Sign out&lt;/a&gt;
+                &lt;/div&gt;
+            &lt;/li&gt;
+        &lt;/ul&gt;
+
+        &lt;!-- major app sections --&gt;
+        &lt;ul class=&quot;navbar-nav mr-auto order-0&quot;&gt;
+            &lt;li class=&quot;nav-item {{ 'active' if is_active['projects'] }}&quot;&gt;
+                &lt;a class=&quot;nav-link d-flex align-items-center&quot; href=&quot;{{ url_for('projects') }}&quot;&gt;
+                    &amp;nbsp;Projects&amp;nbsp;
+                &lt;/a&gt;
+            &lt;/li&gt;
+            &lt;li class=&quot;nav-item {{ 'active' if is_active['issues'] }}&quot;&gt;
+                &lt;a class=&quot;nav-link d-flex align-items-center&quot; href=&quot;{{ url_for('issues') }}&quot;&gt;
+                    &amp;nbsp;Issues&amp;nbsp;{% if user_data['num_issues'] %}&lt;span class=&quot;badge badge-pill badge-primary&quot;&gt;{{ user_data['num_issues'] }}&lt;/span&gt;{% endif %}
+                &lt;/a&gt;
+            &lt;/li&gt;
+            &lt;li class=&quot;nav-item {{ 'active' if is_active['messages'] }}&quot;&gt;
+                &lt;a class=&quot;nav-link d-flex align-items-center&quot; href=&quot;{{ url_for('messages') }}&quot;&gt;
+                    &amp;nbsp;Messages&amp;nbsp;{% if user_data['num_messages'] %}&lt;span class=&quot;badge badge-pill badge-primary&quot;&gt;{{ user_data['num_messages'] }}&lt;/span&gt;{% endif %}
+                &lt;/a&gt;
+            &lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Looking at the code above, you will notice some Jinja statements sprinkled around the place. The statements that populate the navbar user data access a dictionary called <code>user_data</code>, which is supplied to Jinja through each view function. For example, the projects template is rendered within the <code>projects()</code> view function as shown below.</p>
+<h4 id="srcmaininitpy--create_app">src/main/init.py &raquo; <code>create_app()</code></h4>
+<pre><code class="language-python">@app.route('/projects')
+def projects():
+    return render_template('projects.html',
+        is_active={'projects': True},
+        user_data=get_user_data())
+
+def get_user_data():
+    return {
+      'user': 'ahadjinicolaou',
+      'role': 'admin',
+      'num_issues': 12,
+      'num_messages': 2}
+</code></pre>
+<p>Although the function <code>get_user_data()</code> is just returning some dummy data here, you can imagine this function being rewritten to say, query a <code>Users</code> table in a database and parse the results to create a proper user data dictionary.</p>
+<p>Another point worth noting is the use of Flask&rsquo;s <code>url_for()</code> function. Recall that we declare view functions in our code using the <code>app.route</code> decorator. Flask keeps track of the association between each URL rule (e.g. <code>/projects</code>) and its view function using the app instance&rsquo;s URL map. You can inspect the URL map for the application by accessing <code>app.url_map</code> within the main package constructor.</p>
+<p>Here&rsquo;s what it looks like:</p>
+<pre><code class="language-python">Map([&lt;Rule '/projects' (HEAD, OPTIONS, GET) -&gt; projects&gt;,
+    &lt;Rule '/messages' (HEAD, OPTIONS, GET) -&gt; messages&gt;,
+    &lt;Rule '/issues' (HEAD, OPTIONS, GET) -&gt; issues&gt;,
+    &lt;Rule '/' (HEAD, OPTIONS, GET) -&gt; index&gt;,
+    &lt;Rule '/bootstrap/static/&lt;filename&gt;' (HEAD, OPTIONS, GET) -&gt; bootstrap.static&gt;,
+    &lt;Rule '/static/&lt;filename&gt;' (HEAD, OPTIONS, GET) -&gt; static&gt;])
+</code></pre>
+<p>There&rsquo;s some extra stuff in here that we have yet to discuss, but the main takeaway is that for every URL rule, there is an <em>endpoint</em> that identifies the function Flask should use to handle the associated request. By default, Flask uses the name of the function as the endpoint. We can see that, for instance, a request for <code>/projects</code> will be handled using the <code>projects()</code> function.</p>
+<p>We will take another look at this URL map after restructuring our code to use <em>blueprints</em>, but before we get to that, we need to make a quick fix.</p>
+<h1 id="project-restructure">Project restructure</h1>
+<p>As I was looking at my project structure, it dawned on me that the location of some files doesn&rsquo;t make a lot of sense. I&rsquo;m looking at <code>issues.py</code>, <code>config.py</code>, and <code>__init__.py</code>, all of which are located in <code>src/main</code>. The first two don&rsquo;t need to be so deep within the project structure &ndash; in fact, they should be in the project root, since they don&rsquo;t rely on any project-specific packages. There are two consequences of moving these two files:</p>
+<ul>
+<li>the <code>FLASK_APP</code> environment variable should now be set to <code>issues.py</code>,</li>
+<li>the <code>config</code> dictionary within <code>__init__.py</code> should now be imported <code>from config</code>.</li>
+</ul>
+<p>Speaking of <code>__init__.py</code>, since it contains the <code>create_app()</code> factory function, this file should be a package constructor for the <em>src</em> package, rather than the <em>main</em> subpackage. Moving this file to the <code>src</code> directory allows us to keep our project subpackages (containing different functionality for the app) all in one place. The <code>src/main</code> folder (empty at this point) can instead be used to keep our view functions and error response functions, which we will get to as we further modularize the codebase.</p>
+<p>Moving <code>__init__.py</code> requires us to make changes to the arguments in the <code>Flask</code> object initializer:</p>
+<ul>
+<li><code>template_folder='./templates'</code>,</li>
+<li><code>static_folder='./static'</code>.</li>
+</ul>
+<p>We also need to update the factory function import statement in the <code>tests/conftest.py</code> file: <code>from src import create_app</code>.</p>
+<p>Alright, we&rsquo;re finally ready to talk blueprints!</p>
+<h1 id="blueprints">Blueprints</h1>
+<p>One obvious way to better segment our codebase is to somehow isolate our HTML response functions (stuffed within the <code>create_app()</code> factory function) within their own file. There&rsquo;s a wrinkle in that idea, however: outside of the package constructor, the response functions no longer have access to the <code>app</code> variable, and by extension, the <code>app.route</code> decorator.</p>
+<p>Here&rsquo;s where the 
+<a href="https://flask.palletsprojects.com/en/1.1.x/blueprints/" target="_blank" rel="noopener">Blueprint</a> class can help. A blueprint can be used to store all of these response-serving functions, without being attached to the application instance. All that functionality sits in a dormant state, waiting to be registered with the application. Once registered, the functions get grafted onto the app and the instance finds itself with additional powers, just as nature had intended.</p>
+<h2 id="the-main-blueprint">The main blueprint</h2>
+<p>After moving the factory function code into <code>src</code>, we were left with an empty <code>src/main</code> folder. We will promptly repurpose this folder to house the <em>main blueprint</em> &ndash; the blueprint that tells Flask how to render all of our major app components. All of our response and error functions will now be kept in a <code>main</code> package constructor file. Note that we have to use the <code>main.route</code> view decorator associated with the main blueprint.</p>
+<p>We also have to use the <code>main.app_errorhandler</code> decorator to handle our 404 response throughout the whole app. Using the <code>main.errorhandler</code> decorator would tell Flask to run this error function only for routes defined by the main blueprint.</p>
+<h4 id="srcmain__init__py">src/main/__init__.py</h4>
+<pre><code class="language-python">from flask import Blueprint
+from flask import render_template
+
+main = Blueprint('main', __name__)
+
+@main.route('/')
+def index():
+    return render_template('dashboard.html',
+            is_active={},
+            user_data=get_user_data())
+
+@main.route('/projects')
+def projects():
+    return render_template('projects.html',
+            is_active={'projects': True},
+            user_data=get_user_data())
+
+@main.route('/issues')
+def issues():
+    return render_template('issues.html',
+            is_active={'issues': True},
+            user_data=get_user_data())
+
+@main.route('/messages')
+def messages():
+    return render_template('messages.html',
+            is_active={'messages': True},
+            user_data=get_user_data())
+
+@main.app_errorhandler(404)
+def page_not_found(e):
+    return render_template(&quot;404.html&quot;,
+            is_active={},
+            user_data={}), 404
+
+def get_user_data():
+    return {
+        'user': 'ahadjinicolaou',
+        'role': 'admin',
+        'num_issues': 12,
+        'num_messages': 2}
+</code></pre>
+<p>After defining the blueprint, we need to register it within the factory function.</p>
+<h4 id="src__init__py">src/__init__.py</h4>
+<pre><code class="language-python">...
+from flask import Blueprint
+
+# factory function
+def create_app(config_name):
+    app = Flask(__name__, template_folder='./templates', static_folder='./static')
+    app.config.from_object(config[config_name])
+
+    bootstrap.init_app(app)
+
+    from src.main import main as main_blueprint
+    app.register_blueprint(main_blueprint)
+
+    return app
+</code></pre>
+<p>Remember that chatter about Flask&rsquo;s URL map? If we print it out now, you&rsquo;ll see that the endpoints for <code>main_blueprint</code>'s URL rules have been updated to include the <code>main.</code> prefix.</p>
+<pre><code class="language-python">Map([&lt;Rule '/projects' (GET, OPTIONS, HEAD) -&gt; main.projects&gt;,
+    &lt;Rule '/messages' (GET, OPTIONS, HEAD) -&gt; main.messages&gt;,
+    &lt;Rule '/issues' (GET, OPTIONS, HEAD) -&gt; main.issues&gt;,
+    &lt;Rule '/' (GET, OPTIONS, HEAD) -&gt; main.index&gt;,
+    &lt;Rule '/bootstrap/static/&lt;filename&gt;' (GET, OPTIONS, HEAD) -&gt; bootstrap.static&gt;,
+    &lt;Rule '/static/&lt;filename&gt;' (GET, OPTIONS, HEAD) -&gt; static&gt;])
+</code></pre>
+<p>Of course, this means that we have to change the corresponding endpoints referenced in the templates. A call to <code>url_for('index')</code> for example will be replaced by <code>url_for('main.index')</code>.</p>
+<p>After relaunching the server and making sure we haven&rsquo;t broken anything, we should see&hellip; no difference. Brilliant.</p>
+<div class="alert alert-note">
+  <div>
+    If you&rsquo;ve cloned the <a href="https://github.com/ahadjinicolaou/issues.app">project repository</a>, you can run <code>git checkout cff1a49</code> to get the current version of the source code.
+  </div>
+</div>
+<h1 id="summary">Summary</h1>
+<p>After a little bit of futzing with the codebase, we have ourselves a highly modular codebase that allows us to cleanly segment presentation code from application logic. It&rsquo;s also nice to have the beginnings of what will hopefully become a clean, functional user interface fit for an issue tracker.</p>
+<p>I&rsquo;m also happier after having moved those three project files to more suitable locations &ndash; frankly, their previous locations were an afterthought that I should have noticed earlier. Better late than never!</p>
+
+    </div>
+
+    
+
+
+
+
+
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/issues-app-03-blueprints/&amp;text=issues.app%20%283%29:%20Modularity%20with%20Blueprints" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/issues-app-03-blueprints/&amp;t=issues.app%20%283%29:%20Modularity%20with%20Blueprints" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=issues.app%20%283%29:%20Modularity%20with%20Blueprints&amp;body=https://www.remotelycurious.net/post/issues-app-03-blueprints/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/issues-app-03-blueprints/&amp;title=issues.app%20%283%29:%20Modularity%20with%20Blueprints" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=issues.app%20%283%29:%20Modularity%20with%20Blueprints%20https://www.remotelycurious.net/post/issues-app-03-blueprints/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/issues-app-03-blueprints/&amp;title=issues.app%20%283%29:%20Modularity%20with%20Blueprints" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/issues-app-02-templates/">issues.app (2): Making templates with Bootstrap</a></li>
+      
+      <li><a href="/post/issues-app-01-intro/">issues.app (1): Getting started with Flask and Pytest</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

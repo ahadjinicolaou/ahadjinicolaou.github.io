@@ -1,0 +1,2518 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Remotely Curious</title>
+    <link>https://www.remotelycurious.net/</link>
+      <atom:link href="https://www.remotelycurious.net/index.xml" rel="self" type="application/rss+xml" />
+    <description>Remotely Curious</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 25 Oct 2020 19:03:33 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>Remotely Curious</title>
+      <link>https://www.remotelycurious.net/</link>
+    </image>
+    
+    <item>
+      <title>ml.doc (1.1): Learning from data</title>
+      <link>https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/</link>
+      <pubDate>Sun, 25 Oct 2020 19:03:33 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/</guid>
+      <description>&lt;!-- $\newcommand{\norm}[1]{\left\lVert#1\right\rVert}$ --&gt;
+&lt;p&gt;Over the last few weeks I&amp;rsquo;ve been working through MIT&amp;rsquo;s machine learning course 
+&lt;a href=&#34;https://www.edx.org/course/machine-learning-with-python-from-linear-models-to&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;(6.86x)&lt;/a&gt;. The course&amp;rsquo;s emphasis on understanding the core concepts really makes you think about the data and whether a given algorithm is the right tool for the job. This approach would benefit those who are new to machine learning and looking to employ ML algorithms in their own work. On the other hand, the course itself requires some mathematical maturity (not to mention a bucketload of undergraduate algebra and calculus) which can make the material hard to digest. A little exposition in the right places would go a long way towards helping new practitioners use these new tools more effectively in their projects.&lt;/p&gt;
+&lt;p&gt;To address this thought bubble (and reinforce my own understanding), I&amp;rsquo;ve decided to write up some key ideas introduced in MITx 6.86x so as to make them more accessible to a general audience. Think of each writeup as being inspired by the MIT approach, but with some extra material in places to help absorb the ideas.&lt;/p&gt;
+&lt;!-- To help others absorb some of the key ideas underlying ML (but also to reinforce my own understanding), I&#39;ve decided to write up a guide or two. Rather than a comprehensive introduction to machine learning, this series will focus on specific topics, taking occasional detours through related concepts whenever it might help the reader. --&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    To get the most out of these writeups, you should be familiar with basic machine learning concepts, including things such as the difference between supervised and unsupervised learning, and the importance of using separate training and testing datasets. It&amp;rsquo;s also useful to have at least some rusty linear algebra and calculus skills under your belt.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#overview&#34;&gt;Overview&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#measuring-error&#34;&gt;Measuring error&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#sketching-the-goal&#34;&gt;Sketching the goal&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#a-mathematical-translation&#34;&gt;A mathematical translation&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-decision-boundary&#34;&gt;The decision boundary&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-binary-linear-classifier&#34;&gt;The binary linear classifier&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#linear-separability&#34;&gt;Linear separability&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#teaching-the-classifier&#34;&gt;Teaching the classifier&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-perceptron&#34;&gt;The perceptron&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#number-of-iterations&#34;&gt;Number of iterations&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#the-offset-update&#34;&gt;The offset update&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;p&gt;The job of a classifier is to take some input data and figure out how to label it. Many successful applications of machine learning involve classification, ranging from recommender systems to spam and fraud detection to medical diagnosis. This writeup will be focused on classifiers that are both &lt;em&gt;binary&lt;/em&gt; (i.e., two output label choices) and &lt;em&gt;linear&lt;/em&gt;, where the label output is a linear function of the inputs.&lt;/p&gt;
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;A classifier $h$ is a function that maps an input &lt;em&gt;feature vector&lt;/em&gt; $x$ to a discrete output &lt;em&gt;label&lt;/em&gt;, $y = h(x)$. The function is discovered during a training period in which the classifier is exposed to data from a training set $S_{N}$, consisting of $N$ input examples and their labels,&lt;/p&gt;
+&lt;p&gt;$$S_{N} = \{ (x^{(i)}, y^{(i)}), i=1,&amp;hellip;,N \}.$$&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    It&amp;rsquo;s worth paying attention to the notation. The $k$-th component of a vector is indicated using a subscript, $x_{k}$. Subscripts will also be used to indicate a specific piece of information, like a positive training example, $x_+$. The $i$-th member of some collection is indicated by a superscript, e.g. the $i$-th feature vector, $x^{(i)}$. When in doubt, assume you are dealing with a vector.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Imagine you want to build a classifier that can predict whether you will like a brunch dish, based on its ingredients. You might consider a six-item ingredient list:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;🥔 potato&lt;/li&gt;
+&lt;li&gt;🥑 avocado&lt;/li&gt;
+&lt;li&gt;🍅 tomato&lt;/li&gt;
+&lt;li&gt;🥓 bacon&lt;/li&gt;
+&lt;li&gt;🍄 mushroom&lt;/li&gt;
+&lt;li&gt;🥫 baked beans&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We will represent each brunch dish as a 6-dimensional feature vector, $x^{(i)} \in \{0, 1\}^6$, with $x^{(i)}_{k} = 1$ indicating the presence of the $k$-th ingredient in the $i$-th dish. The label $y^{(i)}=1$ is used to indicate that you like the $i$-th dish (and $y^{(i)}=-1$ to encode the opposite).&lt;/p&gt;
+&lt;p&gt;An example training set $S_5$ containing five example brunch dishes is shown below. Each component of $x$ (in other words, each ingredient $x_k$) is known as a &lt;em&gt;feature&lt;/em&gt;.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;$i$&lt;/th&gt;
+&lt;th&gt;dish&lt;/th&gt;
+&lt;th&gt;🥔 $x^{(i)}_{1}$&lt;/th&gt;
+&lt;th&gt;🥑 $x^{(i)}_{2}$&lt;/th&gt;
+&lt;th&gt;🍅 $x^{(i)}_{3}$&lt;/th&gt;
+&lt;th&gt;🥓 $x^{(i)}_{4}$&lt;/th&gt;
+&lt;th&gt;🍄 $x^{(i)}_{5}$&lt;/th&gt;
+&lt;th&gt;🥫 $x^{(i)}_{6}$&lt;/th&gt;
+&lt;th&gt;$y^{(i)}$&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;avocado sandwich&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;huevos rancheros&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;3&lt;/td&gt;
+&lt;td&gt;bacon and eggs&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;english breakfast&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;-1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;5&lt;/td&gt;
+&lt;td&gt;mushroom chowder&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;-1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;After training our brunch classifier $h_{brunch}$ on the training set, it will learn how to map each input vector to its corresponding label. We could then use it to predict whether we would like something new, like breakfast burritos.&lt;/p&gt;
+&lt;p&gt;$$ \textrm{breakfast burrito} = \{🥔, 🥑, 🍅, 🥫\} $$
+$$ h_{brunch}(\{🥔, 🥑, 🍅, 🥫\}) = h_{brunch}([1, 1, 1, 0, 0, 1]) = &amp;hellip; $$&lt;/p&gt;
+&lt;h2 id=&#34;measuring-error&#34;&gt;Measuring error&lt;/h2&gt;
+&lt;p&gt;Classifiers learn from their mistakes with the help of an &lt;em&gt;algorithm&lt;/em&gt;. With each example $(x^{(i)}, y^{(i)})$ considered during training, the algorithm checks to see whether the classifier maps the input to the right label. If $h(x^{(i)}) \neq y^{(i)}$, the classifier has made a mistake. We define the &lt;em&gt;training error&lt;/em&gt; $E_N$ as the average rate of mistakes over the training set,&lt;/p&gt;
+&lt;p&gt;$$ E_N(h) = \frac{1}{N} \sum_{i=1}^{N} [\![ h(x^{(i)}) \neq y^{(i)} ]\!],$$&lt;/p&gt;
+&lt;p&gt;where $ [\![ \textrm{something} ]\!] = 1$ if the thing inside is true, and $0$ otherwise. For example, $ [\![ 2 = 9 ]\!] = 0$ and $ [\![ 2 &amp;lt; 9 ]\!] = 1$. If our brunch classifier gets three of the five training labels wrong, then $E_N(h_{brunch}) = \frac{3}{5}$.&lt;/p&gt;
+&lt;p&gt;Knowing the training error is important, but we are usually more interested in how the classifier would perform in the real world, on data it has not seen before. Since we cannot know how well $h$ would work for every possible feature vector, we settle for knowing the &lt;em&gt;test error&lt;/em&gt; $E(h)$, which is computed in the same way as the training error, but with data that have been set aside for this purpose.&lt;/p&gt;
+&lt;h2 id=&#34;sketching-the-goal&#34;&gt;Sketching the goal&lt;/h2&gt;
+&lt;p&gt;We have talked about the idea of training a classifier to learn from mistakes, but what does that look like? Let&amp;rsquo;s use some sketches to visualize it.&lt;/p&gt;
+&lt;p&gt;Imagine we are midway through training a linear classifier on a set of $N=5$ two-dimensional feature vectors, $x \in \mathbb{R}^2$ (Fig. 1). Their labels, $y \in \{-1, 1\}$ are indicated by the plus/minus symbols. There is also a black line, running through the feature space and dividing it into two halves. This represents our linear classifier.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-a-linear-classifier-that-can-do-better-with-e_nh--15&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/poor-classifier.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; A linear classifier that can do better, with $E_N(h) = 1/5$.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/poor-classifier.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; A linear classifier that can do better, with $E_N(h) = 1/5$.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;On the blue half of the feature space, vectors map to $h(x) = 1$, and on the orange half, $h(x) = -1$. We can see that all but one of the training examples have been mapped correctly. Since we have five examples, the training error $E_N(h) = 1/5$.&lt;/p&gt;
+&lt;p&gt;Not bad, but looking at the plot, you can see some room for improvement. If we just bump the line, this &lt;em&gt;decision boundary&lt;/em&gt; a little bit, we can improve the classifier and achieve zero training error (Fig. 2).&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-after-nudging-the-decision-boundary-we-have-a-better-classifier-with-no-training-error&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/better-classifier.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; After nudging the decision boundary, we have a better classifier, with no training error.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/better-classifier.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; After nudging the decision boundary, we have a better classifier, with no training error.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;This, in a nutshell, is what training a classifier looks like. We start off with a function $h$ that is useless, but with each iteration of the algorithm, the decision boundary dividing each label region gets nudged and the function becomes slightly better at its job.&lt;/p&gt;
+&lt;h1 id=&#34;a-mathematical-translation&#34;&gt;A mathematical translation&lt;/h1&gt;
+&lt;p&gt;If you peer into the black box of a classifier and find out how it &amp;ldquo;learns&amp;rdquo;, you will be unsurprised to find some mathematics. What might surprise you is how little of it you need to know to more fully understand the general problem of classification. In this section we will motivate the use of linear algebra as a language to describe the problem at hand, using it to flesh out the ideas of the previous section.&lt;/p&gt;
+&lt;h2 id=&#34;the-decision-boundary&#34;&gt;The decision boundary&lt;/h2&gt;
+&lt;p&gt;A binary classifier splits the feature space into two, using a decision boundary. Before we can update the classifier, it needs to be described in language that a training algorithm can understand. That is, we need to parameterize the decision boundary. Once we have this, the algorithm can update the decision boundary parameters to improve the classifier.&lt;/p&gt;
+&lt;p&gt;In general, the decision boundary is a function of the inputs. A &lt;em&gt;linear&lt;/em&gt; classifier working in a $d$-dimensional feature space has a decision boundary that is a linear combination of the input features,&lt;/p&gt;
+&lt;p&gt;$$ x_1 \theta_1 + x_2 \theta_2 + &amp;hellip; + x_d \theta_d + \theta_0 = x \cdot \theta + \theta_0 = 0 $$&lt;/p&gt;
+&lt;p&gt;where $\theta = [\theta_1, \theta_2, &amp;hellip;, \theta_d] \in \mathbb{R}^d$ is a $d$-dimensional vector that determines the relative influence of each feature on the classification, and $\theta_0 \in \mathbb{R}$ is a scalar offset.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;Note that the dot in $x \cdot \theta$ denotes the &lt;em&gt;dot product&lt;/em&gt; of two vectors. Geometrically, this operation is defined by
+$\newcommand{\norm}[1]{|| #1 ||}$&lt;/p&gt;
+&lt;p&gt;$$ x \cdot \theta = \norm{x} \norm{\theta} \textrm{cos}\:\alpha, $$&lt;/p&gt;
+&lt;p&gt;where $\norm{x}$ is the &lt;em&gt;norm&lt;/em&gt; of $x$ and $\alpha$ is the angle between the two vectors. If this looks completely foreign to you, it&amp;rsquo;s probably a good idea to stop here and learn the geometric implications of $x \cdot \theta$ before continuing. Make some sketches!&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;To get comfortable with what exactly $\theta$ means here, let&amp;rsquo;s scale the feature space back to two dimensions and play around with the simplest linear classifier: one whose decision boundary passes through the origin, i.e. $\theta_0 = 0$ (Fig. 3). In this case, the decision boundary takes the form of a line,&lt;/p&gt;
+&lt;p&gt;$$ x_1 \theta_1 + x_2 \theta_2 = x \cdot \theta = 0. $$&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-a-linear-classifier-with-decision-boundary-x-cdot-theta--0-going-through-the-origin&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/classifier-thru-origin.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; A linear classifier, with decision boundary $x \cdot \theta = 0$ going through the origin.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/classifier-thru-origin.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; A linear classifier, with decision boundary $x \cdot \theta = 0$ going through the origin.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Let&amp;rsquo;s consider the geometry of our situation. This was not mentioned earlier, but by convention, $\theta = [\theta_1, \theta_2]$ is chosen such that it points towards the (blue) positively-labeled feature space, as indicated in the figure. Keep this in mind.&lt;/p&gt;
+&lt;p&gt;Now, any vector $x = [x_1, x_2]$ that lies exactly on the decision boundary satisfies $x \cdot \theta = 0$. That means $x$ and $\theta$ are perpendicular to each other, which makes sense. The other implication here is that the classifier has no idea what to do with these inputs: should it be unlucky enough to get them, it will map them to the label $y = h(x) = 0$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This means that although we are dealing with a binary classifier whose job is to map inputs to one of two output labels $\{-1, 1\}$, it is still technically possible for the classifier to map an input to a &lt;em&gt;third&lt;/em&gt; output. This is usually avoided in practice by mapping $h(x) = 0$ to one of the labels.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;How about some other options? Say we pick a positively-labeled vector $x = [-1.8, 2.6]$. Since the (smallest) angle between $x$ and $\theta$ is acute, we know that $x \cdot \theta &amp;gt; 0$ (Fig. 4, left). Now try a negatively-labeled one: $x = [-3.1, -1.7]$. This time, the dot product $x \cdot \theta &amp;lt; 0$ (Fig. 4, right). We are starting to see something useful here!&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-left-inputs-that-are-positively-labeled-ie-hx--1-have-a-positive-dot-product-ie-x-cdot-theta--0-right-negatively-labeled-inputs-have-a-negative-dot-product&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/dot-product.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4.&amp;lt;/b&amp;gt; Left: inputs that are positively labeled (i.e. $h(x) = 1$) have a positive dot product, i.e. $x \cdot \theta &amp;amp;gt; 0$. Right: negatively-labeled inputs have a negative dot product.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/dot-product.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4.&lt;/b&gt; Left: inputs that are positively labeled (i.e. $h(x) = 1$) have a positive dot product, i.e. $x \cdot \theta &amp;gt; 0$. Right: negatively-labeled inputs have a negative dot product.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;If we consider the general form of the classifier and add back the scalar offset, such that the decision boundary looks like $x \cdot \theta + \theta_0 = 0$, the key idea stays the same, e.g. if $x \cdot \theta + \theta_0 &amp;gt; 0$, the classifier assigns $x$ a positive label. In other words, $x$ gets mapped to the &lt;em&gt;sign&lt;/em&gt; of the quantity $x \cdot \theta + \theta_0$.&lt;/p&gt;
+&lt;h2 id=&#34;the-binary-linear-classifier&#34;&gt;The binary linear classifier&lt;/h2&gt;
+&lt;p&gt;At last, we are ready for a proper definition. A &lt;em&gt;binary linear classifier&lt;/em&gt; $h$ is a function that maps feature vectors $x$ to $h(x) \in \{-1, 0, 1\}$, where
+$$ h(x) = \textrm{sign}(\theta \cdot x + \theta_0).$$&lt;/p&gt;
+&lt;p&gt;The search for a good classifier now becomes a matter of finding values for the parameter vector $\theta$ and offset parameter $\theta_0,$ such that the classifier output or &lt;em&gt;prediction&lt;/em&gt; $h(x^{(i)})$ is equal to $y^{(i)}$ for a decent proportion of the training set. We will talk about &lt;strong&gt;how&lt;/strong&gt; we find these values very soon.&lt;/p&gt;
+&lt;p&gt;Although we have made use of two-dimensional examples, the same concepts hold in higher dimensions. In general, the decision boundary is a &lt;em&gt;hyperplane&lt;/em&gt; of the feature space. All that fancy word means is that for a $d$-dimensional feature space, the decision boundary is an $(d-1)$-dimensional subset of that space. You have already seen that for a two dimensional feature space, i.e. $x \in \mathbb{R}^2$, the decision boundary is a line. If we move up another dimension and consider features $x \in \mathbb{R}^3$, the decision boundary becomes a plane, as shown below.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-5b-within-a-three-dimensional-feature-space-the-decision-boundary-becomes-a-plane&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/decision-boundary-3d.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 5.&amp;lt;/b&amp;gt; Within a three-dimensional feature space, the decision boundary becomes a plane.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/decision-boundary-3d.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 5.&lt;/b&gt; Within a three-dimensional feature space, the decision boundary becomes a plane.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;linear-separability&#34;&gt;Linear separability&lt;/h2&gt;
+&lt;p&gt;As it turns out, there is a price to pay for this level of simplicity: linear classifiers of this type are quite constrained. Consider the following two-dimensional dataset (Fig. 6). It is an illustration of XOR, the boolean operation that says you can have either one of these two things $(x_1=1 \textrm{ or } x_2=1)$, but not both $(x_1=1 \textrm{ and } x_2=1)$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    XOR comes up often in life. As an example, let $x_1$ and $x_2$ be items on the dessert menu at a restaurant, i.e., $\{x_1, x_2 \} \in \{🍨,🍰,🥧,🍮\}.$
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-6b-a-dataset-that-is-not-linearly-separable&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/xor.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 6.&amp;lt;/b&amp;gt; A dataset that is not linearly separable.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/xor.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 6.&lt;/b&gt; A dataset that is not linearly separable.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;No matter how you slice it, there is no way to draw a line through these training examples to perfectly group them by label. This is an example of a dataset that is not &lt;em&gt;linearly separable&lt;/em&gt;. More formally, the training dataset $S_N = \{(x^{(i)}, y^{(i)}), i=1,&amp;hellip;, N\}$ is said to be linearly separable if there exists a parameter vector $\hat{\theta}$ and offset vector $\hat{\theta_0}$ such that for all training examples $i=1,&amp;hellip;,N$,&lt;/p&gt;
+&lt;p&gt;$$ y^{(i)}(\hat{\theta} \cdot x + \hat{\theta_0}) &amp;gt; 0.$$&lt;/p&gt;
+&lt;p&gt;Take a moment to understand this expression. Imagine we have a pair of these special values $\hat{\theta}$ and $\hat{\theta_0}$ for some dataset. If we look at the above inequality for a positive example $x_+$, we know that $(\hat{\theta} \cdot x_+ + \hat{\theta_0})$ must be positive for it to hold, since $y_+=1$. Similarly, for a negative example $x_-$, the quantity $(\hat{\theta} \cdot x_- + \hat{\theta_0})$ must evaluate to a negative value.&lt;/p&gt;
+&lt;p&gt;What we can see here is that when $y^{(i)}(\theta \cdot x^{(i)} + \theta_0) &amp;gt; 0$, the label and classifier output for the $i$-th training example $x^{(i)}$ are in &lt;em&gt;agreement&lt;/em&gt;. When this equality is not true, the prediction does not match the label and the classifier has made a mistake.&lt;/p&gt;
+&lt;h1 id=&#34;teaching-the-classifier&#34;&gt;Teaching the classifier&lt;/h1&gt;
+&lt;p&gt;It is finally time to talk about how a classifier learns from experience. Until now there have been many mentions of an &amp;ldquo;algorithm&amp;rdquo;, which is vaguely understood to be used for training the classifier. Here we will introduce the &lt;em&gt;perceptron&lt;/em&gt;, a simple and elegant algorithm whose variants have been widely applied to solve all kinds of problems.&lt;/p&gt;
+&lt;p&gt;To train a classifier, an algorithm needs to recognize when the classifier makes a mistake. Recall that the training error for a linear classifier looks like this:&lt;/p&gt;
+&lt;p&gt;$$ E_N(h) = \frac{1}{N} \sum_{i=1}^{N} [\![ h(x^{(i)}) \neq y^{(i)} ]\!],$$&lt;/p&gt;
+&lt;p&gt;where $[\![ h(x^{(i)}) \neq y^{(i)} ]\!]$ equals one for a mistake, and zero otherwise. But thanks to our previous discussion, we know precisely how to express a mistake, i.e,&lt;/p&gt;
+&lt;p&gt;$$y^{(i)}(\theta \cdot x^{(i)} + \theta_0) \leq 0.$$&lt;/p&gt;
+&lt;p&gt;With that in mind, let&amp;rsquo;s take a stroll through the perceptron.&lt;/p&gt;
+&lt;h2 id=&#34;the-perceptron&#34;&gt;The perceptron&lt;/h2&gt;
+&lt;p&gt;The perceptron algorithm takes a training set $S_N$ input, and outputs the classifier parameters $\theta$ and $\theta_0$. The general principle is to find a mistake and then update the parameters to fix the mistake. As long as the training data are linearly separable, doing this for long enough will eventually result in some parameters that do the job.&lt;/p&gt;
+&lt;p&gt;It is typical to initialize $\theta$ to a $d$-dimensional zero vector (where $d$ is the number of features) and $\theta_0$ to a scalar zero. For now we will ignore $\theta_0$ and focus on training a linear classifier whose decision boundary runs through the origin. We begin the proceedings with the following items:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;theta&lt;/code&gt;, a $d$-element array of zeros,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;feature_matrix&lt;/code&gt;, a $d \times N$ feature matrix, with a training example on each row,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;labels&lt;/code&gt;, an array of $N$ labels for each training example.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;An incomplete Python (Numpy) implementation of the algorithm looks like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def incomplete_perceptron(feature_matrix, labels):
+    num_features, num_examples = feature_matrix.shape
+    theta = np.zeros(num_features)
+    
+    for i in range(num_examples):
+        x, y = feature_matrix[i, :], labels[i]
+        # update theta when we have made a mistake
+        if y * np.dot(theta, x) &amp;lt;= 0:
+            theta = theta + y * x
+
+    return theta
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;At the update step, the algorithm tests to see whether &lt;code&gt;theta&lt;/code&gt;, the current iteration of the classifier computes the wrong training label. When that happens, $\theta$ is updated by adding $y^{(i)} x^{(i)}$ to it.&lt;/p&gt;
+&lt;p&gt;To see why that should help things, let&amp;rsquo;s consider the scenario after one update, where $\theta = y^{(i)}x^{(i)}.$ Now imagine if the classifier saw the same training example. If we plugged our updated $\theta$ value into the &amp;ldquo;mistake detector&amp;rdquo;, we would get&lt;/p&gt;
+&lt;p&gt;$$ y^{(i)} (\theta \cdot x^{(i)}) = y^{(i)} ((y^{(i)}x^{(i)}) \cdot x^{(i)}) = x^{(i)} \cdot x^{(i)} = \norm{x^{(i)}}^2$$&lt;/p&gt;
+&lt;p&gt;Now unless you happen to have a row of zeros inside your feature matrix, the squared norm of $x$ is always greater than zero, and so the mistake has been corrected. We can see that the algorithm has somehow improved the situation.&lt;/p&gt;
+&lt;h3 id=&#34;number-of-iterations&#34;&gt;Number of iterations&lt;/h3&gt;
+&lt;p&gt;As we go through the training examples, the parameter vector $\theta$ will change rapidly, sometimes cancelling out the effect of previous examples. It is for this reason that the dataset is typically iterated over multiple times, ideally until the algorithm no longer finds a mistake.&lt;/p&gt;
+&lt;p&gt;To complete the algorithm, we will introduce a new input $T$ that specifies how many times to loop through the dataset, and factor the offset parameter &lt;code&gt;theta_0&lt;/code&gt; into our computation. The last change to make is a practical one: it is tricky to check whether a numerical computation equals an exact value, like zero. To avoid numerical instabilities, we will instead use a tolerance parameter $\epsilon$, such that if some result $|r| &amp;lt; \epsilon$, then $r = 0$.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def perceptron(feature_matrix, labels, T=1, tolerance=1e-6):
+    num_features, num_examples = feature_matrix.shape
+    theta = np.zeros(num_features)
+    theta_0 = 0
+
+    for t in range(T):
+        for i in range(num_examples):
+            x, y = feature_matrix[i, :], labels[i]
+            # update theta, theta_0 when we have made a mistake
+            if y * (np.dot(theta, x) + theta_0) &amp;lt; tolerance:
+                theta = theta + y * x
+                theta_0 = theta_0 + y
+
+    return theta, theta_0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;the-offset-update&#34;&gt;The offset update&lt;/h3&gt;
+&lt;p&gt;It is worth making a quick note about how the update for the offset parameter $\theta_0$ comes about. Consider a dataset that has been &amp;ldquo;extended&amp;rdquo;, such that $\theta_{ext} = [\theta, \theta_0]$ and $x_{ext} = [x, 1],$ where $x \in S_N$. If we want to update $\theta_{ext}$ using our extended training data, we use the same update rule as before,&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\theta_{ext} &amp;amp;= \theta_{ext} + y^{(i)} x_{ext}^{(i)} \\&lt;br&gt;
+\end{align*}
+$$&lt;/p&gt;
+&lt;p&gt;Expanding this out reveals the update for both parameters:&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\begin{bmatrix}
+\theta\\&lt;br&gt;
+\theta_0
+\end{bmatrix}
+&amp;amp;=
+\begin{bmatrix}
+\theta\\&lt;br&gt;
+\theta_0
+\end{bmatrix}
+\end{align*} + y^{(i)}
+\begin{bmatrix}
+x^{(i)}\\&lt;br&gt;
+1
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;p&gt;In other words, handling the extra offset parameter $\theta_0$ is just a matter of considering slightly different training examples.&lt;/p&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;Over the course of this writeup we have peeked behind the curtain and seen that machine learning, for all the hype and buzz, is not something overly mysterious. At heart, machine learning is the practice of identifying patterns in data using some kind of model, with the &amp;ldquo;learning&amp;rdquo; achieved through improving the model parameters.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>issues.app (3): Modularity with Blueprints</title>
+      <link>https://www.remotelycurious.net/post/issues-app-03-blueprints/</link>
+      <pubDate>Fri, 25 Sep 2020 18:34:18 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-03-blueprints/</guid>
+      <description>&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find &lt;a href=&#34;https://www.remotelycurious.net/post/issues-app-02-templates/&#34;&gt;here&lt;/a&gt;. Any code documented here may change significantly in the future. &lt;strong&gt;Be warned!&lt;/strong&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Today I&amp;rsquo;ll be documenting several structure-related changes that collectively represent a significant change to the codebase. In order of appearance, these changes are as follows:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;switching from Flask-Bootstrap to Bootstrap-Flask (i.e. Bootstrap v3 to v4)&lt;/li&gt;
+&lt;li&gt;relocating several source files for more meaningful project structure&lt;/li&gt;
+&lt;li&gt;implementation of &lt;em&gt;blueprints&lt;/em&gt; for better code modularity.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;These are not sexy changes, so to sweeten the deal, I&amp;rsquo;ve also gone ahead and cooked up the beginnings of a user interface for the project. You&amp;rsquo;ll get a glimpse of it as I detail the migration of the codebase to Bootstrap-Flask.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s get started!&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#using-better-templates&#34;&gt;Using better templates&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#switching-to-bootstrap-flask&#34;&gt;Switching to Bootstrap-Flask&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-proto-interface&#34;&gt;The proto-interface&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#the-base-template&#34;&gt;The base template&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#project-restructure&#34;&gt;Project restructure&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#blueprints&#34;&gt;Blueprints&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-main-blueprint&#34;&gt;The main blueprint&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;using-better-templates&#34;&gt;Using better templates&lt;/h1&gt;
+&lt;p&gt;The first order of business is to make a base template for the issue tracker. By defining page components and using template blocks (e.g., &lt;code&gt;{% block content %}&lt;/code&gt;), a base template can make page components available to a child template, such that the derived page can use or modify the base template&amp;rsquo;s content. I will use the base template to hold a &lt;em&gt;navbar&lt;/em&gt;, a horizontal component on the top of each app page that contains links to other pages, as well as other non-view-specific information (e.g., number of issues assigned to the logged-in user).&lt;/p&gt;
+&lt;h2 id=&#34;switching-to-bootstrap-flask&#34;&gt;Switching to Bootstrap-Flask&lt;/h2&gt;
+&lt;p&gt;One of the issues I discovered with Flask-Bootstrap is that the package uses Bootstrap 3. At first I didn&amp;rsquo;t see this as an issue, but the more I wanted to play around with the layout, the more time I was sinking into custom CSS changes and fighting the defaults. It&amp;rsquo;s worth noting that even though I am definitely &lt;strong&gt;not&lt;/strong&gt; an interface designer, nor a master of CSS, I am fussy when it comes to design. By the time I was satisfied with my navbar, more than &lt;em&gt;three hours&lt;/em&gt; had passed through a rapid cycle of Google searches, browser element inspection and minute CSS changes. And that&amp;rsquo;s just a single navbar!&lt;/p&gt;
+&lt;p&gt;After reading so many Stack Overflow posts containing some variant of &amp;ldquo;this is resolved in v4&amp;rdquo;, I pulled the plug on Flask-Bootstrap and replaced it with 
+&lt;a href=&#34;https://bootstrap-flask.readthedocs.io/en/stable/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Bootstrap-Flask&lt;/a&gt;, which uses Bootstrap 4. If you are in any doubt about which version to use, take it from me: use v4.&lt;/p&gt;
+&lt;h2 id=&#34;the-proto-interface&#34;&gt;The proto-interface&lt;/h2&gt;
+&lt;p&gt;The first version of our issue tracker interface can be seen below. At this stage it&amp;rsquo;s really just the navbar with a very plain content page. Most of the what you&amp;rsquo;re looking at is described by a base template, with the content underneath the navbar filled out by each child template. We have four child templates, one for each major component in the app:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the dashboard,&lt;/li&gt;
+&lt;li&gt;the projects page,&lt;/li&gt;
+&lt;li&gt;the issues page,&lt;/li&gt;
+&lt;li&gt;the message page.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-the-proto-interface-for-the-app&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/interface.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; The proto-interface for the app.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/interface.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; The proto-interface for the app.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Aside from some links to different application views, the navbar contains some other information. We have a couple of &lt;em&gt;badges&lt;/em&gt;: little numerical indicators that hold the number of active issues and unread messages for the user. There&amp;rsquo;s also a user dropdown menu that lists the username and their role. We will save a proper description of the major data entities underlying this project (users, projects, issues, messages, etc.) for when we get to implementing the project&amp;rsquo;s database. That will definitely warrant a separate writeup.&lt;/p&gt;
+&lt;p&gt;Currently, each child template looks almost identical and pretty boring. This is what the dashboard template looks like:&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesdashboardhtml&#34;&gt;src/templates/dashboard.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{% extends &amp;quot;base.html&amp;quot; %}
+
+{% block content %}
+&amp;lt;div class=&amp;quot;container&amp;quot;&amp;gt;
+    &amp;lt;div class=&amp;quot;row&amp;quot;&amp;gt;
+        &amp;lt;div class=&amp;quot;col&amp;quot;&amp;gt;
+            &amp;lt;h1&amp;gt;Dashboard&amp;lt;/h1&amp;gt;
+            &amp;lt;p&amp;gt;This test content comes from the dashboard template.&amp;lt;/p&amp;gt;
+        &amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Unlike Flask-Bootstrap, Bootstrap-Flask does not come with its own base template, so 
+&lt;a href=&#34;https://bootstrap-flask.readthedocs.io/en/stable/basic.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;you have to make one&lt;/a&gt;. The next section provides an overview of this project&amp;rsquo;s base template, as well as some important aspects of its design.&lt;/p&gt;
+&lt;h3 id=&#34;the-base-template&#34;&gt;The base template&lt;/h3&gt;
+&lt;p&gt;After leading with the &lt;code&gt;DOCTYPE&lt;/code&gt; tag, the base template includes some meta tags in the &lt;code&gt;head&lt;/code&gt; element that allow for the view to be 
+&lt;a href=&#34;https://learn.shayhowe.com/advanced-html-css/responsive-web-design/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;responsive&lt;/a&gt;, the effects of which will be shown soon. We also have some code that sets the favicon and loads CSS files, including Bootstrap and a custom CSS file for small design tweaks.&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesbasehtml--head&#34;&gt;src/templates/base.html &amp;raquo; &lt;code&gt;&amp;lt;head&amp;gt;&lt;/code&gt;&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{% block head %}
+&amp;lt;!-- required meta tags --&amp;gt;
+&amp;lt;meta charset=&amp;quot;utf-8&amp;quot;&amp;gt;
+&amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=device-width, initial-scale=1, shrink-to-fit=no&amp;quot;&amp;gt;
+
+&amp;lt;!-- favicon resources --&amp;gt;
+&amp;lt;link rel=&amp;quot;shortcut icon&amp;quot; href=&amp;quot;{{ url_for(&#39;static&#39;, filename=&#39;favicon-16.png&#39;) }}&amp;quot; type=&amp;quot;image/png&amp;quot;&amp;gt;
+&amp;lt;link rel=&amp;quot;icon&amp;quot; href=&amp;quot;{{ url_for(&#39;static&#39;, filename=&#39;favicon-16.png&#39;) }}&amp;quot; type=&amp;quot;image/png&amp;quot;&amp;gt;
+
+{% block styles %}
+&amp;lt;!-- bootstrap CSS --&amp;gt;
+{{ bootstrap.load_css() }}
+&amp;lt;link rel=&amp;quot;stylesheet&amp;quot; href=&amp;quot;{{ url_for(&#39;static&#39;, filename=&#39;custom.css&#39;) }}&amp;quot;&amp;gt;
+{% endblock %}
+
+&amp;lt;title&amp;gt;issues.app&amp;lt;/title&amp;gt;
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Most of the remaining code is within the &lt;code&gt;body&lt;/code&gt; element and is used to define the navbar. Bootstrap is a mobile-first framework, so it&amp;rsquo;s worth putting a bit of thought into the navbar&amp;rsquo;s layout for different window sizes. After deciding which components to include in the navbar, we can then choose which components to hide or &lt;em&gt;collapse&lt;/em&gt; when the display size is small enough.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    A &lt;em&gt;mobile-first&lt;/em&gt; design philosophy is geared at making content look good on small displays (e.g., those of phones and tablets), before considering larger displays like laptop screens. This compels you to consider content before everything else, saving your screen real estate for what actually matters.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-a-collapsed-navbar-shows-a-hamburger-menu&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/collapsed.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; A collapsed navbar shows a hamburger menu.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/collapsed.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; A collapsed navbar shows a hamburger menu.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Components can be collapsed by nesting the components within a &lt;code&gt;div.collapse.navbar-collapse&lt;/code&gt; element. The &lt;code&gt;.navbar-toggler&lt;/code&gt; class is used to bundle collapsed components into a hamburger menu that references the components using the &lt;code&gt;#navbarNavDropdown&lt;/code&gt; ID. The &lt;code&gt;navbar-brand&lt;/code&gt; element, used to access the dashboard, will always be shown.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-opening-up-the-menu&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/collapsed-menu.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Opening up the menu.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/collapsed-menu.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Opening up the menu.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h4 id=&#34;srctemplatesbasehtml--body&#34;&gt;src/templates/base.html &amp;raquo; &lt;code&gt;&amp;lt;body&amp;gt;&lt;/code&gt;&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;div class=&amp;quot;navbar navbar-fixed-top navbar-expand-md navbar-light bg-light&amp;quot;&amp;gt;
+    &amp;lt;!-- app brand --&amp;gt;
+    &amp;lt;a class=&amp;quot;navbar-brand&amp;quot; href=&amp;quot;{{ url_for(&#39;index&#39;) }}&amp;quot;&amp;gt;
+        &amp;lt;img class=&amp;quot;d-inline-block align-top&amp;quot; src=&amp;quot;{{ url_for(&#39;static&#39;, filename=&#39;favicon-32.png&#39;) }}&amp;quot; &amp;gt;
+        issues.app
+    &amp;lt;/a&amp;gt;
+
+    &amp;lt;!-- hamburger menu --&amp;gt;
+    &amp;lt;button class=&amp;quot;navbar-toggler&amp;quot; type=&amp;quot;button&amp;quot; data-toggle=&amp;quot;collapse&amp;quot; data-target=&amp;quot;#navbarNavDropdown&amp;quot; aria-controls=&amp;quot;navbarNavDropdown&amp;quot; aria-expanded=&amp;quot;false&amp;quot; aria-label=&amp;quot;Toggle navigation&amp;quot;&amp;gt;
+        &amp;lt;span class=&amp;quot;navbar-toggler-icon&amp;quot;&amp;gt;&amp;lt;/span&amp;gt;
+    &amp;lt;/button&amp;gt;
+    
+    &amp;lt;!-- items below collapse into the menu above--&amp;gt;
+    &amp;lt;div class=&amp;quot;collapse navbar-collapse&amp;quot; id=&amp;quot;navbarNavDropdown&amp;quot;&amp;gt;
+        &amp;lt;!-- logged-in user dropdown --&amp;gt;
+        &amp;lt;ul class=&amp;quot;navbar-nav ml-auto order-1&amp;quot;&amp;gt;
+            &amp;lt;li class=&amp;quot;nav-item dropdown&amp;quot;&amp;gt;
+                &amp;lt;a class=&amp;quot;nav-link dropdown-toggle&amp;quot; href=&amp;quot;#&amp;quot; id=&amp;quot;navbarUserDropdown&amp;quot; role=&amp;quot;button&amp;quot; data-toggle=&amp;quot;dropdown&amp;quot; aria-haspopup=&amp;quot;true&amp;quot; aria-expanded=&amp;quot;false&amp;quot;&amp;gt;
+                    &amp;amp;nbsp;{{ user_data[&#39;user&#39;] }}&amp;lt;span class=&amp;quot;badge badge-secondary&amp;quot;&amp;gt;{{ user_data[&#39;role&#39;] }}&amp;lt;/span&amp;gt;&amp;lt;span class=&amp;quot;caret&amp;quot;&amp;gt;&amp;lt;/span&amp;gt;
+                &amp;lt;/a&amp;gt;
+
+                &amp;lt;div class=&amp;quot;dropdown-menu&amp;quot; aria-labelledby=&amp;quot;navbarUserDropdown&amp;quot;&amp;gt;
+                    &amp;lt;a class=&amp;quot;dropdown-item&amp;quot; href=&amp;quot;#&amp;quot;&amp;gt;Profile&amp;lt;/a&amp;gt;
+                    &amp;lt;a class=&amp;quot;dropdown-item&amp;quot; href=&amp;quot;#&amp;quot;&amp;gt;Settings&amp;lt;/a&amp;gt;
+                    &amp;lt;div class=&amp;quot;dropdown-divider&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+                    &amp;lt;a class=&amp;quot;dropdown-item&amp;quot; href=&amp;quot;#&amp;quot;&amp;gt;Sign out&amp;lt;/a&amp;gt;
+                &amp;lt;/div&amp;gt;
+            &amp;lt;/li&amp;gt;
+        &amp;lt;/ul&amp;gt;
+
+        &amp;lt;!-- major app sections --&amp;gt;
+        &amp;lt;ul class=&amp;quot;navbar-nav mr-auto order-0&amp;quot;&amp;gt;
+            &amp;lt;li class=&amp;quot;nav-item {{ &#39;active&#39; if is_active[&#39;projects&#39;] }}&amp;quot;&amp;gt;
+                &amp;lt;a class=&amp;quot;nav-link d-flex align-items-center&amp;quot; href=&amp;quot;{{ url_for(&#39;projects&#39;) }}&amp;quot;&amp;gt;
+                    &amp;amp;nbsp;Projects&amp;amp;nbsp;
+                &amp;lt;/a&amp;gt;
+            &amp;lt;/li&amp;gt;
+            &amp;lt;li class=&amp;quot;nav-item {{ &#39;active&#39; if is_active[&#39;issues&#39;] }}&amp;quot;&amp;gt;
+                &amp;lt;a class=&amp;quot;nav-link d-flex align-items-center&amp;quot; href=&amp;quot;{{ url_for(&#39;issues&#39;) }}&amp;quot;&amp;gt;
+                    &amp;amp;nbsp;Issues&amp;amp;nbsp;{% if user_data[&#39;num_issues&#39;] %}&amp;lt;span class=&amp;quot;badge badge-pill badge-primary&amp;quot;&amp;gt;{{ user_data[&#39;num_issues&#39;] }}&amp;lt;/span&amp;gt;{% endif %}
+                &amp;lt;/a&amp;gt;
+            &amp;lt;/li&amp;gt;
+            &amp;lt;li class=&amp;quot;nav-item {{ &#39;active&#39; if is_active[&#39;messages&#39;] }}&amp;quot;&amp;gt;
+                &amp;lt;a class=&amp;quot;nav-link d-flex align-items-center&amp;quot; href=&amp;quot;{{ url_for(&#39;messages&#39;) }}&amp;quot;&amp;gt;
+                    &amp;amp;nbsp;Messages&amp;amp;nbsp;{% if user_data[&#39;num_messages&#39;] %}&amp;lt;span class=&amp;quot;badge badge-pill badge-primary&amp;quot;&amp;gt;{{ user_data[&#39;num_messages&#39;] }}&amp;lt;/span&amp;gt;{% endif %}
+                &amp;lt;/a&amp;gt;
+            &amp;lt;/li&amp;gt;
+        &amp;lt;/ul&amp;gt;
+    &amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Looking at the code above, you will notice some Jinja statements sprinkled around the place. The statements that populate the navbar user data access a dictionary called &lt;code&gt;user_data&lt;/code&gt;, which is supplied to Jinja through each view function. For example, the projects template is rendered within the &lt;code&gt;projects()&lt;/code&gt; view function as shown below.&lt;/p&gt;
+&lt;h4 id=&#34;srcmaininitpy--create_app&#34;&gt;src/main/init.py &amp;raquo; &lt;code&gt;create_app()&lt;/code&gt;&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&#39;/projects&#39;)
+def projects():
+    return render_template(&#39;projects.html&#39;,
+        is_active={&#39;projects&#39;: True},
+        user_data=get_user_data())
+
+def get_user_data():
+    return {
+      &#39;user&#39;: &#39;ahadjinicolaou&#39;,
+      &#39;role&#39;: &#39;admin&#39;,
+      &#39;num_issues&#39;: 12,
+      &#39;num_messages&#39;: 2}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Although the function &lt;code&gt;get_user_data()&lt;/code&gt; is just returning some dummy data here, you can imagine this function being rewritten to say, query a &lt;code&gt;Users&lt;/code&gt; table in a database and parse the results to create a proper user data dictionary.&lt;/p&gt;
+&lt;p&gt;Another point worth noting is the use of Flask&amp;rsquo;s &lt;code&gt;url_for()&lt;/code&gt; function. Recall that we declare view functions in our code using the &lt;code&gt;app.route&lt;/code&gt; decorator. Flask keeps track of the association between each URL rule (e.g. &lt;code&gt;/projects&lt;/code&gt;) and its view function using the app instance&amp;rsquo;s URL map. You can inspect the URL map for the application by accessing &lt;code&gt;app.url_map&lt;/code&gt; within the main package constructor.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s what it looks like:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;Map([&amp;lt;Rule &#39;/projects&#39; (HEAD, OPTIONS, GET) -&amp;gt; projects&amp;gt;,
+    &amp;lt;Rule &#39;/messages&#39; (HEAD, OPTIONS, GET) -&amp;gt; messages&amp;gt;,
+    &amp;lt;Rule &#39;/issues&#39; (HEAD, OPTIONS, GET) -&amp;gt; issues&amp;gt;,
+    &amp;lt;Rule &#39;/&#39; (HEAD, OPTIONS, GET) -&amp;gt; index&amp;gt;,
+    &amp;lt;Rule &#39;/bootstrap/static/&amp;lt;filename&amp;gt;&#39; (HEAD, OPTIONS, GET) -&amp;gt; bootstrap.static&amp;gt;,
+    &amp;lt;Rule &#39;/static/&amp;lt;filename&amp;gt;&#39; (HEAD, OPTIONS, GET) -&amp;gt; static&amp;gt;])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There&amp;rsquo;s some extra stuff in here that we have yet to discuss, but the main takeaway is that for every URL rule, there is an &lt;em&gt;endpoint&lt;/em&gt; that identifies the function Flask should use to handle the associated request. By default, Flask uses the name of the function as the endpoint. We can see that, for instance, a request for &lt;code&gt;/projects&lt;/code&gt; will be handled using the &lt;code&gt;projects()&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;We will take another look at this URL map after restructuring our code to use &lt;em&gt;blueprints&lt;/em&gt;, but before we get to that, we need to make a quick fix.&lt;/p&gt;
+&lt;h1 id=&#34;project-restructure&#34;&gt;Project restructure&lt;/h1&gt;
+&lt;p&gt;As I was looking at my project structure, it dawned on me that the location of some files doesn&amp;rsquo;t make a lot of sense. I&amp;rsquo;m looking at &lt;code&gt;issues.py&lt;/code&gt;, &lt;code&gt;config.py&lt;/code&gt;, and &lt;code&gt;__init__.py&lt;/code&gt;, all of which are located in &lt;code&gt;src/main&lt;/code&gt;. The first two don&amp;rsquo;t need to be so deep within the project structure &amp;ndash; in fact, they should be in the project root, since they don&amp;rsquo;t rely on any project-specific packages. There are two consequences of moving these two files:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the &lt;code&gt;FLASK_APP&lt;/code&gt; environment variable should now be set to &lt;code&gt;issues.py&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;the &lt;code&gt;config&lt;/code&gt; dictionary within &lt;code&gt;__init__.py&lt;/code&gt; should now be imported &lt;code&gt;from config&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Speaking of &lt;code&gt;__init__.py&lt;/code&gt;, since it contains the &lt;code&gt;create_app()&lt;/code&gt; factory function, this file should be a package constructor for the &lt;em&gt;src&lt;/em&gt; package, rather than the &lt;em&gt;main&lt;/em&gt; subpackage. Moving this file to the &lt;code&gt;src&lt;/code&gt; directory allows us to keep our project subpackages (containing different functionality for the app) all in one place. The &lt;code&gt;src/main&lt;/code&gt; folder (empty at this point) can instead be used to keep our view functions and error response functions, which we will get to as we further modularize the codebase.&lt;/p&gt;
+&lt;p&gt;Moving &lt;code&gt;__init__.py&lt;/code&gt; requires us to make changes to the arguments in the &lt;code&gt;Flask&lt;/code&gt; object initializer:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;template_folder=&#39;./templates&#39;&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;static_folder=&#39;./static&#39;&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We also need to update the factory function import statement in the &lt;code&gt;tests/conftest.py&lt;/code&gt; file: &lt;code&gt;from src import create_app&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Alright, we&amp;rsquo;re finally ready to talk blueprints!&lt;/p&gt;
+&lt;h1 id=&#34;blueprints&#34;&gt;Blueprints&lt;/h1&gt;
+&lt;p&gt;One obvious way to better segment our codebase is to somehow isolate our HTML response functions (stuffed within the &lt;code&gt;create_app()&lt;/code&gt; factory function) within their own file. There&amp;rsquo;s a wrinkle in that idea, however: outside of the package constructor, the response functions no longer have access to the &lt;code&gt;app&lt;/code&gt; variable, and by extension, the &lt;code&gt;app.route&lt;/code&gt; decorator.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s where the 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/blueprints/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Blueprint&lt;/a&gt; class can help. A blueprint can be used to store all of these response-serving functions, without being attached to the application instance. All that functionality sits in a dormant state, waiting to be registered with the application. Once registered, the functions get grafted onto the app and the instance finds itself with additional powers, just as nature had intended.&lt;/p&gt;
+&lt;h2 id=&#34;the-main-blueprint&#34;&gt;The main blueprint&lt;/h2&gt;
+&lt;p&gt;After moving the factory function code into &lt;code&gt;src&lt;/code&gt;, we were left with an empty &lt;code&gt;src/main&lt;/code&gt; folder. We will promptly repurpose this folder to house the &lt;em&gt;main blueprint&lt;/em&gt; &amp;ndash; the blueprint that tells Flask how to render all of our major app components. All of our response and error functions will now be kept in a &lt;code&gt;main&lt;/code&gt; package constructor file. Note that we have to use the &lt;code&gt;main.route&lt;/code&gt; view decorator associated with the main blueprint.&lt;/p&gt;
+&lt;p&gt;We also have to use the &lt;code&gt;main.app_errorhandler&lt;/code&gt; decorator to handle our 404 response throughout the whole app. Using the &lt;code&gt;main.errorhandler&lt;/code&gt; decorator would tell Flask to run this error function only for routes defined by the main blueprint.&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py&#34;&gt;src/main/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import Blueprint
+from flask import render_template
+
+main = Blueprint(&#39;main&#39;, __name__)
+
+@main.route(&#39;/&#39;)
+def index():
+    return render_template(&#39;dashboard.html&#39;,
+            is_active={},
+            user_data=get_user_data())
+
+@main.route(&#39;/projects&#39;)
+def projects():
+    return render_template(&#39;projects.html&#39;,
+            is_active={&#39;projects&#39;: True},
+            user_data=get_user_data())
+
+@main.route(&#39;/issues&#39;)
+def issues():
+    return render_template(&#39;issues.html&#39;,
+            is_active={&#39;issues&#39;: True},
+            user_data=get_user_data())
+
+@main.route(&#39;/messages&#39;)
+def messages():
+    return render_template(&#39;messages.html&#39;,
+            is_active={&#39;messages&#39;: True},
+            user_data=get_user_data())
+
+@main.app_errorhandler(404)
+def page_not_found(e):
+    return render_template(&amp;quot;404.html&amp;quot;,
+            is_active={},
+            user_data={}), 404
+
+def get_user_data():
+    return {
+        &#39;user&#39;: &#39;ahadjinicolaou&#39;,
+        &#39;role&#39;: &#39;admin&#39;,
+        &#39;num_issues&#39;: 12,
+        &#39;num_messages&#39;: 2}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After defining the blueprint, we need to register it within the factory function.&lt;/p&gt;
+&lt;h4 id=&#34;src__init__py&#34;&gt;src/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;...
+from flask import Blueprint
+
+# factory function
+def create_app(config_name):
+    app = Flask(__name__, template_folder=&#39;./templates&#39;, static_folder=&#39;./static&#39;)
+    app.config.from_object(config[config_name])
+
+    bootstrap.init_app(app)
+
+    from src.main import main as main_blueprint
+    app.register_blueprint(main_blueprint)
+
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Remember that chatter about Flask&amp;rsquo;s URL map? If we print it out now, you&amp;rsquo;ll see that the endpoints for &lt;code&gt;main_blueprint&lt;/code&gt;&#39;s URL rules have been updated to include the &lt;code&gt;main.&lt;/code&gt; prefix.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;Map([&amp;lt;Rule &#39;/projects&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.projects&amp;gt;,
+    &amp;lt;Rule &#39;/messages&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.messages&amp;gt;,
+    &amp;lt;Rule &#39;/issues&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.issues&amp;gt;,
+    &amp;lt;Rule &#39;/&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.index&amp;gt;,
+    &amp;lt;Rule &#39;/bootstrap/static/&amp;lt;filename&amp;gt;&#39; (GET, OPTIONS, HEAD) -&amp;gt; bootstrap.static&amp;gt;,
+    &amp;lt;Rule &#39;/static/&amp;lt;filename&amp;gt;&#39; (GET, OPTIONS, HEAD) -&amp;gt; static&amp;gt;])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Of course, this means that we have to change the corresponding endpoints referenced in the templates. A call to &lt;code&gt;url_for(&#39;index&#39;)&lt;/code&gt; for example will be replaced by &lt;code&gt;url_for(&#39;main.index&#39;)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;After relaunching the server and making sure we haven&amp;rsquo;t broken anything, we should see&amp;hellip; no difference. Brilliant.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;ve cloned the &lt;a href=&#34;https://github.com/ahadjinicolaou/issues.app&#34;&gt;project repository&lt;/a&gt;, you can run &lt;code&gt;git checkout cff1a49&lt;/code&gt; to get the current version of the source code.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;After a little bit of futzing with the codebase, we have ourselves a highly modular codebase that allows us to cleanly segment presentation code from application logic. It&amp;rsquo;s also nice to have the beginnings of what will hopefully become a clean, functional user interface fit for an issue tracker.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m also happier after having moved those three project files to more suitable locations &amp;ndash; frankly, their previous locations were an afterthought that I should have noticed earlier. Better late than never!&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>issues.app (2): Making templates with Bootstrap</title>
+      <link>https://www.remotelycurious.net/post/issues-app-02-templates/</link>
+      <pubDate>Sun, 13 Sep 2020 20:21:12 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-02-templates/</guid>
+      <description>&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find &lt;a href=&#34;https://www.remotelycurious.net/post/issues-app-01-intro/&#34;&gt;here&lt;/a&gt;. Any code documented here may change significantly in the future. &lt;strong&gt;Be warned!&lt;/strong&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The last article ended with a quick mention about how Python functions can be assigned to handle browser requests in a Flask application. It&amp;rsquo;s a topic that is definitely worth more of our time. We are going to talk about &lt;em&gt;templates&lt;/em&gt;: what they are, how they work, and how they can integrate with Bootstrap to make life easier for developers.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#view-decorators&#34;&gt;View decorators&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#static-routes&#34;&gt;Static routes&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#dynamic-routes&#34;&gt;Dynamic routes&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#error-handlers&#34;&gt;Error handlers&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#templates&#34;&gt;Templates&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#jinja-templates&#34;&gt;Jinja templates&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#variables-and-expressions&#34;&gt;Variables and expressions&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#filters&#34;&gt;Filters&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#statements&#34;&gt;Statements&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#template-inheritance&#34;&gt;Template inheritance&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#using-templates&#34;&gt;Using templates&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#templates-with-bootstrap&#34;&gt;Templates with Bootstrap&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#plugging-bootstrap-into-flask&#34;&gt;Plugging Bootstrap into Flask&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#making-nicer-templates&#34;&gt;Making nicer templates&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;view-decorators&#34;&gt;View decorators&lt;/h1&gt;
+&lt;p&gt;In general, decorators are Python constructs that allow you to inject functions with additional capabilities. Flask provides a number of 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;view decorators&lt;/em&gt;&lt;/a&gt; that can be used to conveniently enable web-specific functionality, making it easy to get things done with minimal code. What follows is a quick tour of some of the most common view decorators you will find in a Flask application.&lt;/p&gt;
+&lt;h2 id=&#34;static-routes&#34;&gt;Static routes&lt;/h2&gt;
+&lt;p&gt;We&amp;rsquo;ve already seen one of these. A static route can be implemented with the &lt;code&gt;app.route&lt;/code&gt; decorator to handle a browser request for a single URL. Here&amp;rsquo;s what that looks like:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&#39;/&#39;)
+def index():
+    return &#39;&amp;lt;h1&amp;gt;Show me the money!&amp;lt;/h1&amp;gt;&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Officially, functions that respond to requests are called &lt;em&gt;view functions&lt;/em&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;dynamic-routes&#34;&gt;Dynamic routes&lt;/h2&gt;
+&lt;p&gt;We can write another function that uses a &lt;em&gt;dynamic route&lt;/em&gt; to serve a customized greeting to the user, using the &lt;code&gt;name&lt;/code&gt; argument. Angle brackets are used in the decorator argument to indicate how the function argument should be parsed from the requested URL.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&#39;/greeting/&amp;lt;name&amp;gt;&#39;)
+def greeting(name):
+    return f&amp;quot;&amp;lt;h1&amp;gt;Hi {name.capitalize()}!&amp;lt;/h1&amp;gt;&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After adding this to &lt;code&gt;src/main/__init__.py&lt;/code&gt; and running the server, a trip to &lt;code&gt;/greeting/fred&lt;/code&gt; would serve you with the following:&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-a-personalized-greeting&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-02-templates/greeting.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; A personalized greeting.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-02-templates/greeting.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; A personalized greeting.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;error-handlers&#34;&gt;Error handlers&lt;/h2&gt;
+&lt;p&gt;Sometimes it&amp;rsquo;s nice to provide a customized error page. This can be achieved using the &lt;code&gt;app.errorhandler&lt;/code&gt; decorator. The decorated function must have an error object argument. It&amp;rsquo;s good practice to return the matching error code together with the response.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.errorhandler(404)
+def not_found(e):
+    return &amp;quot;&amp;lt;h1&amp;gt;Looks like I can&#39;t find that page...&amp;lt;/h1&amp;gt;&amp;quot;, 404
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;templates&#34;&gt;Templates&lt;/h1&gt;
+&lt;p&gt;Handling chunks of web code amid our Python source feels a bit dirty. It&amp;rsquo;s probably not a big deal if our view function is returning a one-line response, but imagine the kind of content that Facebook is serving. We&amp;rsquo;re talking reams of HTML, stitched together from different sources that need to be filtered and processed according to the user&amp;rsquo;s data. Sorting this out with a little string interpolation isn&amp;rsquo;t going to cut it. We need a bigger gun.&lt;/p&gt;
+&lt;p&gt;This is where &lt;em&gt;templates&lt;/em&gt; come in. A template is a like a mold that is used to mass produce web pages. The mold is made out of standard HTML elements like &lt;code&gt;body&lt;/code&gt; and &lt;code&gt;div&lt;/code&gt; and has slots reserved for data that will become available in the future. When the data is ready, a template engine can take a template, fill the data slots, and &lt;em&gt;render&lt;/em&gt; the complete page. This allows for presentation logic to be isolated from the rest of the code, simplifying application maintenance and making debugging a bit less painful.&lt;/p&gt;
+&lt;h2 id=&#34;jinja-templates&#34;&gt;Jinja templates&lt;/h2&gt;
+&lt;p&gt;Flask uses a template engine called 
+&lt;a href=&#34;https://palletsprojects.com/p/jinja/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Jinja2&lt;/a&gt; to &lt;em&gt;render&lt;/em&gt; templates with data. Jinja templates are usually just HTML files (although 
+&lt;a href=&#34;https://jinja.palletsprojects.com/en/2.11.x/templates/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;other file formats&lt;/a&gt; are supported). They will typically contain HTML as well as &lt;em&gt;variables&lt;/em&gt; and &lt;em&gt;expressions&lt;/em&gt; that are recognized by Jinja and replaced when rendered.&lt;/p&gt;
+&lt;p&gt;We will now explore some basic Jinja template constructs, with an eye towards making better (or at least more flexible) versions of our greeting functions.&lt;/p&gt;
+&lt;h3 id=&#34;variables-and-expressions&#34;&gt;Variables and expressions&lt;/h3&gt;
+&lt;p&gt;Let&amp;rsquo;s say Jinja is told to render the template below using a &lt;code&gt;name&lt;/code&gt; variable equal to &lt;code&gt;&#39;fred&#39;&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;h1&amp;gt;Hi {{ name }}!&amp;lt;/h1&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;{{ ... }}&lt;/code&gt; delimiters indicate an &lt;em&gt;expression&lt;/em&gt; that Jinja will replace with some kind of output, which in this case is a string literal. Jinja will output &lt;strong&gt;Hi fred!&lt;/strong&gt; after rendering this template.&lt;/p&gt;
+&lt;p&gt;Variables can also be more complex objects like lists and dictionaries. We&amp;rsquo;ll see an example of this very soon when we introduce &lt;em&gt;statements&lt;/em&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;filters&#34;&gt;Filters&lt;/h3&gt;
+&lt;p&gt;Jinja has &lt;em&gt;filters&lt;/em&gt; that can be applied to modify variables using the pipe (&lt;code&gt;|&lt;/code&gt;) operator. Below are a few examples of templates with their rendered output:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Variable&lt;/th&gt;
+&lt;th&gt;Template&lt;/th&gt;
+&lt;th&gt;Output&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;name=&#39;fred&#39;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Hi {{ name | upper }}!&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Hi FRED!&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;name=&#39;emma&#39;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Hi {{ name | capitalize }}!&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Hi Emma!&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;name=None&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Hi {{ name | default(&#39;Stranger&#39;)}}!&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Hi Stranger!&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;price=7.283&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;That is ${{ price | round(2, &#39;floor&#39;) }}.&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;That is $7.28.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Multiple filters can also be chained together, but keep in mind the order of operations. As a contrived example, consider the effect of &lt;code&gt;{{ name | default(&#39;stranger&#39;) | upper }}&lt;/code&gt; versus that of &lt;code&gt;{{ name | upper | default(&#39;stranger&#39;) }}&lt;/code&gt; when &lt;code&gt;name=None&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h3 id=&#34;statements&#34;&gt;Statements&lt;/h3&gt;
+&lt;p&gt;Jinja becomes considerably more powerful when using &lt;em&gt;statements&lt;/em&gt; to control the specific elements that are rendered. Statements are indicated by &lt;code&gt;{% ... %}&lt;/code&gt; delimiters.&lt;/p&gt;
+&lt;p&gt;Imagine we have some kind of shopping list. We can use Jinja to create a bulleted list of our items with the following code:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;ul&amp;gt;
+{% for item in shopping_list %}
+    &amp;lt;li&amp;gt;{{ item }}&amp;lt;/li&amp;gt;
+{% endfor %}
+&amp;lt;/ul&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now if the shopping list contains &lt;code&gt;[&amp;quot;bread&amp;quot;, &amp;quot;milk&amp;quot;, &amp;quot;eggs&amp;quot;, &amp;quot;toy dinosaur&amp;quot;]&lt;/code&gt;, Jinja will render it as a nice bulleted list (simulated with Markdown):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;bread&lt;/li&gt;
+&lt;li&gt;milk&lt;/li&gt;
+&lt;li&gt;eggs&lt;/li&gt;
+&lt;li&gt;toy dinosaur&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Think about our app for a second. Suppose we want to offer up a VIP version of our greeting to users that know the right URL. We can get fancy with our template and have it render a greeting that is sensitive to the time of day, using Jinja to temporarily store different greetings inside variables.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{% if hour &amp;gt;= 0 and hour &amp;lt; 12 %}
+    {% set greeting = &#39;Good morning&#39; %}
+{% elif hour &amp;gt;= 12 and hour &amp;lt; 17 %}
+    {% set greeting = &#39;Good afternoon&#39; %}
+{% else %}
+    {% set greeting = &#39;Good evening&#39; %}
+{% endif %}
+
+&amp;lt;h1&amp;gt;{{ greeting }}, {{ name | capitalize }}.&amp;lt;/h1&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this case the template engine would be dealing with three variables:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;name&lt;/code&gt; and &lt;code&gt;hour&lt;/code&gt;, supplied by the application, and&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;greeting&lt;/code&gt;, set within the template.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;template-inheritance&#34;&gt;Template inheritance&lt;/h3&gt;
+&lt;p&gt;Before we get our hands on some templates, we should talk about &lt;em&gt;template inheritance&lt;/em&gt;. As plain and unexciting as that sounds, you should know that this is the most powerful part of Jinja&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. Template inheritance allows you to create a &amp;ldquo;master template&amp;rdquo; that holds all of the common web elements of your site as well as &lt;em&gt;blocks&lt;/em&gt; that child templates can either build on or completely replace.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;re following the project, note that the templates in this section are just provided to illustrate the concepts. They will not be included in the codebase.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;To get a better understanding of what we&amp;rsquo;re talking about, let&amp;rsquo;s use an example pair of templates: one base, one child. Below is &lt;code&gt;base.html&lt;/code&gt;.&lt;/p&gt;
+&lt;h4 id=&#34;basehtml&#34;&gt;base.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+    {% block head %}
+    &amp;lt;style type=&amp;quot;text/css&amp;quot;&amp;gt;
+        .important { color: #FF0000; }
+    &amp;lt;/style&amp;gt;
+    &amp;lt;title&amp;gt;{% block title %}{% endblock %} :: ACME LLC&amp;lt;/title&amp;gt;
+    {% endblock %}
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+    {% block content %}{% endblock %}
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It looks like a regular HTML page seasoned with some Jinja statements. The base template defines three blocks: &lt;code&gt;head&lt;/code&gt;, &lt;code&gt;title&lt;/code&gt; and &lt;code&gt;content&lt;/code&gt;. Each of these can be overridden by a derived template, like the one below:&lt;/p&gt;
+&lt;h4 id=&#34;childhtml&#34;&gt;child.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{% extends &amp;quot;base.html&amp;quot; %}
+{% block title %}Goods and Services{% endblock %}
+{% block head %}
+    {{ super() }}
+    &amp;lt;style type=&amp;quot;text/css&amp;quot;&amp;gt;
+        .special { color: #0000FF; }
+    &amp;lt;/style&amp;gt;
+{% endblock %}
+{% block content %}
+    &amp;lt;h1&amp;gt;Goods and Services&amp;lt;/h1&amp;gt;
+    &amp;lt;ul&amp;gt;
+        &amp;lt;li&amp;gt;Bread&amp;lt;/li&amp;gt;
+        &amp;lt;li&amp;gt;Milk&amp;lt;/li&amp;gt;
+        &amp;lt;li class=&amp;quot;important&amp;quot;&amp;gt;Eggs&amp;lt;/li&amp;gt;
+        &amp;lt;li class=&amp;quot;special&amp;quot;&amp;gt;Toy dinosaur&amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The line that makes it a child template is the very first one. With the &lt;code&gt;{% extends &amp;quot;base.html&amp;quot; %}&lt;/code&gt; statement, we are telling Jinja that the current template is inheriting from &lt;code&gt;base.html&lt;/code&gt;. When the base and derived templates both contain a nonempty block, the content in the derived block takes precedence.&lt;/p&gt;
+&lt;p&gt;Note the use of &lt;code&gt;super()&lt;/code&gt; within the head block. This tells Jinja to append the block&amp;rsquo;s content to the corresponding block content in the base template. Without the &lt;code&gt;super()&lt;/code&gt; call, the child template would completely replace the base template block and we would lose the &lt;code&gt;important&lt;/code&gt; CSS class defined in the base template.&lt;/p&gt;
+&lt;p&gt;Jinja is capable of a lot more. We will cover more of its features in later articles, but for now let&amp;rsquo;s make some templates and refactor the codebase to make use of them.&lt;/p&gt;
+&lt;h2 id=&#34;using-templates&#34;&gt;Using templates&lt;/h2&gt;
+&lt;p&gt;First we should designate a folder to keep our templates. This will be &lt;code&gt;src/templates&lt;/code&gt;. We are going to make two templates: one for the plain greeting and another for the VIP greeting (we&amp;rsquo;ll leave the 404 and index view functions &amp;ldquo;template-less&amp;rdquo; for now). The plain template is shown below.&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesgreetinghtml&#34;&gt;src/templates/greeting.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;h1&amp;gt;Hi {{ name | capitalize }}!&amp;lt;/h1&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And here&amp;rsquo;s the fancy one.&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesfancy-greetinghtml&#34;&gt;src/templates/fancy-greeting.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;{# time-sensitive greeting #}
+{% if hour &amp;gt;= 0 and hour &amp;lt; 12 %}
+    {% set greeting = &#39;Good morning&#39; %}
+{% elif hour &amp;gt;= 12 and hour &amp;lt; 17 %}
+    {% set greeting = &#39;Good afternoon&#39; %}
+{% else %}
+    {% set greeting = &#39;Good evening&#39; %}
+{% endif %}
+
+&amp;lt;h1&amp;gt;{{ greeting }}, {{ name | capitalize }}.&amp;lt;/h1&amp;gt;
+&amp;lt;p&amp;gt;GreetMaster™: delivering you the finest of greetings.&amp;lt;/p&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we need a way to engage the template engine in our app. This is done using &lt;code&gt;render_template()&lt;/code&gt;, which comes from the &lt;code&gt;flask&lt;/code&gt; package. Each view function supplies &lt;code&gt;render_template()&lt;/code&gt; with the appropriate template filename and any keyword arguments that Jinja needs to populate the corresponding variables in the template.&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py&#34;&gt;src/main/&lt;strong&gt;init&lt;/strong&gt;.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# ...
+from flask import render_template
+from datetime import datetime
+
+def create_app(config_name):
+    # ...
+    @app.route(&#39;/greeting/&amp;lt;name&amp;gt;&#39;)
+    def greeting(name):
+        return render_template(&#39;greeting.html&#39;, name=name)
+
+    @app.route(&#39;/fancy-greeting/&amp;lt;name&amp;gt;&#39;)
+    def fancy_greeting(name):
+        return render_template(&#39;fancy_greeting.html&#39;,
+                name=name,
+                hour=datetime.now().hour)
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return &amp;quot;&amp;lt;h1&amp;gt;Looks like I can&#39;t find that page...&amp;lt;/h1&amp;gt;&amp;quot;, 404
+    
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, Flask needs to be told where we are keeping the templates (otherwise, Flask will assume they are in a &lt;code&gt;templates&lt;/code&gt; folder that sits in the same directory as the app&amp;rsquo;s instantiating file). The &lt;code&gt;create_app()&lt;/code&gt; function is changed like this:&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py-1&#34;&gt;src/main/&lt;strong&gt;init&lt;/strong&gt;.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def create_app(config_name):
+    app = Flask(__name__, template_folder=&#39;../templates&#39;)
+    # ...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can fire up the server and serve ourselves with a magnificent greeting page. Since I&amp;rsquo;m typing this up at ~10 PM, I am treated with an evening salutation.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-a-greetmaster-greeting&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-02-templates/fancy-greeting.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; A GreetMaster™ greeting.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-02-templates/fancy-greeting.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; A GreetMaster™ greeting.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h1 id=&#34;templates-with-bootstrap&#34;&gt;Templates with Bootstrap&lt;/h1&gt;
+&lt;p&gt;Our templates are handy but they&amp;rsquo;re ugly. Fortunately, a bunch of people at Twitter came up with 
+&lt;a href=&#34;https://getbootstrap.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Bootstrap&lt;/a&gt;, an open-source front-end framework that can integrate with Flask and style our templates. We can plug it into our app as a Flask extension with minimal fuss. That&amp;rsquo;s a big reason you&amp;rsquo;re reading about it right now.&lt;/p&gt;
+&lt;h2 id=&#34;plugging-bootstrap-into-flask&#34;&gt;Plugging Bootstrap into Flask&lt;/h2&gt;
+&lt;p&gt;Adding support for Bootstrap within Flask is easy, thanks to the 
+&lt;a href=&#34;https://pythonhosted.org/Flask-Bootstrap/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Flask-Bootstrap&lt;/a&gt; extension. Below we&amp;rsquo;ll add &lt;code&gt;flask-bootstrap&lt;/code&gt; as a project dependency. Make sure to install it in your virtual environment.&lt;/p&gt;
+&lt;h4 id=&#34;setuppy&#34;&gt;setup.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from setuptools import setup, find_packages
+
+setup(
+    name=&#39;issues&#39;,
+    version=&#39;0.2&#39;,
+    packages=find_packages(),
+    install_requires=[&amp;quot;flask&amp;quot;, &amp;quot;pytest&amp;quot;, &amp;quot;pytest-flask&amp;quot;, &amp;quot;flask-bootstrap&amp;quot;],
+)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Bootstrap can now be installed as an app extension using the &lt;code&gt;init_app()&lt;/code&gt; instance method within the main package constructor.&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py-2&#34;&gt;src/main/&lt;strong&gt;init&lt;/strong&gt;.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# ...
+from flask import Flask
+from flask_bootstrap import Bootstrap
+
+bootstrap = Bootstrap()
+
+def create_app(config_name):
+    app = Flask(__name__, template_folder=&#39;../templates&#39;)
+    app.config.from_object(config[config_name])
+
+    bootstrap.init_app(app)
+    # ...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It turns out that 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/extensiondev/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;all approved Flask extensions&lt;/a&gt; will implement the &lt;code&gt;init_app()&lt;/code&gt; method. The major upshot of this (application factory) pattern is to allow multiple instances of our application to use a single extension instance. That&amp;rsquo;s good news for people like us who are interested in using a test framework during development.&lt;/p&gt;
+&lt;h2 id=&#34;making-nicer-templates&#34;&gt;Making nicer templates&lt;/h2&gt;
+&lt;p&gt;With the help of Bootstrap, we are going to drag our templates out of the 90s and into the modern age. This is done by having our templates inherit from Flask-Bootstrap&amp;rsquo;s base template. Let&amp;rsquo;s see how this works with our fancy greeting template.&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesfancy_greetinghtml&#34;&gt;src/templates/fancy_greeting.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code&gt;{% extends &amp;quot;bootstrap/base.html&amp;quot; %}
+
+{# time-sensitive greeting #}
+{% if hour &amp;gt;= 0 and hour &amp;lt; 12 %}
+    {% set greeting = &#39;Good morning&#39; %}
+{% elif hour &amp;gt;= 12 and hour &amp;lt; 17 %}
+    {% set greeting = &#39;Good afternoon&#39; %}
+{% else %}
+    {% set greeting = &#39;Good evening&#39; %}
+{% endif %}
+
+{% block title %}GreetMaster{% endblock %}
+
+{% block content %}
+&amp;lt;div class=&amp;quot;jumbotron jumbotron-fluid&amp;quot;&amp;gt;
+    &amp;lt;div class=&amp;quot;container&amp;quot;&amp;gt;
+        &amp;lt;h1 class=&amp;quot;display-4&amp;quot;&amp;gt;{{ greeting }}, {{ name | capitalize }}.&amp;lt;/h1&amp;gt;
+        &amp;lt;p class=&amp;quot;lead&amp;quot;&amp;gt;GreetMaster™: delivering you the finest of greetings.&amp;lt;/p&amp;gt;
+    &amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Flask-Bootstrap&amp;rsquo;s base template provides access to all of Bootstrap&amp;rsquo;s gadgets, like the &lt;strong&gt;jumbotron&lt;/strong&gt;. If you pull back the curtain and take a look at 
+&lt;a href=&#34;https://github.com/mbr/flask-bootstrap/blob/master/flask_bootstrap/templates/bootstrap/base.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;the base template&lt;/a&gt;, you&amp;rsquo;ll see that Bootstrap&amp;rsquo;s files are sourced within the template blocks. After relaunching the server and visiting &lt;code&gt;localhost/fancy-greeting/fred&lt;/code&gt;, we will now be greeted with a much nicer page.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-our-greetmaster-greeting-spruced-up-with-bootstrap&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-02-templates/bootstrap-template.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4.&amp;lt;/b&amp;gt; Our GreetMaster™ greeting, spruced up with Bootstrap.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-02-templates/bootstrap-template.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4.&lt;/b&gt; Our GreetMaster™ greeting, spruced up with Bootstrap.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Alright, fine. It&amp;rsquo;s still pretty plain. But moving away from Times New Roman has to count for something! Take it as one small step towards a modern interface for our app, which we will build up to as we move through the series.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;ve cloned the &lt;a href=&#34;https://github.com/ahadjinicolaou/issues.app&#34;&gt;project repository&lt;/a&gt;, you can run &lt;code&gt;git checkout ff8887e&lt;/code&gt; to get the current version of the source code.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;At this stage you might already appreciate the convenience that templates have to offer us. If not, then that&amp;rsquo;s entirely understandable. After all, we have been putting together some pretty simple pages up until now. Their convenience will be better appreciated once we start sinking our teeth into the prototype interface for the app, which I hope to cover in the next article.&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Don&amp;rsquo;t take it from me. The developers say it 
+&lt;a href=&#34;https://jinja.palletsprojects.com/en/2.11.x/templates/#template-inheritance&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;right here&lt;/a&gt; in their documentation! &lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>issues.app (1): Getting started with Flask and Pytest</title>
+      <link>https://www.remotelycurious.net/post/issues-app-01-intro/</link>
+      <pubDate>Sun, 30 Aug 2020 15:28:38 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-01-intro/</guid>
+      <description>&lt;p&gt;My biggest regret is not studying software design as an undergraduate.&lt;/p&gt;
+&lt;p&gt;Although I&amp;rsquo;ve been writing code for more than a decade, most of the code behind my programs tends to be stuffed into one or two files. This is fine when the programs are small, but a few months ago I had to fix a bug in one of my more complicated apps, which allows a user to load an audio file and manually annotate speech through a graphical interface. Having forgotten entirely about how my app is structured, I had no choice but to trace through the 3300+ lines of code just to reorient myself, before making what turned out to be a simple change. I have since decided that investing time into becoming a good software engineer will pay massive dividends and do wonders for my future sanity.&lt;/p&gt;
+&lt;p&gt;This is the start of what will become a series about web app development using Flask and Pytest. After some research, I singled out these frameworks because they are extensible, well-designed and don&amp;rsquo;t require loads of boilerplate code, which gets in the way of understanding. My main drive is to learn more about application architecture and test-driven development. Along the way I will distill what I learn into this guide, so that it can help other software engineering novices who have similar goals and working knowledge.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Speaking of knowledge, you should be comfortable with Python to get the most out of this guide. You should also be familiar with relational databases, client-server interactions, and the basics of web development (e.g., writing simple pages in HTTP/CSS/JavaScript).
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#resources&#34;&gt;Resources&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#overview&#34;&gt;Overview&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#codebase&#34;&gt;Codebase&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#project-structure&#34;&gt;Project structure&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#configuration&#34;&gt;Configuration&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#protecting-your-cookies&#34;&gt;Protecting your cookies&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#application&#34;&gt;Application&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#test-code&#34;&gt;Test code&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#execution&#34;&gt;Execution&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#virtual-environment&#34;&gt;Virtual environment&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#environment-variables&#34;&gt;Environment variables&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#launching-the-app&#34;&gt;Launching the app&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#running-some-tests&#34;&gt;Running some tests&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#test-driven-development&#34;&gt;Test-driven development&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#handling-route-requests&#34;&gt;Handling route requests&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;resources&#34;&gt;Resources&lt;/h1&gt;
+&lt;p&gt;I&amp;rsquo;m not a coding novice but there are a lot of uncharted waters here. Throughout the writeup I&amp;rsquo;ll reference docpages from both 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Flask&lt;/a&gt; and 
+&lt;a href=&#34;https://docs.pytest.org/en/stable/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Pytest&lt;/a&gt; as they are well presented and unusually helpful for those getting started. Aside from the documentation and the odd forum post, my primary resources are these two excellent books:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://www.amazon.com/Flask-Web-Development-Developing-Applications-dp-1491991739/dp/1491991739&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Flask Web Development&lt;/em&gt;&lt;/a&gt; by Miguel Grinberg,&lt;/li&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://www.amazon.com/Python-Testing-pytest-Effective-Scalable/dp/1680502409&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Python Testing with Pytest&lt;/em&gt;&lt;/a&gt; by Brian Okken.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let&amp;rsquo;s get this show started.&lt;/p&gt;
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;My target application is a fully operational 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Issue_tracking_system&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;issue tracker&lt;/a&gt; (see 
+&lt;a href=&#34;https://www.youtube.com/watch?v=PQa3NFB_LRg&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;here&lt;/a&gt; for a slick tour through an established product). Sure, it&amp;rsquo;s not the most exciting idea, but getting an app like this up and running calls for a lot of design decisions. There&amp;rsquo;s also enough complexity to make test-driven development worth the effort. To get a feel for what we&amp;rsquo;re talking about, consider just two aspects of the final product:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;a clean and functional &lt;strong&gt;user interface&lt;/strong&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;data storage&lt;/strong&gt; to keep track of users, issues, projects, and their relationships.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The implementation of each of these will heavily depend on how we want to use the issue tracker. We also want some way to &lt;strong&gt;authenticate&lt;/strong&gt; users and securely handle their passwords. Basic account management (e.g. validating new accounts, resetting passwords) will be handled by &lt;strong&gt;email&lt;/strong&gt;. Each of these aspects will be the topic of a separate writeup that builds on the codebase from the previous writeup.&lt;/p&gt;
+&lt;h1 id=&#34;codebase&#34;&gt;Codebase&lt;/h1&gt;
+&lt;p&gt;It&amp;rsquo;s now time to introduce the initial codebase. The rest of this article goes over the details of how it works as well as the rationale behind its structure.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;re looking for a good IDE, I highly recommend &lt;a href=&#34;https://code.visualstudio.com/&#34;&gt;Visual Studio Code&lt;/a&gt;. It&amp;rsquo;s free, widely supported by an extensive list of add-ons, and easy to work with. It is truly a thing of beauty.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;project-structure&#34;&gt;Project structure&lt;/h2&gt;
+&lt;p&gt;Our starting codebase is held in the root directory &lt;code&gt;issues-project&lt;/code&gt; (Fig. 1). Inside we have the &lt;code&gt;src/main&lt;/code&gt; folder, containing three Python files that comprise our app&amp;rsquo;s source code. The &lt;code&gt;tests&lt;/code&gt; folder on the same level holds code that will be used to test the application. We also have &lt;code&gt;setup.py&lt;/code&gt;, which will be invoked to setup the virtual environment.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-directory-listing-for-issues-project&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-01-intro/filetree.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Directory listing for &amp;lt;code&amp;gt;issues-project&amp;lt;/code&amp;gt;.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-01-intro/filetree.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Directory listing for &lt;code&gt;issues-project&lt;/code&gt;.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;There are of course many ways to structure a project. This particular layout allows us to play nice with Pytest and build on the codebase without too much difficulty, but there are other advantages that you can read about in 
+&lt;a href=&#34;https://blog.ionelmc.ro/2014/05/25/python-packaging&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;this comprehensive post&lt;/a&gt;. As the application grows I will likely bundle unit tests and functional tests into separate folders, but for now this structure will do just fine.&lt;/p&gt;
+&lt;h2 id=&#34;configuration&#34;&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;Most large applications need some 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/config/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;configuration&lt;/a&gt;. Each instance of a Flask application comes with a &lt;code&gt;config&lt;/code&gt; attribute that can be modified as if it were a dictionary:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;app = Flask(__name__)
+app.config[&#39;TESTING&#39;] = True
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A few &lt;code&gt;config&lt;/code&gt; values that we use are listed below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;SECRET_KEY&lt;/code&gt;, used to encrypt session cookies (discussed later),&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;DEBUG&lt;/code&gt;, toggles debug mode, which shows an interactive debugger for unhandled exceptions and reloads the development server for code changes,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;TESTING&lt;/code&gt;, toggles testing mode, which tells the app to allow exceptions to propagate, such that they can be handled by a testing framework.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The configuration file is shown below. We have three different configuration structures: one for development, another for testing, and yet another for production. This is useful because often a developer will want to use separate resources for each of these activities. You probably don&amp;rsquo;t want to test CRUD operations on your production database!&lt;/p&gt;
+&lt;p&gt;Each configuration inherits from the base &lt;code&gt;Config&lt;/code&gt; class, which contains settings that are shared across all configuration types. The secret key is assumed to be stored as an environment variable.&lt;/p&gt;
+&lt;h4 id=&#34;srcmainconfigpy&#34;&gt;src/main/config.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import os
+
+class Config:
+    SECRET_KEY = os.environ.get(&#39;SECRET_KEY&#39;)
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+class TestingConfig(Config):
+    TESTING = True
+
+class ProductionConfig(Config):
+    PLACEHOLDER = True
+
+config = {
+    &#39;development&#39;: DevelopmentConfig,
+    &#39;testing&#39;: TestingConfig,
+    &#39;production&#39;: ProductionConfig,
+    &#39;default&#39;: DevelopmentConfig
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can now use the global &lt;code&gt;config&lt;/code&gt; dictionary to easily configure an instance of our application to suit our purpose, whether it be for testing or development:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;app = Flask(__name__)
+app.config.from_object(config[&#39;testing&#39;])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;protecting-your-cookies&#34;&gt;Protecting your cookies&lt;/h3&gt;
+&lt;p&gt;It&amp;rsquo;s worth talking a bit more about that secret key and how it affects the 
+&lt;a href=&#34;https://machinesaredigging.com/2013/10/29/how-does-a-web-session-work/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;user session&lt;/em&gt;&lt;/a&gt;. Most web applications need to maintain some kind of &lt;em&gt;state&lt;/em&gt; with each user without having to dive into (slower) persistent storage. While handling an HTTP request, Flask makes the user session available to the application using the 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/api/#flask.session&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;session&lt;/code&gt;&lt;/a&gt; object. This allows the application to keep track of information across multiple requests using key-value pairs called &lt;em&gt;cookies&lt;/em&gt;. We will see how these can be useful later when we start to use them.&lt;/p&gt;
+&lt;p&gt;For now, just know that Flask will not allow you to use user sessions without defining the secret key. This key should be a long string of text that is not easily guessable and sufficiently random. Flask will use this key to cryptographically sign each cookie, such that a bad actor cannot impersonate you (or the application server) by forging your signature.&lt;/p&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Do not store secrets in cookies. Although your signature cannot be (easily) forged, the cookie payload can be &lt;a href=&#34;https://blog.miguelgrinberg.com/post/how-secure-is-the-flask-user-session&#34;&gt;very easily decrypted&lt;/a&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Make sure that your secrets (including things like API keys) are securely stored outside of source code. Never commit your secrets to version control!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;application&#34;&gt;Application&lt;/h2&gt;
+&lt;p&gt;Here we have our application code. If you&amp;rsquo;re looking at this code and thinking there&amp;rsquo;s something missing, well&amp;hellip; alright. It&amp;rsquo;s quite spartan. What we &lt;em&gt;do&lt;/em&gt; have in our package constructor (&lt;code&gt;__init__.py&lt;/code&gt;) is a 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;factory function&lt;/em&gt;&lt;/a&gt;. We can use &lt;code&gt;create_app()&lt;/code&gt; to create multiple instances of our app and import different configuration sets for each one using &lt;code&gt;app.config.from_object()&lt;/code&gt;. This is great for unit testing, as you will soon see.&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py&#34;&gt;src/main/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import Flask
+from src.main.config import config
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;issues.py&lt;/code&gt; file is used to instantiate the application. It first looks for the &lt;code&gt;ISSUES_CONFIG&lt;/code&gt; environment variable to see which configuration to use, but if that fails, the application is configured with the default (development) settings.&lt;/p&gt;
+&lt;p&gt;Note that the &lt;code&gt;create_app()&lt;/code&gt; function has significance to Flask&amp;rsquo;s command line utility, which we will use to launch the app. We will discuss this shortly.&lt;/p&gt;
+&lt;h4 id=&#34;srcmainissuespy&#34;&gt;src/main/issues.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import os
+from . import create_app
+
+app = create_app(os.getenv(&#39;ISSUES_CONFIG&#39;) or &#39;default&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And there we have it. That&amp;rsquo;s the app. Take a moment to appreciate just how lean it is. It won&amp;rsquo;t always be this way!&lt;/p&gt;
+&lt;h2 id=&#34;test-code&#34;&gt;Test code&lt;/h2&gt;
+&lt;p&gt;We now turn our attention to Pytest and what it will do for us. Taking a look at &lt;code&gt;test_suite.py&lt;/code&gt;, we find a rag-tag collection of unit tests. The first test is not particularly useful, but Pytest doesn&amp;rsquo;t care. All it cares about is whether the logic after any &lt;code&gt;assert&lt;/code&gt; keyword evaluates to &lt;code&gt;True&lt;/code&gt;. If it doesn&amp;rsquo;t, any remaining code in that function is skipped, the function is failed, and Pytest moves on to the next function. If all assertions in the test function are true, the function is passed.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you have used other testing frameworks you will appreciate that this is an incredibly beautiful programming construct. You don&amp;rsquo;t need to use things like &lt;code&gt;assertLess(a, b)&lt;/code&gt;: just write &lt;code&gt;assert a &amp;lt; b&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h4 id=&#34;teststest_suitepy&#34;&gt;tests/test_suite.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def test_sanity():
+    assert 1 + 1 == 2
+
+def test_config(app):
+    assert app.config[&#39;TESTING&#39;]
+
+def test_response(client):
+    response = client.get(&#39;/&#39;)
+    assert response.status_code == 200
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The remaining two test functions have arguments that sound more relevant. Where do &lt;code&gt;app&lt;/code&gt; and &lt;code&gt;client&lt;/code&gt; come from? That brings us to our next file.&lt;/p&gt;
+&lt;p&gt;Within the &lt;code&gt;conftest.py&lt;/code&gt; file, Pytest expects to find 
+&lt;a href=&#34;https://docs.pytest.org/en/latest/fixture.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;fixtures&lt;/em&gt;&lt;/a&gt;. These are functions that can be used to prepare &lt;em&gt;something&lt;/em&gt; (data, initialization, teardown, etc.) for a test function. In the code below, the &lt;code&gt;pytest.fixture&lt;/code&gt; decorator is used to tell Pytest that the function &lt;code&gt;app()&lt;/code&gt; is a fixture. Now Pytest knows to run the function whenever it encounters &lt;code&gt;app&lt;/code&gt; in the argument list of a test function. The &lt;code&gt;test_config()&lt;/code&gt; function in our test suite, for example, gets a fresh instance of our application that has been configured for testing.&lt;/p&gt;
+&lt;h4 id=&#34;testsconftestpy&#34;&gt;tests/conftest.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from src.main import create_app
+import pytest
+
+@pytest.fixture
+def app():
+    # initializes the app with the testing config
+    app = create_app(&#39;testing&#39;)
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that there is another fixture called &lt;code&gt;client&lt;/code&gt; that hasn&amp;rsquo;t been defined. This fixture is automatically made available to us courtesy of the &lt;code&gt;pyflask-test&lt;/code&gt; package (installed in our upcoming virtual environment), which looks for an &lt;code&gt;app&lt;/code&gt; fixture and uses it to create a test client. We will use the test client to generate browser requests and see whether we are getting back an expected response from our application.&lt;/p&gt;
+&lt;h1 id=&#34;execution&#34;&gt;Execution&lt;/h1&gt;
+&lt;p&gt;Now that we have introduced the codebase, it&amp;rsquo;s time to fire it up. We will run &lt;code&gt;issues&lt;/code&gt; within a virtual environment that is managed by 
+&lt;a href=&#34;https://docs.conda.io/en/latest/miniconda.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Miniconda&lt;/a&gt;, a lightweight version of the Anaconda package management system.&lt;/p&gt;
+&lt;h2 id=&#34;virtual-environment&#34;&gt;Virtual environment&lt;/h2&gt;
+&lt;p&gt;We&amp;rsquo;ll go ahead and use Miniconda to create our Python 3.7 environment. Once it&amp;rsquo;s ready, activate and use &lt;code&gt;pip&lt;/code&gt; to install our requisite packages. Don&amp;rsquo;t forget that trailing period.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;ROOTDIR&amp;gt; conda create -n issues python=3.7
+ROOTDIR&amp;gt; conda activate issues
+(issues) ROOTDIR&amp;gt; pip install -e .
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;When invoked by the command above, pip will search the current directory for the &lt;code&gt;setup.py&lt;/code&gt; file, which includes a list of dependencies needed for &lt;code&gt;issues&lt;/code&gt; to run properly. Each package listed in &lt;code&gt;install_requires&lt;/code&gt; will be installed into the virtual environment.&lt;/p&gt;
+&lt;h4 id=&#34;setuppy&#34;&gt;setup.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from setuptools import setup, find_packages
+
+setup(
+    name=&#39;issues&#39;,
+    version=&#39;0.1&#39;,
+    packages=find_packages(),
+    install_requires=[&amp;quot;flask&amp;quot;, &amp;quot;pytest&amp;quot;, &amp;quot;pytest-flask&amp;quot;],
+)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;What about that &lt;code&gt;-e&lt;/code&gt;? Running &lt;code&gt;pip install&lt;/code&gt; with the &lt;em&gt;editable&lt;/em&gt; option installs a link within the virtual environment to each local package discovered by 
+&lt;a href=&#34;https://setuptools.readthedocs.io/en/latest/setuptools.html#using-find-packages&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;find_packages()&lt;/code&gt;&lt;/a&gt; (i.e., &lt;code&gt;main&lt;/code&gt;). One of the major benefits of installing our project packages in this way is that our test files can now import them without resorting to hacky system path workarounds. Even better, the editable option means that we can continue to change the source code without having to reinstall the packages.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    At first glance importing a package from a neighboring directory doesn&amp;rsquo;t seem to be such a big problem, but take a look at the age of &lt;a href=&#34;https://stackoverflow.com/questions/6323860/sibling-package-imports&#34;&gt;this Stack Overflow post&lt;/a&gt;. People have been dealing with this issue for a very long time&amp;hellip;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;environment-variables&#34;&gt;Environment variables&lt;/h2&gt;
+&lt;p&gt;Remember that we need to set up a couple of environment variables. The syntax used to do this will vary depending on your shell (see 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/tutorial/factory/#run-the-application&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;this link&lt;/a&gt; for some examples). I&amp;rsquo;m using Visual Studio Code on Windows, whose terminal uses PowerShell. Note that your secret key should be more complex than this random headline I took from the New York Times.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$env:FLASK_APP=&#39;src/main/issues.py&#39;
+$env:ISSUES_CONFIG=&#39;development&#39;
+$env:SECRET_KEY=&#39;Are you overpraising your child?&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There&amp;rsquo;s a variable here that has not yet been introduced to us. As you might suspect, &lt;code&gt;FLASK_APP&lt;/code&gt; holds the location of our app. We&amp;rsquo;ll see how Flask uses this variable in the next section.&lt;/p&gt;
+&lt;h2 id=&#34;launching-the-app&#34;&gt;Launching the app&lt;/h2&gt;
+&lt;p&gt;Once installed inside the virtual environment, Flask gives us access to 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/cli/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;flask&lt;/code&gt;&lt;/a&gt;, a command line utility. Entering &lt;code&gt;flask run&lt;/code&gt; will first query the &lt;code&gt;FLASK_APP&lt;/code&gt; variable to discover our application. Since we have specified a path to a Python file, Flask will look for the &lt;code&gt;create_app()&lt;/code&gt; factory function in this file and use it to instantiate the application. Flask will then start up a development server and host the app on &lt;code&gt;http://localhost:5000/&lt;/code&gt;. You can find other ways to configure &lt;code&gt;FLASK_APP&lt;/code&gt; 
+&lt;a href=&#34;https://www.twilio.com/blog/how-run-flask-application&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;in this writeup&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If you visit the server right now, you will be greeted with a &lt;strong&gt;404 Not Found&lt;/strong&gt; error. That&amp;rsquo;s expected, since we haven&amp;rsquo;t yet told Flask how to handle any request. We&amp;rsquo;ll get to that shortly but for now let&amp;rsquo;s kill the server and see how to run our test suite.&lt;/p&gt;
+&lt;h2 id=&#34;running-some-tests&#34;&gt;Running some tests&lt;/h2&gt;
+&lt;p&gt;We are going to invoke Pytest through &lt;code&gt;pytest-flask&lt;/code&gt;, which gives us access to the test client, as described earlier. We can run the test suite with this command:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;(issues) ROOTDIR&amp;gt; py.test
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Pytest will now go off and search through any test code (i.e. files that look like &lt;code&gt;test_*.py&lt;/code&gt; or &lt;code&gt;*_test.py&lt;/code&gt;) within your current directory and all subdirectories. Test functions should start with &amp;ldquo;test&amp;rdquo;, like &lt;code&gt;test_response()&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Running &lt;code&gt;py.test&lt;/code&gt; results in a big chunk of text that starts with the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;============================= test session starts =============================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+plugins: flask-1.0.0
+collected 3 items
+
+tests\test_suite.py ..F   
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The last line tells the story: Pytest found three tests in &lt;code&gt;test_suite.py&lt;/code&gt;, of which two tests passed (indicated with a &lt;code&gt;.&lt;/code&gt;) and one test failed (&lt;code&gt;F&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;At the end of the test output, we see the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;=========================== short test summary info ===========================
+FAILED tests/test_suite.py::test_response - AssertionError: assert 404 == 200
+========================= 1 failed, 2 passed in 0.08s =========================
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Seems like &lt;code&gt;test_response()&lt;/code&gt; failed. Let&amp;rsquo;s take another look at the function:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def test_response(client):
+    response = client.get(&#39;/&#39;)
+    assert response.status_code == 200
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Pytest is telling us that after our test client made a GET request for the server&amp;rsquo;s root URL, the server did not return with a successful (&lt;strong&gt;200 OK&lt;/strong&gt;) response. We were expecting this since the server gave our browser a &lt;strong&gt;404 Not Found&lt;/strong&gt; response earlier. Since the returned status code was not equal to 200, the assertion failed and caused our test function to fail.&lt;/p&gt;
+&lt;h1 id=&#34;test-driven-development&#34;&gt;Test-driven development&lt;/h1&gt;
+&lt;p&gt;We have now set ourselves up to do some 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Test-driven_development&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;test-driven development&lt;/em&gt;&lt;/a&gt;. Under this methodology, each new feature in our application begins life as a test. The goal is then to implement the feature by writing as little code as possible so as to pass the test. This extremely short development cycle of writing and passing tests is repeated many times until you have yourself an application.&lt;/p&gt;
+&lt;p&gt;Our first &amp;ldquo;feature&amp;rdquo; is very simple: deliver a successful response to the client that requests the root URL.&lt;/p&gt;
+&lt;h2 id=&#34;handling-route-requests&#34;&gt;Handling route requests&lt;/h2&gt;
+&lt;p&gt;While the web server is running, it passes all received requests to &lt;code&gt;app&lt;/code&gt;, the Flask application instance. The app needs to know how to respond to each requested URL. More specifically, Flask needs to know what function to use to create the response. This is achieved using &lt;em&gt;routes&lt;/em&gt;, which associate a URL with a response function. We can use the &lt;code&gt;app.route&lt;/code&gt; decorator to specify a route for the root URL:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&#39;/&#39;)
+def index():
+    return &#39;&amp;lt;h1&amp;gt;Show me the money!&amp;lt;/h1&amp;gt;&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this way, the &lt;code&gt;index()&lt;/code&gt; function has now been assigned to handle the response for the root URL. We will add this code to the &lt;code&gt;create_app()&lt;/code&gt; function within the &lt;code&gt;issues&lt;/code&gt; package constructor:&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py-1&#34;&gt;src/main/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import Flask
+from src.main.config import config
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+
+    @app.route(&#39;/&#39;)
+    def index():
+       return &#39;&amp;lt;h1&amp;gt;Show me the money!&amp;lt;/h1&amp;gt;&#39;
+
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After revising the code and launching the app with &lt;code&gt;flask run&lt;/code&gt;, you will find that a trip to the server root no longer results in a 404 Not Found.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-success&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-01-intro/200-OK.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Success!&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-01-intro/200-OK.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Success!
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Let&amp;rsquo;s run pytest once more.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;(issues) ROOTDIR&amp;gt; py.test
+============================= test session starts =============================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+plugins: flask-1.0.0
+collected 3 items
+
+tests\test_suite.py ...                                                  [100%]
+
+============================== 3 passed in 0.06s ==============================
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As expected, we have passed the tests and restored order to the universe.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;ve cloned the &lt;a href=&#34;https://github.com/ahadjinicolaou/issues.app&#34;&gt;project repository&lt;/a&gt;, you can run &lt;code&gt;git checkout fe2b7ce&lt;/code&gt; to get the current version of the source code.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;That concludes the initialization of the issue tracker project. Although it takes a bit more work to distribute a Flask application over several source files, this modular design should allow for a more streamlined development and testing experience.&lt;/p&gt;
+&lt;p&gt;There is a lot of code between what we have and a working issue tracker. In the next article I&amp;rsquo;ll create a basic user interface for the app and motivate the use of &lt;em&gt;templates&lt;/em&gt;, which allow for the clean separation of presentation logic and application data.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Differential responses to high-frequency electrical stimulation in brisk-transient and delta retinal ganglion cells</title>
+      <link>https://www.remotelycurious.net/publication/embc-2020/</link>
+      <pubDate>Thu, 27 Aug 2020 00:00:00 +0000</pubDate>
+      <guid>https://www.remotelycurious.net/publication/embc-2020/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Beware those bearing linear regression models</title>
+      <link>https://www.remotelycurious.net/post/beware-linear-regression/</link>
+      <pubDate>Sun, 12 Jul 2020 22:06:30 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/beware-linear-regression/</guid>
+      <description>&lt;p&gt;Lift a rock in your garden and you might find a linear regression model. They are everywhere, working hard to predict all sorts of things, like how much further you can drive with this much fuel in the tank, or how much your house might sell for in your neighborhood. Linear regression models owe their success to their ease-of-use as well as their natural interpretability &amp;ndash; most people would probably find it a lot harder to predict the output of a neural network, compared with that of $y=2x$.&lt;/p&gt;
+&lt;p&gt;Unfortunately, it is this ease-of-use and interpretability that make linear regression models especially prone to misuse, even by people who should know better&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. Before rushing to apply a model (any model), we need to ask ourselves two questions:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;What does this model assume?&lt;/li&gt;
+&lt;li&gt;Do these assumptions make sense for our data?&lt;/li&gt;
+&lt;/ol&gt;
+&lt;!--[^1]: Highly-educated scientists and medical professionals are human and therefore perfectly capable of [bad judgement](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1297101/). --&gt;
+&lt;p&gt;As it turns out, the linear regression model makes some pretty strong assumptions that don&amp;rsquo;t always hold up in reality. This writeup takes a look at these assumptions, what happens when they don&amp;rsquo;t hold, and which ones we can bend.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#simple-linear-regression&#34;&gt;Simple linear regression&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#meet-the-residual&#34;&gt;Meet the residual&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#out-with-the-assumptions&#34;&gt;Out with the assumptions&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#normality&#34;&gt;Normality&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#independent-errors&#34;&gt;Independent errors&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#normally-distributed-errors&#34;&gt;Normally-distributed errors&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#homoscedasticity&#34;&gt;Homoscedasticity&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#all-too-human&#34;&gt;All too human&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;simple-linear-regression&#34;&gt;Simple linear regression&lt;/h1&gt;
+&lt;p&gt;The goal of a linear regression model is to model $k$ &lt;em&gt;response&lt;/em&gt; variables, $Y_{1},Y_{2},&amp;hellip;,Y_{k}$ using $p$ &lt;em&gt;predictor&lt;/em&gt; variables, $X_{1},X_{2},&amp;hellip;,X_{p}$. In this article we will focus on &amp;ldquo;simple linear regression&amp;rdquo;, or SLR $(k=1)$ to avoid getting bogged down in notation. To model our response $Y$ using $p=3$ predictor variables, for example, we assume a relationship of the form&lt;/p&gt;
+&lt;p&gt;$$
+Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3},
+$$&lt;/p&gt;
+&lt;p&gt;where $\beta_{i}$ are predictor coefficients that have been found by the end of the fitting process.&lt;/p&gt;
+&lt;p&gt;Most of the core assumptions underlying linear regression have to do with the &lt;em&gt;residuals&lt;/em&gt;, which are used to estimate prediction errors. Since they play such an important role in the modeling process, it&amp;rsquo;s worth taking some time to formally introduce them.&lt;/p&gt;
+&lt;h2 id=&#34;meet-the-residual&#34;&gt;Meet the residual&lt;/h2&gt;
+&lt;p&gt;To train a model, you need data. More specifically, you need a set of $N &amp;gt; p$ response &lt;em&gt;observations&lt;/em&gt; and predictor &lt;em&gt;measurements&lt;/em&gt;, ${(\hat{y_{i}}, x_{i1},x_{i2},x_{i3}  )}_{i=1}^{N}$. Note the little hat sitting on $\hat{y_i}$. Our model formulation assumes that each of our responses is corrupted by some error $\epsilon$ such that for our $i$th observation, $\hat{y_i} = y_i + \epsilon_i$. The hat indicates that the observations $\hat{y_i}$ are actually &lt;em&gt;estimates&lt;/em&gt; of the true responses $y_i$ that we can never observe.&lt;/p&gt;
+&lt;p&gt;Our SLR model relates the predictor measurements to the observations by&lt;/p&gt;
+&lt;p&gt;$$
+\hat{y_i} = \hat{\beta_{0}} + \hat{\beta_{1}}x_{i1} + \hat{\beta_{2}}x_{i2} + \hat{\beta_{3}}x_{i3} + \epsilon_{i},
+$$&lt;/p&gt;
+&lt;p&gt;with our fitting process giving us estimates $\hat{\beta_i}$ of the true, hidden coefficients $\beta_i$. Our model thus consists of a &lt;em&gt;deterministic&lt;/em&gt; component (i.e., the equation for $Y$ in terms of the $X_i$s) and a &lt;em&gt;random&lt;/em&gt; component, represented by the error $\epsilon$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Unlike the response and the coefficients, the predictor measurements are hatless, meaning that they are assumed to be measured with no error.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Since there is no way to know the true response, we can never know the error terms $\epsilon_i$. So we estimate them using &lt;em&gt;residuals&lt;/em&gt;. Compared directly,&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the error $\epsilon_i$ is the difference between the measured value and the (unobservable) &lt;em&gt;true&lt;/em&gt; value,&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;$$\epsilon_i = y_i - y,$$&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the residual $r_i$ is the difference between the measured value and the &lt;em&gt;predicted&lt;/em&gt; value computed from the model,&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;$$r_i = y_i - \hat{y_i}.$$&lt;/p&gt;
+&lt;p&gt;Now that we have some measure of prediction error in the residuals, we can use them to build a &lt;em&gt;loss function&lt;/em&gt; that describes the overall model error. Linear regression then works to find the coefficient values that minimize this loss function. The &lt;em&gt;L2-norm&lt;/em&gt; loss function $L = \sum_{i=1}^{N}r_i ^2$ is popular because it punishes outliers and makes finding the optimal coefficients a matter of 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Ordinary_least_squares#Estimation&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;plugging values into a formula&lt;/a&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;out-with-the-assumptions&#34;&gt;Out with the assumptions&lt;/h1&gt;
+&lt;p&gt;Although you will see all sorts of assumptions scattered throughout this article, there are four major ones (each with their own subsection) that rule them all. That is, these four alone are sufficient for linear regression analysis. Some are less demanding than others. Ultimately, you can probably get away with bending all of them in some way (as long as the statisticians aren&amp;rsquo;t looking), with the caveat that your model may become unreliable and therefore unsuitable for inference. Let&amp;rsquo;s see what can happen.&lt;/p&gt;
+&lt;h2 id=&#34;normality&#34;&gt;Normality&lt;/h2&gt;
+&lt;p&gt;Our first assumption is inherent in the name of the model: the response is a linear combination of the predictors. This supposedly fundamental assumption is arguably the one that gets overlooked most of the time. Why? In a nutshell, when you&amp;rsquo;re close enough to a curve, it looks like a straight line.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Note that &amp;ldquo;linear&amp;rdquo; is in the sense of the coefficients, not the predictors. This means that relations like $Y = \beta X^{2}$ are fine but ones like $Y = \beta ^{2}X$ are not.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-any-curve-can-look-like-a-straight-line-at-close-range&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/beware-linear-regression/close-up.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Any curve can look like a straight line at close range.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/beware-linear-regression/close-up.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Any curve can look like a straight line at close range.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;There&amp;rsquo;s a reason the &amp;ldquo;flat Earth&amp;rdquo; theory was so compelling before NASA.&lt;/p&gt;
+&lt;p&gt;In practice, we have some wiggle room with this one. As long as our response data $y_{i}$ are far away from any theoretical limit, we can generally draw a straight line through the data and that will be enough for all sorts of applications. CEOs can project their yearly sales, consumers can work out their monthly electricity consumption, and life goes on.&lt;/p&gt;
+&lt;!-- Linear regression also tends to be fast, which can be useful if you&#39;re fitting models on embedded devices or portable hardware. --&gt;
+&lt;p&gt;On the other hand, if we are looking to describe phenomena more generally, then we need to take the idea of linearity more seriously. Let&amp;rsquo;s say you want to build an SLR model to describe height $H = \beta_{0} + \beta_{1}W$ as a function of weight $W$, using data from your coworkers. As long as you have enough coworkers (and enough of them agree to give you that data), you will end up with coefficients $\hat{\beta_{i}}$ that capture this relationship for adults that more or less resemble your coworkers. That last point is crucial. If you are a professional wrestler (presumably learning statistical analysis in your own time) and each of your coworkers resembles 
+&lt;a href=&#34;https://www.remotelycurious.net/beware-linear-regression/thanos.jpg&#34;&gt;Thanos&lt;/a&gt;, your coefficients will be useless for predicting the height of an average human being. If your coworkers are a regular group of men and women, your coefficients won&amp;rsquo;t help you to predict the height of a child. In general, the more useful you want your model to be, the less likely you&amp;rsquo;ll be using linear regression.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    An important side-effect of the model&amp;rsquo;s formulation has to do with the effect of each predictor on the response. By assuming a response of the form $Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3}$, we are also assuming that the effect of one predictor variable is independent of the others. If this holds, one unit of change in $X_{1}$ will have the same effect on the response, &lt;em&gt;no matter what values the other predictors have&lt;/em&gt;. That is a strong assumption!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The bottom line is that under certain circumstances, an SLR model might be enough to describe non-linear phenomena. If you scatter your data and it looks like they will conform to a straight line without excluding too many outliers, it might be all you need. Just be wary about using the model to extrapolate data beyond your current range of responses.&lt;/p&gt;
+&lt;h2 id=&#34;independent-errors&#34;&gt;Independent errors&lt;/h2&gt;
+&lt;p&gt;To assess how good our model is, and to do it &lt;em&gt;correctly&lt;/em&gt;, we need the residuals to have properties that are like the actual errors they are supposed to estimate: independent and normally distributed, with zero mean and fixed variance. Each of the remaining core assumptions behind linear regression is right there in that last sentence.&lt;/p&gt;
+&lt;p&gt;What does it mean for the residuals to be independent? This means that they should not have a relationship with any of the predictors, or each other. When we plot the residuals as a function of a predictor variable (or as a function of time, for time-series data), we don&amp;rsquo;t want to see any kind of pattern. Nothing except some random-looking points centered on zero. Anything else means that the residuals have some kind of &lt;em&gt;structure&lt;/em&gt;, suggesting that the model might not be a great fit for the data.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If the residuals are orders of magnitude smaller than the responses, some residual dependence might be tolerable. But it&amp;rsquo;s usually a good idea to work out how they arise, and how to control for them.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;To see what it means when we don&amp;rsquo;t have independent residuals, we&amp;rsquo;ll use the 
+&lt;a href=&#34;http://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Boston Housing dataset&lt;/a&gt; to build a (naive) SLR model of the median house value $V$ based on a single predictor, the mean number of rooms in a house $RM$, related by $V = \beta_0 + \beta_1 RM$. We fit our model and sure enough, the more rooms in your house, the greater its predicted value (Fig. 2, left panel). No surprises there.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-median-house-value-v-spanspan1000s-regressed-onto-mean-room-number-rm-for-the-boston-housing-dataset-left-scatterplot-of-v-against-rm-with-a-linear-fit-red-trace-95-ci-right-the-corresponding-residual-plot-with-a-lowess-smoother-fit-indicated-by-the-orange-trace-data-entries-whose-observations-appeared-to-be-capped-at-the-maximum-value-50000-were-excluded-from-the-analysis&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/beware-linear-regression/dependent-residuals.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Median house value $V$ (&amp;lt;span&amp;gt;$&amp;lt;/span&amp;gt;1,000s) regressed onto mean room number $RM$ for the Boston Housing dataset. Left: Scatterplot of $V$ against $RM$ with a linear fit (red trace; 95% CI). Right: the corresponding residual plot, with a lowess smoother fit indicated by the orange trace. Data entries whose observations appeared to be capped at the maximum value ($50,000) were excluded from the analysis.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/beware-linear-regression/dependent-residuals.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Median house value $V$ (&lt;span&gt;$&lt;/span&gt;1,000s) regressed onto mean room number $RM$ for the Boston Housing dataset. Left: Scatterplot of $V$ against $RM$ with a linear fit (red trace; 95% CI). Right: the corresponding residual plot, with a lowess smoother fit indicated by the orange trace. Data entries whose observations appeared to be capped at the maximum value ($50,000) were excluded from the analysis.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Taking a look at the residual plot in Fig. 2B (right panel), we see that the residuals start off with a positive bias, sagging in the middle of our response range, before increasing again for large room counts. We are underestimating value for houses that don&amp;rsquo;t have an &amp;ldquo;average&amp;rdquo; number of rooms.&lt;/p&gt;
+&lt;p&gt;This residual plot is telling us that our model&amp;rsquo;s deterministic component (i.e., the formula $V = \beta_0 + \beta_1 RM$) is missing something important. But before we try adding other predictors, let&amp;rsquo;s make a small change to our single predictor and use its square $RM^2$, as suggested by the authors of the study that initially made use of this dataset&lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;. This cheap modification gets us a slightly better r-squared value (from 0.47 to 0.50) as well as a residual plot that bends a bit closer to zero (Fig. 3). Transforming the predictors (or the response) can improve the distribution of our residuals and the model&amp;rsquo;s fit quality.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-median-house-value-v-spanspan1000s-regressed-onto-the-square-of-mean-room-number-rm2-for-the-boston-housing-dataset&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/beware-linear-regression/less-dependent-residuals.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Median house value $V$ (&amp;lt;span&amp;gt;$&amp;lt;/span&amp;gt;1,000s) regressed onto the square of mean room number $RM^2$ for the Boston Housing dataset.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/beware-linear-regression/less-dependent-residuals.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Median house value $V$ (&lt;span&gt;$&lt;/span&gt;1,000s) regressed onto the square of mean room number $RM^2$ for the Boston Housing dataset.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Of course, it&amp;rsquo;s unlikely that we can model something as complex as house value with a single predictor. By including two more predictors (house age and per-capita crime), we easily improve the model fit ($R^2=0.65$) and our residuals tend closer to zero. Generally, additional predictors should be considered if (a) they are informative for the response variable, and (b) they are (at most) weakly correlated with any of the existing predictors.&lt;/p&gt;
+&lt;p&gt;Correlation, whether among the residuals or among the predictors, can cause all sorts of problems in regression analysis. As an extreme example, consider what would happen if we fit a model of house value with two perfectly correlated predictors, $RM$ and $RM^2$. Compared with the model that only includes $RM^2$, we net ourselves an artificial boost in $R^2$ (from 0.50 to 0.53) and our $RM^2$ coefficient estimate ends up being an order of magnitude larger (from 0.67 to 2.23). Not only do we not gain any meaningful insight with our extra predictor, we actually &lt;em&gt;lose&lt;/em&gt; insight &amp;ndash; we have made it harder to understand the true effect of room count on house value.&lt;/p&gt;
+&lt;p&gt;Linear regression has a couple more things to say about the distribution of our residuals.&lt;/p&gt;
+&lt;h2 id=&#34;normally-distributed-errors&#34;&gt;Normally-distributed errors&lt;/h2&gt;
+&lt;p&gt;The errors (and the residuals) should not only have a mean of zero, they should also be normally distributed with constant variance $\sigma^2$. We can write this as&lt;/p&gt;
+&lt;p&gt;$$ \epsilon_i \sim \textrm{Normal}(0,\sigma^2). $$&lt;/p&gt;
+&lt;p&gt;If the errors are not normally distributed, you can still go ahead and compute coefficients, but your measures of uncertainty and significance testing may be compromised if you don&amp;rsquo;t have enough observations. For instance, the standard error terms for the predictor coefficients and the model itself, and by extension, their associated confidence intervals, are all computed under the assumption of residual normality. If you do find evidence of non-normality (preferrably through statistical measures like the Kolmogorov-Smirnov test, rather than by visual inspection), but you&amp;rsquo;ve decided that it&amp;rsquo;s acceptable, it might be best to use wider confidence intervals to indicate this additional uncertainty, documenting your rationale.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    How much non-normality is acceptable? That&amp;rsquo;s a tricky question that usually depends on your experience. Probably best to ask a statistician!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Your ears might have detected a loophole earlier, in that we might not need normally-distributed residuals if our observation count is high enough. Thanks to the &lt;em&gt;central limit theorem&lt;/em&gt;, it turns out that with a moderate observation count (let&amp;rsquo;s say $N&amp;gt;20$), linear regression will be perfectly capable of handling your non-normal response data&lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;. The specific number of observations you need will vary depending on whether your response variable is &amp;ldquo;well-behaved&amp;rdquo; or not. If you are dealing with extremely skewed response distributions or large outlier counts, for instance, you will likely need (many) more observations.&lt;/p&gt;
+&lt;h2 id=&#34;homoscedasticity&#34;&gt;Homoscedasticity&lt;/h2&gt;
+&lt;p&gt;In the last section we described the errors as being normally distributed, but we didn&amp;rsquo;t talk about their &lt;em&gt;variance&lt;/em&gt;. When we write $ \epsilon_i \sim \textrm{Normal}(0,\sigma^2),$ we are saying that the errors are &lt;em&gt;identically distributed&lt;/em&gt; for every observation $i$, as if each is being drawn from the same normal distribution with zero mean and variance $\sigma^2$. The errors are said to be &lt;em&gt;homoscedastic&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;(Which is a bit of a mouthful. I&amp;rsquo;d rather just say they have constant variance.)&lt;/p&gt;
+&lt;p&gt;We can test for constant variance using most modern statistical libraries (e.g. 
+&lt;a href=&#34;https://www.statsmodels.org/stable/diagnostic.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;statsmodels&lt;/code&gt;&lt;/a&gt;) but a quick visual indication can be found in the residual plots. If the spread of residuals appears to vary with a given predictor, you should probably run a test to confirm its severity and whether you can tolerate it in your analysis. Too much variability will compromise any measures of uncertainty or significance.&lt;/p&gt;
+&lt;h1 id=&#34;all-too-human&#34;&gt;All too human&lt;/h1&gt;
+&lt;p&gt;So with all these statistical landmines, why are linear regression models so pervasive? &lt;em&gt;Probably because we can understand them&lt;/em&gt;. It is difficult to wrap our minds around nonlinear phenomena because the mental models we use to make sense of our world 
+&lt;a href=&#34;https://hbr.org/2017/05/linear-thinking-in-a-nonlinear-world&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;tend to be linear!&lt;/a&gt;&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Porter, 
+&lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1297101/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Misuse of correlation and regression in three medical journals&lt;/em&gt;&lt;/a&gt;. Journal of the Royal Society of Medicine (1999). &lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Harrison Jr &amp;amp; Rubinfeld, 
+&lt;a href=&#34;https://www.sciencedirect.com/science/article/abs/pii/0095069678900062&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Hedonic housing prices and the demand for clean air&lt;/em&gt;&lt;/a&gt;. Journal of Environmental Economics and Management (1978). &lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Lumley et al., 
+&lt;a href=&#34;https://doi.org/10.1146/annurev.publhealth.23.100901.140546&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;The importance of the normality assumption in large public health datasets&lt;/em&gt;&lt;/a&gt;. Annual Reviews (2002) &lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Intent Decoder</title>
+      <link>https://www.remotelycurious.net/project/intent-decoder/</link>
+      <pubDate>Wed, 10 Jun 2020 11:14:09 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/project/intent-decoder/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Building a homelab with Proxmox</title>
+      <link>https://www.remotelycurious.net/post/homelab/</link>
+      <pubDate>Fri, 05 Jun 2020 23:13:08 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/homelab/</guid>
+      <description>&lt;p&gt;It turns out that the journey to setting up a homelab is filled with trapdoors and snake pits.&lt;/p&gt;
+&lt;p&gt;This writeup is largely for documentation purposes &amp;ndash; it&amp;rsquo;s written as a note to my future self who might look to recreate this setup and wonder why certain design decisions were made. My goal is to avoid having to rediscover all of the little hazards that can (and did) result in hours of frustration. That said, my hope is that other people with similar goals can learn from my experience and save themselves from navigating seas of browser tabs in search of enlightenment.&lt;/p&gt;
+&lt;p&gt;By the time my homelab took shape, I had made use of all sorts of resources on the topic. One of the best belongs to Dan Ford, whose excellent 
+&lt;a href=&#34;https://www.dlford.io/tag/how-to-home-lab-series/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;homelab writeup series&lt;/a&gt; really helped me to get started. The documentation for 
+&lt;a href=&#34;https://pve.proxmox.com/wiki/Main_Page&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Proxmox&lt;/a&gt; and 
+&lt;a href=&#34;https://docs.netgate.com/pfsense/en/latest/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;pfSense&lt;/a&gt; was also useful. Aside from these, there were also many valuable snippets of information, forum posts and docpages scattered throughout the internet, which have been cited where appropriate.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#objectives&#34;&gt;Objectives&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#requirements&#34;&gt;Requirements&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#hardware&#34;&gt;Hardware&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#hypervisor&#34;&gt;Hypervisor&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#network&#34;&gt;Network&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#installation&#34;&gt;Installation&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#installing-proxmox&#34;&gt;Installing Proxmox&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#file-system&#34;&gt;File system&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#network-configuration&#34;&gt;Network configuration&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#configuring-proxmox&#34;&gt;Configuring Proxmox&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#enabling-software-updates&#34;&gt;Enabling software updates&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#uploading-iso-images&#34;&gt;Uploading ISO images&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#configuring-the-virtual-network&#34;&gt;Configuring the virtual network&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#installing-pfsense&#34;&gt;Installing pfSense&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#configuring-pfsense&#34;&gt;Configuring pfSense&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#creating-the-internal-network&#34;&gt;Creating the internal network&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#restricting-access&#34;&gt;Restricting access&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;objectives&#34;&gt;Objectives&lt;/h1&gt;
+&lt;p&gt;There are a lot of reasons you might want to build a homelab. 
+&lt;a href=&#34;https://www.reddit.com/r/homelab/comments/4mc7sf/why_build_a_homelab_some_thoughts_for_beginners/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Many of them&lt;/a&gt; have to do with learning something. My short-term goal is to learn system administration (things like configuring firewalls and networks, managing security policy, etc) but eventually I want to learn more about network intrusion detection. I&amp;rsquo;d be curious to see if I could break into my own network &amp;ndash; and what that would look like from the perspective of a sysadmin.&lt;/p&gt;
+&lt;h1 id=&#34;requirements&#34;&gt;Requirements&lt;/h1&gt;
+&lt;p&gt;A homelab can take many forms, from an array of physical computers mounted on racks, to a book-sized unit hosting a virtualized computer network. In this section I discuss the major constraints and design decisions that guided my approach.&lt;/p&gt;
+&lt;h2 id=&#34;hardware&#34;&gt;Hardware&lt;/h2&gt;
+&lt;p&gt;Since I like quiet and despise both heat and clutter, the first major constraint was that this homelab needed to be virtual. This means the homelab is going to be implemented by a bare-metal hypervisor&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;, on a host computer with a low noise, power, and physical profile. In the end I went with the 
+&lt;a href=&#34;https://protectli.com/product/fw6b/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Protectli FW6B&lt;/a&gt;. It&amp;rsquo;s a silent, well-built unit that comes with a dual-core i3-7100U and 6x Intel Gigabit NICs. I opted to load it with 2x8 GiB of DDR4 RAM and 480 GiB of mSATA storage. This is definitely overkill for a bunch of lightweight VMs, but I&amp;rsquo;ll be putting this little box to good use in future projects.&lt;/p&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Whatever you do, make sure that your host CPU supports virtualization!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    According to &lt;a href=&#34;https://www.reddit.com/r/homelab/comments/7at38f/1gig_pcie_nic_recommendations/&#34;&gt;people who know better&lt;/a&gt;, Intel NICs seem to better support virtualization, compared with those from other manufacturers.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;hypervisor&#34;&gt;Hypervisor&lt;/h2&gt;
+&lt;p&gt;After a couple hours of internet research, I decided to run with 
+&lt;a href=&#34;https://www.proxmox.com/en/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Proxmox&lt;/a&gt; as my hypervisor. People also seem to be pretty happy with 
+&lt;a href=&#34;https://www.vmware.com/products/esxi-and-esx.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;ESXi&lt;/a&gt;, but my decision largely came down to favoring an unrestricted, open-source solution. I&amp;rsquo;m definitely not a seasoned practitioner, so it&amp;rsquo;s unlikely that I would really be able to appreciate the difference between the two products right now.&lt;/p&gt;
+&lt;h2 id=&#34;network&#34;&gt;Network&lt;/h2&gt;
+&lt;p&gt;To start with, having some virtual machines running on an internal network, isolated from the home network by a firewall, sounds like a good idea. 
+&lt;a href=&#34;https://www.pfsense.org/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;pfSense&lt;/a&gt; is a well-regarded firewall whose documentation specifically includes guidance on 
+&lt;a href=&#34;https://docs.netgate.com/pfsense/en/latest/virtualization/virtualizing-pfsense-with-proxmox.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;running it as a VM in Proxmox&lt;/a&gt;, which is exactly what I want to do. It also can be configured as an intrusion detection/prevention system by way of add-on packages like Suricata and Snort, something I&amp;rsquo;m keen to play around with in the future.&lt;/p&gt;
+&lt;p&gt;Although I&amp;rsquo;m generally comfortable with vanilla home networking, there&amp;rsquo;s a lot of uncharted territory for me in this project. To limit what could go wrong, I will keep things simple and just focus on getting a basic system up-and-running. This means leaving things like VLAN configuration and SSH access for another homelab iteration.&lt;/p&gt;
+&lt;p&gt;The schematic for the eventual homelab is shown below:&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-homelab-schematic-with-two-virtual-switches-vmbrx-and-three-vms&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/network-diagram.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1&amp;lt;/b&amp;gt;. Homelab schematic, with two virtual switches (&amp;lt;code&amp;gt;vmbrx&amp;lt;/code&amp;gt;) and three VMs.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/network-diagram.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1&lt;/b&gt;. Homelab schematic, with two virtual switches (&lt;code&gt;vmbrx&lt;/code&gt;) and three VMs.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
+&lt;p&gt;Before beginning, you should have the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;$\geq$8 GB USB flash drive&lt;/li&gt;
+&lt;li&gt;Rufus installer (&lt;code&gt;rufus-3.10.exe&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Proxmox VE ISO image (&lt;code&gt;proxmox-ve_6.2-1.iso&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;pfSense ISO image (&lt;code&gt;pfSense-CE-2.4.5-RELEASE-amd64.iso&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Linux ISO image (&lt;code&gt;CentOS-8.1.1911-x86_64-dvd1.iso&lt;/code&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+&lt;a href=&#34;https://rufus.ie/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Rufus&lt;/a&gt; will be used to wipe and format the USB drive as a bootable installation drive&lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;, so please make sure it&amp;rsquo;s not holding anything of value! Once you&amp;rsquo;ve selected the USB drive under &lt;em&gt;Device&lt;/em&gt; and the Proxmox ISO image under &lt;em&gt;Boot selection&lt;/em&gt;, go ahead and click Start. You might get a couple of prompts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;Download a newer version of GRUB?&amp;rdquo; → &lt;strong&gt;No&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;Write as an ISO image or DD image?&amp;rdquo; → &lt;strong&gt;Write in DD Image mode&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Once the disk is written, plug it into your homelab host and turn it on. Immediately hold down ESC or DEL and let go once you&amp;rsquo;ve entered the BIOS.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    At this point, you should probably enable &lt;a href=&#34;https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface&#34;&gt;UEFI&lt;/a&gt; mode. Most operating systems these days support UEFI, which allows for things like using a mouse in the installation GUI. The only reason to use legacy mode is for compatibility with ancient OS installation media.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    While we&amp;rsquo;re here, make sure that the relevant virtualization setting (Intel VT, AMD-V, SVM, etc) is enabled.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Within the BIOS, find the boot section and either reorder the device list such that your USB drive comes first, or if there&amp;rsquo;s an option to immediately boot from a selected device, use that to boot from the drive. Selecting &lt;strong&gt;Install Proxmox VE&lt;/strong&gt; from the menu that pops up will launch the installatoon process.&lt;/p&gt;
+&lt;h2 id=&#34;installing-proxmox&#34;&gt;Installing Proxmox&lt;/h2&gt;
+&lt;p&gt;While going through the 
+&lt;a href=&#34;https://pve.proxmox.com/wiki/Installation&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;installation process&lt;/a&gt;, you will have to make some important decisions. The first of these concerns what file system to use on the host.&lt;/p&gt;
+&lt;h3 id=&#34;file-system&#34;&gt;File system&lt;/h3&gt;
+&lt;p&gt;If we ignore Ext3, we have three choices: Ext4, XFS, and ZFS. The default file system, 
+&lt;a href=&#34;https://opensource.com/article/18/4/ext4-filesystem&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ext4&lt;/a&gt;, was designed to be backwards-compatible with older file systems. It&amp;rsquo;s known for stability, which is probably the reason why it&amp;rsquo;s the default file system on most Linux distributions. 
+&lt;a href=&#34;https://www.usenix.org/system/files/login/articles/140-hellwig.pdf&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;XFS&lt;/a&gt; is another mature solution that is particularly well-suited for servers that deal with many large (exbibytes) files.&lt;/p&gt;
+&lt;p&gt;
+&lt;a href=&#34;https://www.freebsd.org/doc/handbook/zfs.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;ZFS&lt;/a&gt; is a next-generation file system that was designed to eliminate many issues found in legacy file systems. ZFS is probably the way to go for someone who knows what they&amp;rsquo;re doing (and doesn&amp;rsquo;t need support for enormous files) &amp;ndash; you get great performance, configuration flexibility, and access to enterprise-level features, in return for a larger memory footprint and a bit more configuration.&lt;/p&gt;
+&lt;p&gt;Since I&amp;rsquo;m just learning the ropes and don&amp;rsquo;t really need advanced features and capabilities, I left Proxmox with Ext4 as the default choice. You would only see the option to change this by clicking &lt;em&gt;Options&lt;/em&gt; next to the Target Harddisk dropdown during the installation, so keep this in mind if you want to choose a different file system&lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;network-configuration&#34;&gt;Network configuration&lt;/h3&gt;
+&lt;p&gt;Proxmox will eventually ask you to confirm your network configuration. The IP address here will be accessed by a browser on another computer on your network, allowing you to perform hypervisor management through a web interface. Choose an IP address that is on the same network segment as your router (and home network). If your router is running DHCP, you want this management address to be outside of the DHCP pool.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ve selected &lt;code&gt;192.168.0.10/24&lt;/code&gt; as the management IP address, with the address of my router (&lt;code&gt;192.168.0.1&lt;/code&gt;) as the gateway. Keep the management address handy. I&amp;rsquo;ve also gone with a FQDN (fully-qualified domain name) of &lt;code&gt;pve.alex.home&lt;/code&gt;, which implies the hostname &lt;code&gt;pve&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you want to change the management IP address later, you will need to do it in &lt;em&gt;two&lt;/em&gt; places: (a) &lt;code&gt;/etc/hosts&lt;/code&gt; and (b) &lt;code&gt;/etc/network/interfaces&lt;/code&gt;. We&amp;rsquo;ll look at the latter configuration file later on.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;configuring-proxmox&#34;&gt;Configuring Proxmox&lt;/h2&gt;
+&lt;p&gt;After the installation has finished, remove the USB drive and reboot. You&amp;rsquo;ll eventually see a prompt that asks you to configure Proxmox by visiting &lt;code&gt;https://&amp;lt;MANAGEMENT-IP&amp;gt;:8006&lt;/code&gt;. Provided you&amp;rsquo;ve configured the network settings properly, you will be able to access the web GUI from another computer in your home network by entering that address in a browser. Once you&amp;rsquo;ve supplied your credentials (user &lt;code&gt;root&lt;/code&gt; and the password you specified earlier) and logged in, you are ready to start configuring the hypervisor.&lt;/p&gt;
+&lt;h3 id=&#34;enabling-software-updates&#34;&gt;Enabling software updates&lt;/h3&gt;
+&lt;p&gt;At this point, it&amp;rsquo;s a good idea to enable software updates. Proxmox is configured by default to access the software repositories for subscribed customers, which are not accessible to those without a subscription. We&amp;rsquo;re going to configure Proxmox to access the community repositories instead.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s take a quick look at the interface. On the left you&amp;rsquo;ve got the &lt;em&gt;resource tree&lt;/em&gt;, a column that gives you an overview of your hypervisor (Fig. 2, left column). Underneath &lt;em&gt;Datacenter&lt;/em&gt;, you&amp;rsquo;ve got a single &lt;em&gt;node&lt;/em&gt; with hostname &lt;code&gt;pve&lt;/code&gt;. One more level down lists all the VMs and logical storage devices associated with the node. At the moment there are no VMs and two shared storage objects called &lt;code&gt;local&lt;/code&gt; and &lt;code&gt;local-lvm&lt;/code&gt; that resulted from the default Proxmox installation options. The &lt;code&gt;local-lvm&lt;/code&gt; object holds VM disk images, while the &lt;code&gt;local&lt;/code&gt; object holds backup files and ISO images. We&amp;rsquo;ll be dealing with &lt;code&gt;local&lt;/code&gt; shortly.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-left-column-proxmox-resource-tree-showing-the-vms-and-storage-objects-available-to-the-node-pve-right-panel-iso-images-in-local-shared-storage-after-uploading-to-the-host&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/proxmox-storage.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2&amp;lt;/b&amp;gt;. Left column: Proxmox resource tree, showing the VMs and storage objects available to the node &amp;lt;code&amp;gt;pve&amp;lt;/code&amp;gt;. Right panel: ISO images in &amp;lt;code&amp;gt;local&amp;lt;/code&amp;gt; shared storage after uploading to the host.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/proxmox-storage.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2&lt;/b&gt;. Left column: Proxmox resource tree, showing the VMs and storage objects available to the node &lt;code&gt;pve&lt;/code&gt;. Right panel: ISO images in &lt;code&gt;local&lt;/code&gt; shared storage after uploading to the host.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;The toolbar in Fig. 2 above (with title &lt;em&gt;Storage &amp;lsquo;local&amp;rsquo; on node &amp;lsquo;pve&amp;rsquo;&lt;/em&gt; and button &lt;em&gt;Help&lt;/em&gt; on the right) will change according to the selected resource in the tree. Clicking the &lt;code&gt;pve&lt;/code&gt; node will bring up node-specific toolbar buttons, like &lt;em&gt;Reboot&lt;/em&gt;, &lt;em&gt;Shutdown&lt;/em&gt;, and &lt;em&gt;Shell&lt;/em&gt;. Go ahead and click that &lt;strong&gt;Shell&lt;/strong&gt; button.&lt;/p&gt;
+&lt;p&gt;Time to configure the software repositories. Debian (Proxmox&amp;rsquo;s underlying operating system) makes use of &lt;code&gt;apt&lt;/code&gt; (Advanced Package Tool) to manage and update software. We are going to navigate to the directory that holds the repository configuration, rename (and effectively disable) the config file, and create a new config file containing a link to the community repositories.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;cd /etc/apt/sources.list.d
+mv pve-enterprise.list pve-enterprise.list.original
+echo &#39;deb http://download.proxmox.com/debian/pve buster pve-no-subscription&#39; &amp;gt; pve-community.list
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;code&gt;buster&lt;/code&gt; is the name of the Debian release used by Proxmox 6. Make sure to use the release name for your version of Proxmox.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;You can now run &lt;code&gt;apt update&lt;/code&gt; and &lt;code&gt;apt dist-upgrade&lt;/code&gt; to download and install all available updates.&lt;/p&gt;
+&lt;h3 id=&#34;uploading-iso-images&#34;&gt;Uploading ISO images&lt;/h3&gt;
+&lt;p&gt;Before we can start making VMs, we need to upload the ISO installation media. Click the &lt;code&gt;local&lt;/code&gt; storage object &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Content&lt;/em&gt; tab to bring up a (currently empty) list of items sitting in the storage. After using the Upload button to store the pfSense and CentOS ISO images, the list will look like Fig. 2 (right panel).&lt;/p&gt;
+&lt;h3 id=&#34;configuring-the-virtual-network&#34;&gt;Configuring the virtual network&lt;/h3&gt;
+&lt;p&gt;As mentioned earlier, the host will have two network segments: one that allows the host to communicate with the home network, and an internal network segment, insulated by a firewall. This section talks about the configuration needed to prepare the virtualized network for the firewall.&lt;/p&gt;
+&lt;h4 id=&#34;virtual-switches&#34;&gt;Virtual switches&lt;/h4&gt;
+&lt;p&gt;The network components available to Proxmox can be found by clicking the &lt;code&gt;pve&lt;/code&gt; node &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;System&lt;/em&gt; tab group &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Network&lt;/em&gt; tab. The Protectli box has six NICs, which are listed as &lt;code&gt;enp[1-6]s0&lt;/code&gt; in Fig. 3 below as Network Devices.&lt;/p&gt;
+&lt;p&gt;You&amp;rsquo;ll also see something called a &lt;em&gt;Linux Bridge&lt;/em&gt;, named &lt;code&gt;vmbr0&lt;/code&gt;. This behaves like a network switch, allowing for communication between devices using both virtual and physical interfaces. Currently it&amp;rsquo;s associated with one physical interface (&lt;code&gt;enp1s0&lt;/code&gt;), through which the host is connected to the router. The bridge is also associated with Proxmox through its management IP address (&lt;code&gt;192.168.0.10/24&lt;/code&gt;). If we connected a VM to &lt;code&gt;vmbr0&lt;/code&gt; and gave it an IP address from the same subnet, that VM will gain access to both Proxmox&amp;rsquo;s management interface and the router. We&amp;rsquo;ll be doing exactly this for pfSense.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    A Linux Bridge &lt;a href=&#34;https://unix.stackexchange.com/questions/572261/virtual-network-bridge-why-does-it-have-to-have-an-ip-address-assigned-to-it&#34;&gt;does not necessarily need an IP address&lt;/a&gt;, but since we want to be able to manage Proxmox from the home network, we need &lt;code&gt;vmbr0&lt;/code&gt; to be bound to an IP address on the home network subnet, &lt;code&gt;192.168.0.0/24&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-proxmox-network-devices-shown-with-two-linux-bridges&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/proxmox-network.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3&amp;lt;/b&amp;gt;. Proxmox network devices, shown with two Linux Bridges.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/proxmox-network.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3&lt;/b&gt;. Proxmox network devices, shown with two Linux Bridges.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h4 id=&#34;forwarding-between-private-networks&#34;&gt;Forwarding between (private) networks&lt;/h4&gt;
+&lt;p&gt;Now we&amp;rsquo;re going to focus on the internal network segment, which needs its own Linux Bridge. Make one and call it &lt;code&gt;vmbr1&lt;/code&gt;, without assigning an IP address or any other settings to the bridge. The internal network will make use of the subnet &lt;code&gt;192.168.1.0/24&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;As useful as Proxmox&amp;rsquo;s web interface is, we cannot use it to completely configure the virtual network for our use case. To make this work, we need to directly edit the &lt;code&gt;/etc/network/interfaces&lt;/code&gt; file to ask Proxmox to do two things for us:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;forward IP packets across different network segments, and&lt;/li&gt;
+&lt;li&gt;use 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Network_address_translation&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;IP masquerading&lt;/a&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The effect of (2) will be to allow all devices in the internal network (each with their own private IP address on the internal subnet) to communicate with the outside world using a single &amp;ldquo;external&amp;rdquo; IP address &amp;ndash; the address of the host.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    I say &amp;ldquo;external&amp;rdquo; in quotes because often when we talk about NAT (network address translation), we&amp;rsquo;re mapping a private IP address to a &lt;em&gt;public&lt;/em&gt; IP address. Here we&amp;rsquo;re mapping private IP addresses to another private IP address.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;If we take a look at &lt;code&gt;/etc/network/interfaces&lt;/code&gt;, we will see the six physical interfaces, &lt;code&gt;enp[1-6]s0&lt;/code&gt;, as well as &lt;code&gt;vmbr0&lt;/code&gt; and &lt;code&gt;vmbr1&lt;/code&gt;. The configuration for the two Linux Bridges is shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;auto vmbr0
+iface vmbr0 inet static
+        address 192.168.0.10/24
+        gateway 192.168.0.1
+        bridge-ports enp1s0
+        bridge-stp off
+        bridge-fd 0
+
+auto vmbr1
+iface vmbr1 inet manual
+        bridge-ports none
+        bridge-stp off
+        bridge-fd 0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can confirm that only &lt;code&gt;vmbr0&lt;/code&gt; has an IP address and gateway, allowing for communication between the host, router, and firewall on the &lt;code&gt;192.168.0.0/24&lt;/code&gt; subnet.&lt;/p&gt;
+&lt;p&gt;At the end of the file, we will add the following three lines:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;post-up echo 1 &amp;gt; /proc/sys/net/ipv4/ip_forward
+post-up iptables -t nat -A POSTROUTING -s &#39;192.168.1.0/24&#39; -o vmbr0 -j MASQUERADE
+post-down iptables -t nat -D POSTROUTING -s &#39;192.168.1.0/24&#39; -o vmbr0 -j MASQUERADE
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The first line enables packet forwarding after the interface has been brought up, and the next two lines conditionally add/remove a rule for 
+&lt;a href=&#34;https://linux.die.net/man/8/iptables&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Proxmox&amp;rsquo;s firewall&lt;/a&gt;. Let&amp;rsquo;s break it down:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;-t nat -A POSTROUTING&lt;/code&gt;: the rule gets added to the POSTROUTING NAT table, to alter packets as they leave the interface,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-s &#39;192.168.1.0/24&#39;&lt;/code&gt;: the rule applies to any packet whose source IP belongs to the internal network,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-o vmbr0&lt;/code&gt;: matching packets get sent to interface &lt;code&gt;vmbr0&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-j MASQUERADE&lt;/code&gt;: matching packets get their source IP replaced by that of &lt;code&gt;vmbr0&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In the last line, instead of adding the rule after the interface is brought up, the rule is removed after the interface is brought down.&lt;/p&gt;
+&lt;p&gt;To summarize, the effect of this extra configuration is to take packets that are heading out from the internal network (e.g. with source IP &lt;code&gt;192.168.1.99&lt;/code&gt;), replace their source IPs with &lt;code&gt;192.168.0.10&lt;/code&gt;, and send them on their way. When an internal VM&amp;rsquo;s network request is reciprocated by a public server, the server will send packets that are addressed to Proxmox, which will intercept and redirect those packets back through the firewall.&lt;/p&gt;
+&lt;h2 id=&#34;installing-pfsense&#34;&gt;Installing pfSense&lt;/h2&gt;
+&lt;p&gt;We are finally ready to create our pfSense virtual machine! In this homelab iteration, the firewall is just going to have a small amount of configuration to control administrative access and configure DHCP to assign IP addresses to two CentOS VMs (a client and a server) using their MAC addresses.&lt;/p&gt;
+&lt;p&gt;Since there&amp;rsquo;s not going to be any heavy traffic processing going on here, I&amp;rsquo;ve opted for a single-core VM (hostname &lt;code&gt;pfsense&lt;/code&gt;) with pfSense&amp;rsquo;s minimum hardware requirements (512 MiB RAM and 4 GiB of disk space), using the Create Virtual Machine dialog to choose a VirtIO SCSI controller and VirtIO network device connected to the &lt;code&gt;vmbr0&lt;/code&gt; bridge.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    According to the &lt;a href=&#34;https://pve.proxmox.com/wiki/Qemu/KVM_Virtual_Machines&#34;&gt;documentation&lt;/a&gt;, we should use paravirtualized (VirtIO) devices where possible. Paravirtualization allows guest operating systems to talk directly to the hypervisor, which generally leads to improved performance and less virtualization overhead.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Now we&amp;rsquo;ll add another network device to the VM. In the resource tree, click the &lt;code&gt;pfsense&lt;/code&gt; VM &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Hardware&lt;/em&gt; tab &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Add&lt;/em&gt; dropdown button &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Network Device&lt;/em&gt;, to connect &lt;code&gt;vmbr1&lt;/code&gt;. Now the pfSense VM has two NICs: &lt;code&gt;net0&lt;/code&gt;, connected to &lt;code&gt;vmbr0&lt;/code&gt;, and &lt;code&gt;net1&lt;/code&gt;, connected to &lt;code&gt;vmbr1&lt;/code&gt;. Start up the VM and install pfSense with all of the defaults.&lt;/p&gt;
+&lt;h3 id=&#34;configuring-pfsense&#34;&gt;Configuring pfSense&lt;/h3&gt;
+&lt;p&gt;After installation and a reboot, pfSense will ask whether you want to set up VLANs. We&amp;rsquo;re not doing this, but before you proceed, make sure you see two valid interfaces, &lt;code&gt;vtnet0&lt;/code&gt; and &lt;code&gt;vtnet1&lt;/code&gt;, listed above the prompt. Next, you&amp;rsquo;ll get a couple more prompts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;Enter the WAN interface name&amp;rdquo; → &lt;strong&gt;&lt;code&gt;vtnetx&lt;/code&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;Enter the LAN interface name&amp;rdquo; → &lt;strong&gt;&lt;code&gt;vtnety&lt;/code&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Make sure that each interface corresponds to its Linux Bridge counterpart (e.g. &lt;code&gt;vtnet0&lt;/code&gt; is &lt;code&gt;vmbr0&lt;/code&gt;). Check that the listed MAC addresses match the ones found under &lt;em&gt;Datacenter&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;code&gt;pve&lt;/code&gt; node &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;code&gt;pfSense&lt;/code&gt; VM &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Hardware&lt;/em&gt; tab.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The WAN interface is the firewall&amp;rsquo;s untrusted entrance. If I were confident that these homelab shenanigans wouldn&amp;rsquo;t eventually disrupt my internet connectivity, I&amp;rsquo;d arrange for the firewall to handle internet traffic directly, before forwarding traffic to the home router and network through the firewall&amp;rsquo;s LAN interface. (But I&amp;rsquo;m not. At least, not yet!)&lt;/p&gt;
+&lt;p&gt;After confirming the above information, pfSense will continue booting and eventually present you with a menu (Fig. 3). In my case, the router has allocated pfSense&amp;rsquo;s WAN interface an IP address, &lt;code&gt;192.168.0.180/24&lt;/code&gt;. That is a nice gesture, but I want to give it a static IP address. After choosing option 2, enter the WAN&amp;rsquo;s new IP address as &lt;code&gt;192.168.0.11/24&lt;/code&gt; and a gateway of &lt;code&gt;192.168.0.1&lt;/code&gt;. Enter &lt;strong&gt;no&lt;/strong&gt; when asked to revert to HTTP as the webConfigurator protocol (this is unimportant right now). Time to reboot.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-pfsense-command-line-menu&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/pfsense-menu.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3&amp;lt;/b&amp;gt;. pfSense command line menu.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/pfsense-menu.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3&lt;/b&gt;. pfSense command line menu.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h4 id=&#34;using-the-setup-wizard&#34;&gt;Using the setup wizard&lt;/h4&gt;
+&lt;p&gt;Once we&amp;rsquo;re back at the menu, we can access the management GUI using the WAN interface IP address, although we need to temporarily disable the firewall to access it. Choose option 8 to enter the shell, run &lt;code&gt;pfctl -d&lt;/code&gt; to bring down the firewall, and then enter &lt;code&gt;192.168.0.11&lt;/code&gt; in a browser on your home network. After supplying the default credentials (username &lt;code&gt;admin&lt;/code&gt;, password &lt;code&gt;pfsense&lt;/code&gt;), you&amp;rsquo;ll be brought to pfSense&amp;rsquo;s setup wizard. I&amp;rsquo;ll highlight some important configuration below (with the steps in parentheses):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;(2/9)&lt;/strong&gt; &lt;em&gt;Hostname/domain&lt;/em&gt;: nice to make these match your Proxmox details,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(2/9)&lt;/strong&gt; &lt;em&gt;Primary/secondary&lt;/em&gt; DNS Server: as above,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(3/9)&lt;/strong&gt; &lt;em&gt;Timezone&lt;/em&gt;: choose yours,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(4/9)&lt;/strong&gt; &lt;em&gt;Static IP configuration&lt;/em&gt;: make sure these details are correct (&lt;code&gt;192.168.0.11/24&lt;/code&gt;, with gateway &lt;code&gt;192.168.0.1&lt;/code&gt;),&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(4/9)&lt;/strong&gt; &lt;em&gt;RFC1918/bogon networks&lt;/em&gt;: uncheck the two boxes to allow private/non-internet routed networks through the WAN interface &amp;ndash; this firewall will of course be dealing with these kinds of networks,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(5/9)&lt;/strong&gt; &lt;em&gt;Configure LAN interface&lt;/em&gt;: make sure these details are correct (&lt;code&gt;192.168.1.1/24&lt;/code&gt;) &amp;ndash; this will be the gateway for the VMs in the internal network,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(6/9)&lt;/strong&gt; &lt;em&gt;Set admin webGUI password&lt;/em&gt;: now&amp;rsquo;s a good time!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Setting the admin password will trigger an update, after which you will get kicked off the management GUI. Go ahead and reboot the pfSense VM. We haven&amp;rsquo;t yet made allowances for management access in the firewall, so once it&amp;rsquo;s ready you will have to once again disable the firewall (&lt;code&gt;pfctl -d&lt;/code&gt;) before logging back in with your new credentials.&lt;/p&gt;
+&lt;h4 id=&#34;playing-nice-with-virtio&#34;&gt;Playing nice with VirtIO&lt;/h4&gt;
+&lt;p&gt;If you try moving through different parts of the web interface, you might notice that it seems a bit sluggish. This comes about from an issue with using VirtIO network drivers to interface with pfSense, which can be resolved by changing a couple of settings as recommended by 
+&lt;a href=&#34;https://docs.netgate.com/pfsense/en/latest/virtualization/virtualizing-pfsense-with-proxmox.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;the documentation&lt;/a&gt; (section &lt;em&gt;Configuring pfSense Software to work with Proxmox VirtIO&lt;/em&gt;).&lt;/p&gt;
+&lt;p&gt;Click the &lt;em&gt;System&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Advanced&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Networking&lt;/em&gt; tab and scroll to the bottom to the &lt;em&gt;Network Interfaces&lt;/em&gt; section. Make sure these boxes below are checked:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; Disable hardware checksum offload&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; Disable hardware TCP segmentation offload&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; Disable hardware large receive offload&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;allowing-administrative-access&#34;&gt;Allowing administrative access&lt;/h4&gt;
+&lt;p&gt;Our next order of business is to allow ourselves administrative access, so that we don&amp;rsquo;t have to tear down our firewall every time we need to perform some management. We are going to do a couple of things here:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;define &lt;em&gt;aliases&lt;/em&gt; to specify IP management ports,&lt;/li&gt;
+&lt;li&gt;use these aliases to allow pfSense management through those ports.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To define the aliases, click the &lt;em&gt;Firewall&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Aliases&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Ports&lt;/em&gt; tab, and then click &lt;em&gt;Add&lt;/em&gt;. We will allow management through ports 80 (HTTP) and 8080 (alt-HTTP). When you&amp;rsquo;ve got these ports listed as in Fig. 4 below, save and apply the changes when prompted.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-specifying-pfsense-aliases&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/pfsense-aliases.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4&amp;lt;/b&amp;gt;. Specifying pfSense aliases.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/pfsense-aliases.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4&lt;/b&gt;. Specifying pfSense aliases.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Now we will add a rule to allow management traffic through the WAN interface. The rule we add will act on inbound packets at the interface. Click the &lt;em&gt;Firewall&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Rules&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;WAN&lt;/em&gt; tab, and then click &lt;em&gt;Add&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Stepping through the configuration:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;Edit firewall rule&lt;/em&gt;: pass TCP IPv4 traffic through the WAN interface &amp;ndash; you will find that the default settings under this heading work for us,&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Source&lt;/em&gt;: allow access to home network devices, so specify &lt;em&gt;Network&lt;/em&gt; and enter &lt;code&gt;192.168.0.0/24&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Destination&lt;/em&gt;: match traffic headed for this firewall (select this in the destination dropdown) through the management ports (fill out the &lt;em&gt;Custom&lt;/em&gt; port ranges with the alias &lt;code&gt;pfsense_admin_ports&lt;/code&gt;),&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Extra options&lt;/em&gt;: fill out the description with something like &amp;ldquo;allow administrative access from home network&amp;rdquo;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After saving the new firewall rule, we will get pfSense to provide access to the management interface through the alternative HTTP port. Click the &lt;em&gt;System&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Advanced&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Admin Access&lt;/em&gt; tab, enter &lt;code&gt;8080&lt;/code&gt; in the &lt;em&gt;TCP port&lt;/em&gt; field, and apply the changes.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    A firewall will go through each of its rules until it finds a match, at which point it will act on the traffic according to the matching rule. If an inbound packet doesn&amp;rsquo;t match any rule, the packet gets dropped.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    It&amp;rsquo;s &lt;a href=&#34;https://www.w3.org/Daemon/User/Installation/PrivilegedPorts.html&#34;&gt;good practice&lt;/a&gt; to serve the web interface on alternative HTTP port &lt;code&gt;8080&lt;/code&gt;, as some systems require full administrative privileges to access port numbers lower than &lt;code&gt;1024&lt;/code&gt; (like the HTTP port &lt;code&gt;80&lt;/code&gt;, for example).
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Now we can freely manage the firewall through the web interface! You can either reboot the router or run &lt;code&gt;pfctrl -e&lt;/code&gt; to bring the firewall back online.&lt;/p&gt;
+&lt;h2 id=&#34;creating-the-internal-network&#34;&gt;Creating the internal network&lt;/h2&gt;
+&lt;p&gt;We&amp;rsquo;re now going to create two CentOS VMs: a client VM and server VM. In reality they will be pretty much identical (save for their NIC MAC addresses) but they will play certain roles as I learn the ropes of system administration. I will then configure pfSense to assign each VM with an IP address that allows them to communicate.&lt;/p&gt;
+&lt;p&gt;Setting up a CentOS VM is pretty straightforward. The first one will have the hostname &lt;code&gt;centos-server&lt;/code&gt;. It will have 1 CPU, 2 GiB RAM, 20 GiB of hard disk space, and be connected to &lt;code&gt;vmbr1&lt;/code&gt;. Here we will choose a &lt;em&gt;non-paravirtualized&lt;/em&gt; NIC model, the Intel E1000.&lt;/p&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Make sure you &lt;strong&gt;do not&lt;/strong&gt; choose the VirtIO network device! With that NIC, I could &lt;code&gt;ping google.com&lt;/code&gt; but could not &lt;code&gt;curl google.com&lt;/code&gt;. This was the cause of hours of madness, until &lt;a href=&#34;https://forum.netgate.com/topic/79004/pfsense-2-2-not-passing-traffic-but-ping-does-get-through/23&#34;&gt;this forum post&lt;/a&gt; gave me a hint. There is apparently an issue with a VM using paravirtualized network drivers to communicate with pfSense, but it&amp;rsquo;s not at all clear why.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Once you&amp;rsquo;ve run through the installation and logged in, you should be able to access the internet through the VM (provided you&amp;rsquo;ve got a working DNS configuration). Now the VM can be cloned to yield &lt;code&gt;centos-client&lt;/code&gt; and there will be two functional VMs on the internal network, with full internet connectivity.&lt;/p&gt;
+&lt;h3 id=&#34;restricting-access&#34;&gt;Restricting access&lt;/h3&gt;
+&lt;p&gt;We&amp;rsquo;re pretty close to achieving the design goal. The main issue is that right now, the firewall isn&amp;rsquo;t really doing much. Now I want to restrict access to whitelist these two CentOS VMs and nothing more. To do this, I&amp;rsquo;ll make use of pfSense&amp;rsquo;s DHCP service to map each MAC address to a static IP address on the internal network segment.&lt;/p&gt;
+&lt;h4 id=&#34;mapping-vms-to-ip-addresses&#34;&gt;Mapping VMs to IP addresses&lt;/h4&gt;
+&lt;p&gt;The MAC address of a given VM can be accessed by selecting the VM in the Proxmox resource tree &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Hardware&lt;/em&gt; tab and double-clicking the &lt;em&gt;Network Device&lt;/em&gt; row associated with &lt;code&gt;vmbr1&lt;/code&gt;. Grab the server and client MAC addresses and keep them handy. Incidentally, I&amp;rsquo;ll be assigning &lt;code&gt;centos-server&lt;/code&gt; to &lt;code&gt;192.168.1.101&lt;/code&gt; and &lt;code&gt;centos-client&lt;/code&gt; to &lt;code&gt;192.168.1.102&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s head back into the pfSense web interface and click the &lt;em&gt;Services&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;DHCP Server&lt;/em&gt;. At the moment, the VMs are getting their IP addresses from the available range indicated at the bottom of the &lt;em&gt;General Options&lt;/em&gt; section. Set the range to &lt;code&gt;192.168.1.220&lt;/code&gt; to &lt;code&gt;192.168.1.240&lt;/code&gt; and click &lt;strong&gt;Save&lt;/strong&gt;. The specific range isn&amp;rsquo;t too important &amp;ndash; we just want the range not to include any of the static VM addresses.&lt;/p&gt;
+&lt;p&gt;At the bottom of the page there&amp;rsquo;s a section called &lt;em&gt;DHCP Static Mappings for this Interface&lt;/em&gt;, which sounds like what we want. Click &lt;strong&gt;Add&lt;/strong&gt; to add a mapping for both VMs, filling out the MAC address, client identifier, IP address, and hostname for each mapping (Fig. 5).&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-5b-specifying-dhcp-static-mappings-for-the-centos-vms&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/pfsense-mappings.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 5&amp;lt;/b&amp;gt;. Specifying DHCP static mappings for the CentOS VMs.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/pfsense-mappings.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 5&lt;/b&gt;. Specifying DHCP static mappings for the CentOS VMs.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;We can now bring a VM&amp;rsquo;s interface down and back up again to reassign the IP address, confirming the change with the last command:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;nmcli connection down ens18
+nmcli connection up ens18
+ip address show ens18
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;blacklisting-unknown-devices&#34;&gt;Blacklisting unknown devices&lt;/h4&gt;
+&lt;p&gt;For our final act, we are going to block traffic leaving the internal network from all unauthorized devices, i.e., anything other than &lt;code&gt;centos-server&lt;/code&gt; and &lt;code&gt;centos-client&lt;/code&gt;. This can be done by whitelisting the network &lt;code&gt;192.168.1.100/30&lt;/code&gt; and blocking everything else.&lt;/p&gt;
+&lt;p&gt;In the pfSense interface, click the &lt;em&gt;Firewall&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Rules&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;LAN&lt;/em&gt; tab. We will create a rule to pass IPv4 packets from &lt;em&gt;any&lt;/em&gt; protocol with a source IP coming from the network &lt;code&gt;192.168.1.100/30&lt;/code&gt;. After disabling any other rules and applying the changes, we have successfully locked down the internal network. You can confirm this by manually setting one of the VM&amp;rsquo;s IP addresses to a non-whitelisted address and running &lt;code&gt;curl google.com&lt;/code&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;At last, the homelab is up and running! There is of course a lot that can be done to improve this setup, particularly in the way of security. I think it would be a great idea to configure VLANs and enable SSH access for firewall management in the next homelab iteration, but for now it can serve as a testbed for all sorts of administrative tasks.&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Another solution would be to implement the lab on a 
+&lt;a href=&#34;https://cloud.google.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;cloud platform&lt;/a&gt;. &lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;A cross-platform alternative to Rufus is 
+&lt;a href=&#34;https://www.balena.io/etcher/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Etcher&lt;/a&gt;. &lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;See 
+&lt;a href=&#34;https://access.redhat.com/articles/3129891&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;this article&lt;/a&gt; from Red Hat for a good discussion about how to choose a file system (although they conspicuously do not mention ZFS). &lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Frequency responses of rat retinal ganglion cells</title>
+      <link>https://www.remotelycurious.net/publication/plos-one-2016/</link>
+      <pubDate>Fri, 24 Jun 2016 00:00:00 +0000</pubDate>
+      <guid>https://www.remotelycurious.net/publication/plos-one-2016/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Prosthetic vision: devices, patient outcomes and retinal research</title>
+      <link>https://www.remotelycurious.net/publication/clin-exp-optom-2015/</link>
+      <pubDate>Tue, 22 Sep 2015 00:00:00 +0000</pubDate>
+      <guid>https://www.remotelycurious.net/publication/clin-exp-optom-2015/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Optimizing the electrical stimulation of retinal ganglion cells</title>
+      <link>https://www.remotelycurious.net/publication/tnsre-2014/</link>
+      <pubDate>Fri, 17 Oct 2014 00:00:00 +0000</pubDate>
+      <guid>https://www.remotelycurious.net/publication/tnsre-2014/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Electrical stimulation of retinal ganglion cells with diamond and the development of an all-diamond retinal prosthesis</title>
+      <link>https://www.remotelycurious.net/publication/biomaterials-2012/</link>
+      <pubDate>Sun, 20 May 2012 00:00:00 +0000</pubDate>
+      <guid>https://www.remotelycurious.net/publication/biomaterials-2012/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

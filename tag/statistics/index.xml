@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>statistics | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/tag/statistics/</link>
+      <atom:link href="https://www.remotelycurious.net/tag/statistics/index.xml" rel="self" type="application/rss+xml" />
+    <description>statistics</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 12 Jul 2020 22:06:30 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>statistics</title>
+      <link>https://www.remotelycurious.net/tag/statistics/</link>
+    </image>
+    
+    <item>
+      <title>Beware those bearing linear regression models</title>
+      <link>https://www.remotelycurious.net/post/beware-linear-regression/</link>
+      <pubDate>Sun, 12 Jul 2020 22:06:30 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/beware-linear-regression/</guid>
+      <description>&lt;p&gt;Lift a rock in your garden and you might find a linear regression model. They are everywhere, working hard to predict all sorts of things, like how much further you can drive with this much fuel in the tank, or how much your house might sell for in your neighborhood. Linear regression models owe their success to their ease-of-use as well as their natural interpretability &amp;ndash; most people would probably find it a lot harder to predict the output of a neural network, compared with that of $y=2x$.&lt;/p&gt;
+&lt;p&gt;Unfortunately, it is this ease-of-use and interpretability that make linear regression models especially prone to misuse, even by people who should know better&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. Before rushing to apply a model (any model), we need to ask ourselves two questions:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;What does this model assume?&lt;/li&gt;
+&lt;li&gt;Do these assumptions make sense for our data?&lt;/li&gt;
+&lt;/ol&gt;
+&lt;!--[^1]: Highly-educated scientists and medical professionals are human and therefore perfectly capable of [bad judgement](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1297101/). --&gt;
+&lt;p&gt;As it turns out, the linear regression model makes some pretty strong assumptions that don&amp;rsquo;t always hold up in reality. This writeup takes a look at these assumptions, what happens when they don&amp;rsquo;t hold, and which ones we can bend.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#simple-linear-regression&#34;&gt;Simple linear regression&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#meet-the-residual&#34;&gt;Meet the residual&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#out-with-the-assumptions&#34;&gt;Out with the assumptions&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#normality&#34;&gt;Normality&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#independent-errors&#34;&gt;Independent errors&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#normally-distributed-errors&#34;&gt;Normally-distributed errors&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#homoscedasticity&#34;&gt;Homoscedasticity&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#all-too-human&#34;&gt;All too human&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;simple-linear-regression&#34;&gt;Simple linear regression&lt;/h1&gt;
+&lt;p&gt;The goal of a linear regression model is to model $k$ &lt;em&gt;response&lt;/em&gt; variables, $Y_{1},Y_{2},&amp;hellip;,Y_{k}$ using $p$ &lt;em&gt;predictor&lt;/em&gt; variables, $X_{1},X_{2},&amp;hellip;,X_{p}$. In this article we will focus on &amp;ldquo;simple linear regression&amp;rdquo;, or SLR $(k=1)$ to avoid getting bogged down in notation. To model our response $Y$ using $p=3$ predictor variables, for example, we assume a relationship of the form&lt;/p&gt;
+&lt;p&gt;$$
+Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3},
+$$&lt;/p&gt;
+&lt;p&gt;where $\beta_{i}$ are predictor coefficients that have been found by the end of the fitting process.&lt;/p&gt;
+&lt;p&gt;Most of the core assumptions underlying linear regression have to do with the &lt;em&gt;residuals&lt;/em&gt;, which are used to estimate prediction errors. Since they play such an important role in the modeling process, it&amp;rsquo;s worth taking some time to formally introduce them.&lt;/p&gt;
+&lt;h2 id=&#34;meet-the-residual&#34;&gt;Meet the residual&lt;/h2&gt;
+&lt;p&gt;To train a model, you need data. More specifically, you need a set of $N &amp;gt; p$ response &lt;em&gt;observations&lt;/em&gt; and predictor &lt;em&gt;measurements&lt;/em&gt;, ${(\hat{y_{i}}, x_{i1},x_{i2},x_{i3}  )}_{i=1}^{N}$. Note the little hat sitting on $\hat{y_i}$. Our model formulation assumes that each of our responses is corrupted by some error $\epsilon$ such that for our $i$th observation, $\hat{y_i} = y_i + \epsilon_i$. The hat indicates that the observations $\hat{y_i}$ are actually &lt;em&gt;estimates&lt;/em&gt; of the true responses $y_i$ that we can never observe.&lt;/p&gt;
+&lt;p&gt;Our SLR model relates the predictor measurements to the observations by&lt;/p&gt;
+&lt;p&gt;$$
+\hat{y_i} = \hat{\beta_{0}} + \hat{\beta_{1}}x_{i1} + \hat{\beta_{2}}x_{i2} + \hat{\beta_{3}}x_{i3} + \epsilon_{i},
+$$&lt;/p&gt;
+&lt;p&gt;with our fitting process giving us estimates $\hat{\beta_i}$ of the true, hidden coefficients $\beta_i$. Our model thus consists of a &lt;em&gt;deterministic&lt;/em&gt; component (i.e., the equation for $Y$ in terms of the $X_i$s) and a &lt;em&gt;random&lt;/em&gt; component, represented by the error $\epsilon$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Unlike the response and the coefficients, the predictor measurements are hatless, meaning that they are assumed to be measured with no error.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Since there is no way to know the true response, we can never know the error terms $\epsilon_i$. So we estimate them using &lt;em&gt;residuals&lt;/em&gt;. Compared directly,&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the error $\epsilon_i$ is the difference between the measured value and the (unobservable) &lt;em&gt;true&lt;/em&gt; value,&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;$$\epsilon_i = y_i - y,$$&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the residual $r_i$ is the difference between the measured value and the &lt;em&gt;predicted&lt;/em&gt; value computed from the model,&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;$$r_i = y_i - \hat{y_i}.$$&lt;/p&gt;
+&lt;p&gt;Now that we have some measure of prediction error in the residuals, we can use them to build a &lt;em&gt;loss function&lt;/em&gt; that describes the overall model error. Linear regression then works to find the coefficient values that minimize this loss function. The &lt;em&gt;L2-norm&lt;/em&gt; loss function $L = \sum_{i=1}^{N}r_i ^2$ is popular because it punishes outliers and makes finding the optimal coefficients a matter of 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Ordinary_least_squares#Estimation&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;plugging values into a formula&lt;/a&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;out-with-the-assumptions&#34;&gt;Out with the assumptions&lt;/h1&gt;
+&lt;p&gt;Although you will see all sorts of assumptions scattered throughout this article, there are four major ones (each with their own subsection) that rule them all. That is, these four alone are sufficient for linear regression analysis. Some are less demanding than others. Ultimately, you can probably get away with bending all of them in some way (as long as the statisticians aren&amp;rsquo;t looking), with the caveat that your model may become unreliable and therefore unsuitable for inference. Let&amp;rsquo;s see what can happen.&lt;/p&gt;
+&lt;h2 id=&#34;normality&#34;&gt;Normality&lt;/h2&gt;
+&lt;p&gt;Our first assumption is inherent in the name of the model: the response is a linear combination of the predictors. This supposedly fundamental assumption is arguably the one that gets overlooked most of the time. Why? In a nutshell, when you&amp;rsquo;re close enough to a curve, it looks like a straight line.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Note that &amp;ldquo;linear&amp;rdquo; is in the sense of the coefficients, not the predictors. This means that relations like $Y = \beta X^{2}$ are fine but ones like $Y = \beta ^{2}X$ are not.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-any-curve-can-look-like-a-straight-line-at-close-range&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/beware-linear-regression/close-up.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Any curve can look like a straight line at close range.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/beware-linear-regression/close-up.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Any curve can look like a straight line at close range.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;There&amp;rsquo;s a reason the &amp;ldquo;flat Earth&amp;rdquo; theory was so compelling before NASA.&lt;/p&gt;
+&lt;p&gt;In practice, we have some wiggle room with this one. As long as our response data $y_{i}$ are far away from any theoretical limit, we can generally draw a straight line through the data and that will be enough for all sorts of applications. CEOs can project their yearly sales, consumers can work out their monthly electricity consumption, and life goes on.&lt;/p&gt;
+&lt;!-- Linear regression also tends to be fast, which can be useful if you&#39;re fitting models on embedded devices or portable hardware. --&gt;
+&lt;p&gt;On the other hand, if we are looking to describe phenomena more generally, then we need to take the idea of linearity more seriously. Let&amp;rsquo;s say you want to build an SLR model to describe height $H = \beta_{0} + \beta_{1}W$ as a function of weight $W$, using data from your coworkers. As long as you have enough coworkers (and enough of them agree to give you that data), you will end up with coefficients $\hat{\beta_{i}}$ that capture this relationship for adults that more or less resemble your coworkers. That last point is crucial. If you are a professional wrestler (presumably learning statistical analysis in your own time) and each of your coworkers resembles 
+&lt;a href=&#34;https://www.remotelycurious.net/beware-linear-regression/thanos.jpg&#34;&gt;Thanos&lt;/a&gt;, your coefficients will be useless for predicting the height of an average human being. If your coworkers are a regular group of men and women, your coefficients won&amp;rsquo;t help you to predict the height of a child. In general, the more useful you want your model to be, the less likely you&amp;rsquo;ll be using linear regression.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    An important side-effect of the model&amp;rsquo;s formulation has to do with the effect of each predictor on the response. By assuming a response of the form $Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \beta_{3}X_{3}$, we are also assuming that the effect of one predictor variable is independent of the others. If this holds, one unit of change in $X_{1}$ will have the same effect on the response, &lt;em&gt;no matter what values the other predictors have&lt;/em&gt;. That is a strong assumption!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The bottom line is that under certain circumstances, an SLR model might be enough to describe non-linear phenomena. If you scatter your data and it looks like they will conform to a straight line without excluding too many outliers, it might be all you need. Just be wary about using the model to extrapolate data beyond your current range of responses.&lt;/p&gt;
+&lt;h2 id=&#34;independent-errors&#34;&gt;Independent errors&lt;/h2&gt;
+&lt;p&gt;To assess how good our model is, and to do it &lt;em&gt;correctly&lt;/em&gt;, we need the residuals to have properties that are like the actual errors they are supposed to estimate: independent and normally distributed, with zero mean and fixed variance. Each of the remaining core assumptions behind linear regression is right there in that last sentence.&lt;/p&gt;
+&lt;p&gt;What does it mean for the residuals to be independent? This means that they should not have a relationship with any of the predictors, or each other. When we plot the residuals as a function of a predictor variable (or as a function of time, for time-series data), we don&amp;rsquo;t want to see any kind of pattern. Nothing except some random-looking points centered on zero. Anything else means that the residuals have some kind of &lt;em&gt;structure&lt;/em&gt;, suggesting that the model might not be a great fit for the data.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If the residuals are orders of magnitude smaller than the responses, some residual dependence might be tolerable. But it&amp;rsquo;s usually a good idea to work out how they arise, and how to control for them.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;To see what it means when we don&amp;rsquo;t have independent residuals, we&amp;rsquo;ll use the 
+&lt;a href=&#34;http://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Boston Housing dataset&lt;/a&gt; to build a (naive) SLR model of the median house value $V$ based on a single predictor, the mean number of rooms in a house $RM$, related by $V = \beta_0 + \beta_1 RM$. We fit our model and sure enough, the more rooms in your house, the greater its predicted value (Fig. 2, left panel). No surprises there.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-median-house-value-v-spanspan1000s-regressed-onto-mean-room-number-rm-for-the-boston-housing-dataset-left-scatterplot-of-v-against-rm-with-a-linear-fit-red-trace-95-ci-right-the-corresponding-residual-plot-with-a-lowess-smoother-fit-indicated-by-the-orange-trace-data-entries-whose-observations-appeared-to-be-capped-at-the-maximum-value-50000-were-excluded-from-the-analysis&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/beware-linear-regression/dependent-residuals.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Median house value $V$ (&amp;lt;span&amp;gt;$&amp;lt;/span&amp;gt;1,000s) regressed onto mean room number $RM$ for the Boston Housing dataset. Left: Scatterplot of $V$ against $RM$ with a linear fit (red trace; 95% CI). Right: the corresponding residual plot, with a lowess smoother fit indicated by the orange trace. Data entries whose observations appeared to be capped at the maximum value ($50,000) were excluded from the analysis.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/beware-linear-regression/dependent-residuals.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Median house value $V$ (&lt;span&gt;$&lt;/span&gt;1,000s) regressed onto mean room number $RM$ for the Boston Housing dataset. Left: Scatterplot of $V$ against $RM$ with a linear fit (red trace; 95% CI). Right: the corresponding residual plot, with a lowess smoother fit indicated by the orange trace. Data entries whose observations appeared to be capped at the maximum value ($50,000) were excluded from the analysis.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Taking a look at the residual plot in Fig. 2B (right panel), we see that the residuals start off with a positive bias, sagging in the middle of our response range, before increasing again for large room counts. We are underestimating value for houses that don&amp;rsquo;t have an &amp;ldquo;average&amp;rdquo; number of rooms.&lt;/p&gt;
+&lt;p&gt;This residual plot is telling us that our model&amp;rsquo;s deterministic component (i.e., the formula $V = \beta_0 + \beta_1 RM$) is missing something important. But before we try adding other predictors, let&amp;rsquo;s make a small change to our single predictor and use its square $RM^2$, as suggested by the authors of the study that initially made use of this dataset&lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;. This cheap modification gets us a slightly better r-squared value (from 0.47 to 0.50) as well as a residual plot that bends a bit closer to zero (Fig. 3). Transforming the predictors (or the response) can improve the distribution of our residuals and the model&amp;rsquo;s fit quality.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-median-house-value-v-spanspan1000s-regressed-onto-the-square-of-mean-room-number-rm2-for-the-boston-housing-dataset&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/beware-linear-regression/less-dependent-residuals.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Median house value $V$ (&amp;lt;span&amp;gt;$&amp;lt;/span&amp;gt;1,000s) regressed onto the square of mean room number $RM^2$ for the Boston Housing dataset.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/beware-linear-regression/less-dependent-residuals.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Median house value $V$ (&lt;span&gt;$&lt;/span&gt;1,000s) regressed onto the square of mean room number $RM^2$ for the Boston Housing dataset.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Of course, it&amp;rsquo;s unlikely that we can model something as complex as house value with a single predictor. By including two more predictors (house age and per-capita crime), we easily improve the model fit ($R^2=0.65$) and our residuals tend closer to zero. Generally, additional predictors should be considered if (a) they are informative for the response variable, and (b) they are (at most) weakly correlated with any of the existing predictors.&lt;/p&gt;
+&lt;p&gt;Correlation, whether among the residuals or among the predictors, can cause all sorts of problems in regression analysis. As an extreme example, consider what would happen if we fit a model of house value with two perfectly correlated predictors, $RM$ and $RM^2$. Compared with the model that only includes $RM^2$, we net ourselves an artificial boost in $R^2$ (from 0.50 to 0.53) and our $RM^2$ coefficient estimate ends up being an order of magnitude larger (from 0.67 to 2.23). Not only do we not gain any meaningful insight with our extra predictor, we actually &lt;em&gt;lose&lt;/em&gt; insight &amp;ndash; we have made it harder to understand the true effect of room count on house value.&lt;/p&gt;
+&lt;p&gt;Linear regression has a couple more things to say about the distribution of our residuals.&lt;/p&gt;
+&lt;h2 id=&#34;normally-distributed-errors&#34;&gt;Normally-distributed errors&lt;/h2&gt;
+&lt;p&gt;The errors (and the residuals) should not only have a mean of zero, they should also be normally distributed with constant variance $\sigma^2$. We can write this as&lt;/p&gt;
+&lt;p&gt;$$ \epsilon_i \sim \textrm{Normal}(0,\sigma^2). $$&lt;/p&gt;
+&lt;p&gt;If the errors are not normally distributed, you can still go ahead and compute coefficients, but your measures of uncertainty and significance testing may be compromised if you don&amp;rsquo;t have enough observations. For instance, the standard error terms for the predictor coefficients and the model itself, and by extension, their associated confidence intervals, are all computed under the assumption of residual normality. If you do find evidence of non-normality (preferrably through statistical measures like the Kolmogorov-Smirnov test, rather than by visual inspection), but you&amp;rsquo;ve decided that it&amp;rsquo;s acceptable, it might be best to use wider confidence intervals to indicate this additional uncertainty, documenting your rationale.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    How much non-normality is acceptable? That&amp;rsquo;s a tricky question that usually depends on your experience. Probably best to ask a statistician!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Your ears might have detected a loophole earlier, in that we might not need normally-distributed residuals if our observation count is high enough. Thanks to the &lt;em&gt;central limit theorem&lt;/em&gt;, it turns out that with a moderate observation count (let&amp;rsquo;s say $N&amp;gt;20$), linear regression will be perfectly capable of handling your non-normal response data&lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;. The specific number of observations you need will vary depending on whether your response variable is &amp;ldquo;well-behaved&amp;rdquo; or not. If you are dealing with extremely skewed response distributions or large outlier counts, for instance, you will likely need (many) more observations.&lt;/p&gt;
+&lt;h2 id=&#34;homoscedasticity&#34;&gt;Homoscedasticity&lt;/h2&gt;
+&lt;p&gt;In the last section we described the errors as being normally distributed, but we didn&amp;rsquo;t talk about their &lt;em&gt;variance&lt;/em&gt;. When we write $ \epsilon_i \sim \textrm{Normal}(0,\sigma^2),$ we are saying that the errors are &lt;em&gt;identically distributed&lt;/em&gt; for every observation $i$, as if each is being drawn from the same normal distribution with zero mean and variance $\sigma^2$. The errors are said to be &lt;em&gt;homoscedastic&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;(Which is a bit of a mouthful. I&amp;rsquo;d rather just say they have constant variance.)&lt;/p&gt;
+&lt;p&gt;We can test for constant variance using most modern statistical libraries (e.g. 
+&lt;a href=&#34;https://www.statsmodels.org/stable/diagnostic.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;statsmodels&lt;/code&gt;&lt;/a&gt;) but a quick visual indication can be found in the residual plots. If the spread of residuals appears to vary with a given predictor, you should probably run a test to confirm its severity and whether you can tolerate it in your analysis. Too much variability will compromise any measures of uncertainty or significance.&lt;/p&gt;
+&lt;h1 id=&#34;all-too-human&#34;&gt;All too human&lt;/h1&gt;
+&lt;p&gt;So with all these statistical landmines, why are linear regression models so pervasive? &lt;em&gt;Probably because we can understand them&lt;/em&gt;. It is difficult to wrap our minds around nonlinear phenomena because the mental models we use to make sense of our world 
+&lt;a href=&#34;https://hbr.org/2017/05/linear-thinking-in-a-nonlinear-world&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;tend to be linear!&lt;/a&gt;&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Porter, 
+&lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1297101/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Misuse of correlation and regression in three medical journals&lt;/em&gt;&lt;/a&gt;. Journal of the Royal Society of Medicine (1999). &lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Harrison Jr &amp;amp; Rubinfeld, 
+&lt;a href=&#34;https://www.sciencedirect.com/science/article/abs/pii/0095069678900062&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Hedonic housing prices and the demand for clean air&lt;/em&gt;&lt;/a&gt;. Journal of Environmental Economics and Management (1978). &lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Lumley et al., 
+&lt;a href=&#34;https://doi.org/10.1146/annurev.publhealth.23.100901.140546&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;The importance of the normality assumption in large public health datasets&lt;/em&gt;&lt;/a&gt;. Annual Reviews (2002) &lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

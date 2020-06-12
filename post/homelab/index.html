@@ -1,0 +1,1545 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Or, the things I will do to avoid running multiple VMs on my laptop.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/homelab/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.f72481ea6518a9efe938e95819339e7a.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/homelab/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/homelab/">
+  <meta property="og:title" content="Building a homelab with Proxmox | Remotely Curious">
+  <meta property="og:description" content="Or, the things I will do to avoid running multiple VMs on my laptop."><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-06-05T23:13:08-04:00">
+    
+    <meta property="article:modified_time" content="2020-06-05T23:13:08-04:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/homelab/"
+  },
+  "headline": "Building a homelab with Proxmox",
+  
+  "datePublished": "2020-06-05T23:13:08-04:00",
+  "dateModified": "2020-06-05T23:13:08-04:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Or, the things I will do to avoid running multiple VMs on my laptop."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Building a homelab with Proxmox | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Building a homelab with Proxmox</h1>
+
+  
+  <p class="page-subtitle">Or, the things I will do to avoid running multiple VMs on my laptop.</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Jun 5, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    21 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/homelab/">homelab</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>It turns out that the journey to setting up a homelab is filled with trapdoors and snake pits.</p>
+<p>This writeup is largely for documentation purposes &ndash; it&rsquo;s written as a note to my future self who might look to recreate this setup and wonder why certain design decisions were made. My goal is to avoid having to rediscover all of the little hazards that can (and did) result in hours of frustration. That said, my hope is that other people with similar goals can learn from my experience and save themselves from navigating seas of browser tabs in search of enlightenment.</p>
+<p>By the time my homelab took shape, I had made use of all sorts of resources on the topic. One of the best belongs to Dan Ford, whose excellent 
+<a href="https://www.dlford.io/tag/how-to-home-lab-series/" target="_blank" rel="noopener">homelab writeup series</a> really helped me to get started. The documentation for 
+<a href="https://pve.proxmox.com/wiki/Main_Page" target="_blank" rel="noopener">Proxmox</a> and 
+<a href="https://docs.netgate.com/pfsense/en/latest/" target="_blank" rel="noopener">pfSense</a> was also useful. Aside from these, there were also many valuable snippets of information, forum posts and docpages scattered throughout the internet, which have been cited where appropriate.</p>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#objectives">Objectives</a></li>
+    <li><a href="#requirements">Requirements</a>
+      <ul>
+        <li><a href="#hardware">Hardware</a></li>
+        <li><a href="#hypervisor">Hypervisor</a></li>
+        <li><a href="#network">Network</a></li>
+      </ul>
+    </li>
+    <li><a href="#installation">Installation</a>
+      <ul>
+        <li><a href="#installing-proxmox">Installing Proxmox</a>
+          <ul>
+            <li><a href="#file-system">File system</a></li>
+            <li><a href="#network-configuration">Network configuration</a></li>
+          </ul>
+        </li>
+        <li><a href="#configuring-proxmox">Configuring Proxmox</a>
+          <ul>
+            <li><a href="#enabling-software-updates">Enabling software updates</a></li>
+            <li><a href="#uploading-iso-images">Uploading ISO images</a></li>
+            <li><a href="#configuring-the-virtual-network">Configuring the virtual network</a></li>
+          </ul>
+        </li>
+        <li><a href="#installing-pfsense">Installing pfSense</a>
+          <ul>
+            <li><a href="#configuring-pfsense">Configuring pfSense</a></li>
+          </ul>
+        </li>
+        <li><a href="#creating-the-internal-network">Creating the internal network</a>
+          <ul>
+            <li><a href="#restricting-access">Restricting access</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="objectives">Objectives</h1>
+<p>There are a lot of reasons you might want to build a homelab. 
+<a href="https://www.reddit.com/r/homelab/comments/4mc7sf/why_build_a_homelab_some_thoughts_for_beginners/" target="_blank" rel="noopener">Many of them</a> have to do with learning something. My short-term goal is to learn system administration (things like configuring firewalls and networks, managing security policy, etc) but eventually I want to learn more about network intrusion detection. I&rsquo;d be curious to see if I could break into my own network &ndash; and what that would look like from the perspective of a sysadmin.</p>
+<h1 id="requirements">Requirements</h1>
+<p>A homelab can take many forms, from an array of physical computers mounted on racks, to a book-sized unit hosting a virtualized computer network. In this section I discuss the major constraints and design decisions that guided my approach.</p>
+<h2 id="hardware">Hardware</h2>
+<p>Since I like quiet and despise both heat and clutter, the first major constraint was that this homelab needed to be virtual. This means the homelab is going to be implemented by a bare-metal hypervisor<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>, on a host computer with a low noise, power, and physical profile. In the end I went with the 
+<a href="https://protectli.com/product/fw6b/" target="_blank" rel="noopener">Protectli FW6B</a>. It&rsquo;s a silent, well-built unit that comes with a dual-core i3-7100U and 6x Intel Gigabit NICs. I opted to load it with 2x8 GiB of DDR4 RAM and 480 GiB of mSATA storage. This is definitely overkill for a bunch of lightweight VMs, but I&rsquo;ll be putting this little box to good use in future projects.</p>
+<div class="alert alert-warning">
+  <div>
+    Whatever you do, make sure that your host CPU supports virtualization!
+  </div>
+</div>
+<div class="alert alert-note">
+  <div>
+    According to <a href="https://www.reddit.com/r/homelab/comments/7at38f/1gig_pcie_nic_recommendations/">people who know better</a>, Intel NICs seem to better support virtualization, compared with those from other manufacturers.
+  </div>
+</div>
+<h2 id="hypervisor">Hypervisor</h2>
+<p>After a couple hours of internet research, I decided to run with 
+<a href="https://www.proxmox.com/en/" target="_blank" rel="noopener">Proxmox</a> as my hypervisor. People also seem to be pretty happy with 
+<a href="https://www.vmware.com/products/esxi-and-esx.html" target="_blank" rel="noopener">ESXi</a>, but my decision largely came down to favoring an unrestricted, open-source solution. I&rsquo;m definitely not a seasoned practitioner, so it&rsquo;s unlikely that I would really be able to appreciate the difference between the two products right now.</p>
+<h2 id="network">Network</h2>
+<p>To start with, having some virtual machines running on an internal network, isolated from the home network by a firewall, sounds like a good idea. 
+<a href="https://www.pfsense.org/" target="_blank" rel="noopener">pfSense</a> is a well-regarded firewall whose documentation specifically includes guidance on 
+<a href="https://docs.netgate.com/pfsense/en/latest/virtualization/virtualizing-pfsense-with-proxmox.html" target="_blank" rel="noopener">running it as a VM in Proxmox</a>, which is exactly what I want to do. It also can be configured as an intrusion detection/prevention system by way of add-on packages like Suricata and Snort, something I&rsquo;m keen to play around with in the future.</p>
+<p>Although I&rsquo;m generally comfortable with vanilla home networking, there&rsquo;s a lot of uncharted territory for me in this project. To limit what could go wrong, I will keep things simple and just focus on getting a basic system up-and-running. This means leaving things like VLAN configuration and SSH access for another homelab iteration.</p>
+<p>The schematic for the eventual homelab is shown below:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-homelab-schematic-with-two-virtual-switches-vmbrx-and-three-vms">
+
+
+  <a data-fancybox="" href="/homelab/network-diagram.png" data-caption="&lt;b&gt;Fig. 1&lt;/b&gt;. Homelab schematic, with two virtual switches (&lt;code&gt;vmbrx&lt;/code&gt;) and three VMs.">
+
+
+  <img src="/homelab/network-diagram.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1</b>. Homelab schematic, with two virtual switches (<code>vmbrx</code>) and three VMs.
+  </figcaption>
+
+
+</figure>
+
+<h1 id="installation">Installation</h1>
+<p>Before beginning, you should have the following:</p>
+<ul>
+<li>$\geq$8 GB USB flash drive</li>
+<li>Rufus installer (<code>rufus-3.10.exe</code>)</li>
+<li>Proxmox VE ISO image (<code>proxmox-ve_6.2-1.iso</code>)</li>
+<li>pfSense ISO image (<code>pfSense-CE-2.4.5-RELEASE-amd64.iso</code>)</li>
+<li>Linux ISO image (<code>CentOS-8.1.1911-x86_64-dvd1.iso</code>)</li>
+</ul>
+<p>
+<a href="https://rufus.ie/" target="_blank" rel="noopener">Rufus</a> will be used to wipe and format the USB drive as a bootable installation drive<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>, so please make sure it&rsquo;s not holding anything of value! Once you&rsquo;ve selected the USB drive under <em>Device</em> and the Proxmox ISO image under <em>Boot selection</em>, go ahead and click Start. You might get a couple of prompts:</p>
+<ul>
+<li>&ldquo;Download a newer version of GRUB?&rdquo; → <strong>No</strong></li>
+<li>&ldquo;Write as an ISO image or DD image?&rdquo; → <strong>Write in DD Image mode</strong></li>
+</ul>
+<p>Once the disk is written, plug it into your homelab host and turn it on. Immediately hold down ESC or DEL and let go once you&rsquo;ve entered the BIOS.</p>
+<div class="alert alert-note">
+  <div>
+    At this point, you should probably enable <a href="https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface">UEFI</a> mode. Most operating systems these days support UEFI, which allows for things like using a mouse in the installation GUI. The only reason to use legacy mode is for compatibility with ancient OS installation media.
+  </div>
+</div>
+<div class="alert alert-note">
+  <div>
+    While we&rsquo;re here, make sure that the relevant virtualization setting (Intel VT, AMD-V, SVM, etc) is enabled.
+  </div>
+</div>
+<p>Within the BIOS, find the boot section and either reorder the device list such that your USB drive comes first, or if there&rsquo;s an option to immediately boot from a selected device, use that to boot from the drive. Selecting <strong>Install Proxmox VE</strong> from the menu that pops up will launch the installatoon process.</p>
+<h2 id="installing-proxmox">Installing Proxmox</h2>
+<p>While going through the 
+<a href="https://pve.proxmox.com/wiki/Installation" target="_blank" rel="noopener">installation process</a>, you will have to make some important decisions. The first of these concerns what file system to use on the host.</p>
+<h3 id="file-system">File system</h3>
+<p>If we ignore Ext3, we have three choices: Ext4, XFS, and ZFS. The default file system, 
+<a href="https://opensource.com/article/18/4/ext4-filesystem" target="_blank" rel="noopener">Ext4</a>, was designed to be backwards-compatible with older file systems. It&rsquo;s known for stability, which is probably the reason why it&rsquo;s the default file system on most Linux distributions. 
+<a href="https://www.usenix.org/system/files/login/articles/140-hellwig.pdf" target="_blank" rel="noopener">XFS</a> is another mature solution that is particularly well-suited for servers that deal with many large (exbibytes) files.</p>
+<p>
+<a href="https://www.freebsd.org/doc/handbook/zfs.html" target="_blank" rel="noopener">ZFS</a> is a next-generation file system that was designed to eliminate many issues found in legacy file systems. ZFS is probably the way to go for someone who knows what they&rsquo;re doing (and doesn&rsquo;t need support for enormous files) &ndash; you get great performance, configuration flexibility, and access to enterprise-level features, in return for a larger memory footprint and a bit more configuration.</p>
+<p>Since I&rsquo;m just learning the ropes and don&rsquo;t really need advanced features and capabilities, I left Proxmox with Ext4 as the default choice. You would only see the option to change this by clicking <em>Options</em> next to the Target Harddisk dropdown during the installation, so keep this in mind if you want to choose a different file system<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>.</p>
+<h3 id="network-configuration">Network configuration</h3>
+<p>Proxmox will eventually ask you to confirm your network configuration. The IP address here will be accessed by a browser on another computer on your network, allowing you to perform hypervisor management through a web interface. Choose an IP address that is on the same network segment as your router (and home network). If your router is running DHCP, you want this management address to be outside of the DHCP pool.</p>
+<p>I&rsquo;ve selected <code>192.168.0.10/24</code> as the management IP address, with the address of my router (<code>192.168.0.1</code>) as the gateway. Keep the management address handy. I&rsquo;ve also gone with a FQDN (fully-qualified domain name) of <code>pve.alex.home</code>, which implies the hostname <code>pve</code>.</p>
+<div class="alert alert-note">
+  <div>
+    If you want to change the management IP address later, you will need to do it in <em>two</em> places: (a) <code>/etc/hosts</code> and (b) <code>/etc/network/interfaces</code>. We&rsquo;ll look at the latter configuration file later on.
+  </div>
+</div>
+<h2 id="configuring-proxmox">Configuring Proxmox</h2>
+<p>After the installation has finished, remove the USB drive and reboot. You&rsquo;ll eventually see a prompt that asks you to configure Proxmox by visiting <code>https://&lt;MANAGEMENT-IP&gt;:8006</code>. Provided you&rsquo;ve configured the network settings properly, you will be able to access the web GUI from another computer in your home network by entering that address in a browser. Once you&rsquo;ve supplied your credentials (user <code>root</code> and the password you specified earlier) and logged in, you are ready to start configuring the hypervisor.</p>
+<h3 id="enabling-software-updates">Enabling software updates</h3>
+<p>At this point, it&rsquo;s a good idea to enable software updates. Proxmox is configured by default to access the software repositories for subscribed customers, which are not accessible to those without a subscription. We&rsquo;re going to configure Proxmox to access the community repositories instead.</p>
+<p>Let&rsquo;s take a quick look at the interface. On the left you&rsquo;ve got the <em>resource tree</em>, a column that gives you an overview of your hypervisor (Fig. 2, left column). Underneath <em>Datacenter</em>, you&rsquo;ve got a single <em>node</em> with hostname <code>pve</code>. One more level down lists all the VMs and logical storage devices associated with the node. At the moment there are no VMs and two shared storage objects called <code>local</code> and <code>local-lvm</code> that resulted from the default Proxmox installation options. The <code>local-lvm</code> object holds VM disk images, while the <code>local</code> object holds backup files and ISO images. We&rsquo;ll be dealing with <code>local</code> shortly.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-left-column-proxmox-resource-tree-showing-the-vms-and-storage-objects-available-to-the-node-pve-right-panel-iso-images-in-local-shared-storage-after-uploading-to-the-host">
+
+
+  <a data-fancybox="" href="/homelab/proxmox-storage.png" data-caption="&lt;b&gt;Fig. 2&lt;/b&gt;. Left column: Proxmox resource tree, showing the VMs and storage objects available to the node &lt;code&gt;pve&lt;/code&gt;. Right panel: ISO images in &lt;code&gt;local&lt;/code&gt; shared storage after uploading to the host.">
+
+
+  <img src="/homelab/proxmox-storage.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2</b>. Left column: Proxmox resource tree, showing the VMs and storage objects available to the node <code>pve</code>. Right panel: ISO images in <code>local</code> shared storage after uploading to the host.
+  </figcaption>
+
+
+</figure>
+
+<p>The toolbar in Fig. 2 above (with title <em>Storage &lsquo;local&rsquo; on node &lsquo;pve&rsquo;</em> and button <em>Help</em> on the right) will change according to the selected resource in the tree. Clicking the <code>pve</code> node will bring up node-specific toolbar buttons, like <em>Reboot</em>, <em>Shutdown</em>, and <em>Shell</em>. Go ahead and click that <strong>Shell</strong> button.</p>
+<p>Time to configure the software repositories. Debian (Proxmox&rsquo;s underlying operating system) makes use of <code>apt</code> (Advanced Package Tool) to manage and update software. We are going to navigate to the directory that holds the repository configuration, rename (and effectively disable) the config file, and create a new config file containing a link to the community repositories.</p>
+<pre><code class="language-bash">cd /etc/apt/sources.list.d
+mv pve-enterprise.list pve-enterprise.list.original
+echo 'deb http://download.proxmox.com/debian/pve buster pve-no-subscription' &gt; pve-community.list
+</code></pre>
+<div class="alert alert-note">
+  <div>
+    <code>buster</code> is the name of the Debian release used by Proxmox 6. Make sure to use the release name for your version of Proxmox.
+  </div>
+</div>
+<p>You can now run <code>apt update</code> and <code>apt dist-upgrade</code> to download and install all available updates.</p>
+<h3 id="uploading-iso-images">Uploading ISO images</h3>
+<p>Before we can start making VMs, we need to upload the ISO installation media. Click the <code>local</code> storage object <i class="fas fa-angle-double-right"></i> <em>Content</em> tab to bring up a (currently empty) list of items sitting in the storage. After using the Upload button to store the pfSense and CentOS ISO images, the list will look like Fig. 2 (right panel).</p>
+<h3 id="configuring-the-virtual-network">Configuring the virtual network</h3>
+<p>As mentioned earlier, the host will have two network segments: one that allows the host to communicate with the home network, and an internal network segment, insulated by a firewall. This section talks about the configuration needed to prepare the virtualized network for the firewall.</p>
+<h4 id="virtual-switches">Virtual switches</h4>
+<p>The network components available to Proxmox can be found by clicking the <code>pve</code> node <i class="fas fa-angle-double-right"></i> <em>System</em> tab group <i class="fas fa-angle-double-right"></i> <em>Network</em> tab. The Protectli box has six NICs, which are listed as <code>enp[1-6]s0</code> in Fig. 3 below as Network Devices.</p>
+<p>You&rsquo;ll also see something called a <em>Linux Bridge</em>, named <code>vmbr0</code>. This behaves like a network switch, allowing for communication between devices using both virtual and physical interfaces. Currently it&rsquo;s associated with one physical interface (<code>enp1s0</code>), through which the host is connected to the router. The bridge is also associated with Proxmox through its management IP address (<code>192.168.0.10/24</code>). If we connected a VM to <code>vmbr0</code> and gave it an IP address from the same subnet, that VM will gain access to both Proxmox&rsquo;s management interface and the router. We&rsquo;ll be doing exactly this for pfSense.</p>
+<div class="alert alert-note">
+  <div>
+    A Linux Bridge <a href="https://unix.stackexchange.com/questions/572261/virtual-network-bridge-why-does-it-have-to-have-an-ip-address-assigned-to-it">does not necessarily need an IP address</a>, but since we want to be able to manage Proxmox from the home network, we need <code>vmbr0</code> to be bound to an IP address on the home network subnet, <code>192.168.0.0/24</code>.
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-proxmox-network-devices-shown-with-two-linux-bridges">
+
+
+  <a data-fancybox="" href="/homelab/proxmox-network.png" data-caption="&lt;b&gt;Fig. 3&lt;/b&gt;. Proxmox network devices, shown with two Linux Bridges.">
+
+
+  <img src="/homelab/proxmox-network.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3</b>. Proxmox network devices, shown with two Linux Bridges.
+  </figcaption>
+
+
+</figure>
+
+<h4 id="forwarding-between-private-networks">Forwarding between (private) networks</h4>
+<p>Now we&rsquo;re going to focus on the internal network segment, which needs its own Linux Bridge. Make one and call it <code>vmbr1</code>, without assigning an IP address or any other settings to the bridge. The internal network will make use of the subnet <code>192.168.1.0/24</code>.</p>
+<p>As useful as Proxmox&rsquo;s web interface is, we cannot use it to completely configure the virtual network for our use case. To make this work, we need to directly edit the <code>/etc/network/interfaces</code> file to ask Proxmox to do two things for us:</p>
+<ol>
+<li>forward IP packets across different network segments, and</li>
+<li>use 
+<a href="https://en.wikipedia.org/wiki/Network_address_translation" target="_blank" rel="noopener">IP masquerading</a>.</li>
+</ol>
+<p>The effect of (2) will be to allow all devices in the internal network (each with their own private IP address on the internal subnet) to communicate with the outside world using a single &ldquo;external&rdquo; IP address &ndash; the address of the host.</p>
+<div class="alert alert-note">
+  <div>
+    I say &ldquo;external&rdquo; in quotes because often when we talk about NAT (network address translation), we&rsquo;re mapping a private IP address to a <em>public</em> IP address. Here we&rsquo;re mapping private IP addresses to another private IP address.
+  </div>
+</div>
+<p>If we take a look at <code>/etc/network/interfaces</code>, we will see the six physical interfaces, <code>enp[1-6]s0</code>, as well as <code>vmbr0</code> and <code>vmbr1</code>. The configuration for the two Linux Bridges is shown below:</p>
+<pre><code class="language-bash">auto vmbr0
+iface vmbr0 inet static
+        address 192.168.0.10/24
+        gateway 192.168.0.1
+        bridge-ports enp1s0
+        bridge-stp off
+        bridge-fd 0
+
+auto vmbr1
+iface vmbr1 inet manual
+        bridge-ports none
+        bridge-stp off
+        bridge-fd 0
+</code></pre>
+<p>We can confirm that only <code>vmbr0</code> has an IP address and gateway, allowing for communication between the host, router, and firewall on the <code>192.168.0.0/24</code> subnet.</p>
+<p>At the end of the file, we will add the following three lines:</p>
+<pre><code class="language-bash">post-up echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+post-up iptables -t nat -A POSTROUTING -s '192.168.1.0/24' -o vmbr0 -j MASQUERADE
+post-down iptables -t nat -D POSTROUTING -s '192.168.1.0/24' -o vmbr0 -j MASQUERADE
+</code></pre>
+<p>The first line enables packet forwarding after the interface has been brought up, and the next two lines conditionally add/remove a rule for 
+<a href="https://linux.die.net/man/8/iptables" target="_blank" rel="noopener">Proxmox&rsquo;s firewall</a>. Let&rsquo;s break it down:</p>
+<ul>
+<li><code>-t nat -A POSTROUTING</code>: the rule gets added to the POSTROUTING NAT table, to alter packets as they leave the interface,</li>
+<li><code>-s '192.168.1.0/24'</code>: the rule applies to any packet whose source IP belongs to the internal network,</li>
+<li><code>-o vmbr0</code>: matching packets get sent to interface <code>vmbr0</code>,</li>
+<li><code>-j MASQUERADE</code>: matching packets get their source IP replaced by that of <code>vmbr0</code>.</li>
+</ul>
+<p>In the last line, instead of adding the rule after the interface is brought up, the rule is removed after the interface is brought down.</p>
+<p>To summarize, the effect of this extra configuration is to take packets that are heading out from the internal network (e.g. with source IP <code>192.168.1.99</code>), replace their source IPs with <code>192.168.0.10</code>, and send them on their way. When an internal VM&rsquo;s network request is reciprocated by a public server, the server will send packets that are addressed to Proxmox, which will intercept and redirect those packets back through the firewall.</p>
+<h2 id="installing-pfsense">Installing pfSense</h2>
+<p>We are finally ready to create our pfSense virtual machine! In this homelab iteration, the firewall is just going to have a small amount of configuration to control administrative access and configure DHCP to assign IP addresses to two CentOS VMs (a client and a server) using their MAC addresses.</p>
+<p>Since there&rsquo;s not going to be any heavy traffic processing going on here, I&rsquo;ve opted for a single-core VM (hostname <code>pfsense</code>) with pfSense&rsquo;s minimum hardware requirements (512 MiB RAM and 4 GiB of disk space), using the Create Virtual Machine dialog to choose a VirtIO SCSI controller and VirtIO network device connected to the <code>vmbr0</code> bridge.</p>
+<div class="alert alert-note">
+  <div>
+    According to the <a href="https://pve.proxmox.com/wiki/Qemu/KVM_Virtual_Machines">documentation</a>, we should use paravirtualized (VirtIO) devices where possible. Paravirtualization allows guest operating systems to talk directly to the hypervisor, which generally leads to improved performance and less virtualization overhead.
+  </div>
+</div>
+<p>Now we&rsquo;ll add another network device to the VM. In the resource tree, click the <code>pfsense</code> VM <i class="fas fa-angle-double-right"></i> <em>Hardware</em> tab <i class="fas fa-angle-double-right"></i> <em>Add</em> dropdown button <i class="fas fa-angle-double-right"></i> <em>Network Device</em>, to connect <code>vmbr1</code>. Now the pfSense VM has two NICs: <code>net0</code>, connected to <code>vmbr0</code>, and <code>net1</code>, connected to <code>vmbr1</code>. Start up the VM and install pfSense with all of the defaults.</p>
+<h3 id="configuring-pfsense">Configuring pfSense</h3>
+<p>After installation and a reboot, pfSense will ask whether you want to set up VLANs. We&rsquo;re not doing this, but before you proceed, make sure you see two valid interfaces, <code>vtnet0</code> and <code>vtnet1</code>, listed above the prompt. Next, you&rsquo;ll get a couple more prompts:</p>
+<ul>
+<li>&ldquo;Enter the WAN interface name&rdquo; → <strong><code>vtnetx</code></strong></li>
+<li>&ldquo;Enter the LAN interface name&rdquo; → <strong><code>vtnety</code></strong></li>
+</ul>
+<div class="alert alert-note">
+  <div>
+    Make sure that each interface corresponds to its Linux Bridge counterpart (e.g. <code>vtnet0</code> is <code>vmbr0</code>). Check that the listed MAC addresses match the ones found under <em>Datacenter</em> <i class="fas fa-angle-double-right"></i> <code>pve</code> node <i class="fas fa-angle-double-right"></i> <code>pfSense</code> VM <i class="fas fa-angle-double-right"></i> <em>Hardware</em> tab.
+  </div>
+</div>
+<p>The WAN interface is the firewall&rsquo;s untrusted entrance. If I were confident that these homelab shenanigans wouldn&rsquo;t eventually disrupt my internet connectivity, I&rsquo;d arrange for the firewall to handle internet traffic directly, before forwarding traffic to the home router and network through the firewall&rsquo;s LAN interface. (But I&rsquo;m not. At least, not yet!)</p>
+<p>After confirming the above information, pfSense will continue booting and eventually present you with a menu (Fig. 3). In my case, the router has allocated pfSense&rsquo;s WAN interface an IP address, <code>192.168.0.180/24</code>. That is a nice gesture, but I want to give it a static IP address. After choosing option 2, enter the WAN&rsquo;s new IP address as <code>192.168.0.11/24</code> and a gateway of <code>192.168.0.1</code>. Enter <strong>no</strong> when asked to revert to HTTP as the webConfigurator protocol (this is unimportant right now). Time to reboot.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-pfsense-command-line-menu">
+
+
+  <a data-fancybox="" href="/homelab/pfsense-menu.png" data-caption="&lt;b&gt;Fig. 3&lt;/b&gt;. pfSense command line menu.">
+
+
+  <img src="/homelab/pfsense-menu.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3</b>. pfSense command line menu.
+  </figcaption>
+
+
+</figure>
+
+<h4 id="using-the-setup-wizard">Using the setup wizard</h4>
+<p>Once we&rsquo;re back at the menu, we can access the management GUI using the WAN interface IP address, although we need to temporarily disable the firewall to access it. Choose option 8 to enter the shell, run <code>pfctl -d</code> to bring down the firewall, and then enter <code>192.168.0.11</code> in a browser on your home network. After supplying the default credentials (username <code>admin</code>, password <code>pfsense</code>), you&rsquo;ll be brought to pfSense&rsquo;s setup wizard. I&rsquo;ll highlight some important configuration below (with the steps in parentheses):</p>
+<ul>
+<li><strong>(2/9)</strong> <em>Hostname/domain</em>: nice to make these match your Proxmox details,</li>
+<li><strong>(2/9)</strong> <em>Primary/secondary</em> DNS Server: as above,</li>
+<li><strong>(3/9)</strong> <em>Timezone</em>: choose yours,</li>
+<li><strong>(4/9)</strong> <em>Static IP configuration</em>: make sure these details are correct (<code>192.168.0.11/24</code>, with gateway <code>192.168.0.1</code>),</li>
+<li><strong>(4/9)</strong> <em>RFC1918/bogon networks</em>: uncheck the two boxes to allow private/non-internet routed networks through the WAN interface &ndash; this firewall will of course be dealing with these kinds of networks,</li>
+<li><strong>(5/9)</strong> <em>Configure LAN interface</em>: make sure these details are correct (<code>192.168.1.1/24</code>) &ndash; this will be the gateway for the VMs in the internal network,</li>
+<li><strong>(6/9)</strong> <em>Set admin webGUI password</em>: now&rsquo;s a good time!</li>
+</ul>
+<p>Setting the admin password will trigger an update, after which you will get kicked off the management GUI. Go ahead and reboot the pfSense VM. We haven&rsquo;t yet made allowances for management access in the firewall, so once it&rsquo;s ready you will have to once again disable the firewall (<code>pfctl -d</code>) before logging back in with your new credentials.</p>
+<h4 id="playing-nice-with-virtio">Playing nice with VirtIO</h4>
+<p>If you try moving through different parts of the web interface, you might notice that it seems a bit sluggish. This comes about from an issue with using VirtIO network drivers to interface with pfSense, which can be resolved by changing a couple of settings as recommended by 
+<a href="https://docs.netgate.com/pfsense/en/latest/virtualization/virtualizing-pfsense-with-proxmox.html" target="_blank" rel="noopener">the documentation</a> (section <em>Configuring pfSense Software to work with Proxmox VirtIO</em>).</p>
+<p>Click the <em>System</em> header menu <i class="fas fa-angle-double-right"></i> <em>Advanced</em> <i class="fas fa-angle-double-right"></i> <em>Networking</em> tab and scroll to the bottom to the <em>Network Interfaces</em> section. Make sure these boxes below are checked:</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Disable hardware checksum offload</li>
+<li><input checked="" disabled="" type="checkbox"> Disable hardware TCP segmentation offload</li>
+<li><input checked="" disabled="" type="checkbox"> Disable hardware large receive offload</li>
+</ul>
+<h4 id="allowing-administrative-access">Allowing administrative access</h4>
+<p>Our next order of business is to allow ourselves administrative access, so that we don&rsquo;t have to tear down our firewall every time we need to perform some management. We are going to do a couple of things here:</p>
+<ul>
+<li>define <em>aliases</em> to specify IP management ports,</li>
+<li>use these aliases to allow pfSense management through those ports.</li>
+</ul>
+<p>To define the aliases, click the <em>Firewall</em> header menu <i class="fas fa-angle-double-right"></i> <em>Aliases</em> <i class="fas fa-angle-double-right"></i> <em>Ports</em> tab, and then click <em>Add</em>. We will allow management through ports 80 (HTTP) and 8080 (alt-HTTP). When you&rsquo;ve got these ports listed as in Fig. 4 below, save and apply the changes when prompted.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-4b-specifying-pfsense-aliases">
+
+
+  <a data-fancybox="" href="/homelab/pfsense-aliases.png" data-caption="&lt;b&gt;Fig. 4&lt;/b&gt;. Specifying pfSense aliases.">
+
+
+  <img src="/homelab/pfsense-aliases.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 4</b>. Specifying pfSense aliases.
+  </figcaption>
+
+
+</figure>
+
+<p>Now we will add a rule to allow management traffic through the WAN interface. The rule we add will act on inbound packets at the interface. Click the <em>Firewall</em> header menu <i class="fas fa-angle-double-right"></i> <em>Rules</em> <i class="fas fa-angle-double-right"></i> <em>WAN</em> tab, and then click <em>Add</em>.</p>
+<p>Stepping through the configuration:</p>
+<ul>
+<li><em>Edit firewall rule</em>: pass TCP IPv4 traffic through the WAN interface &ndash; you will find that the default settings under this heading work for us,</li>
+<li><em>Source</em>: allow access to home network devices, so specify <em>Network</em> and enter <code>192.168.0.0/24</code>,</li>
+<li><em>Destination</em>: match traffic headed for this firewall (select this in the destination dropdown) through the management ports (fill out the <em>Custom</em> port ranges with the alias <code>pfsense_admin_ports</code>),</li>
+<li><em>Extra options</em>: fill out the description with something like &ldquo;allow administrative access from home network&rdquo;.</li>
+</ul>
+<p>After saving the new firewall rule, we will get pfSense to provide access to the management interface through the alternative HTTP port. Click the <em>System</em> header menu <i class="fas fa-angle-double-right"></i> <em>Advanced</em> <i class="fas fa-angle-double-right"></i> <em>Admin Access</em> tab, enter <code>8080</code> in the <em>TCP port</em> field, and apply the changes.</p>
+<div class="alert alert-note">
+  <div>
+    A firewall will go through each of its rules until it finds a match, at which point it will act on the traffic according to the matching rule. If an inbound packet doesn&rsquo;t match any rule, the packet gets dropped.
+  </div>
+</div>
+<div class="alert alert-note">
+  <div>
+    It&rsquo;s <a href="https://www.w3.org/Daemon/User/Installation/PrivilegedPorts.html">good practice</a> to serve the web interface on alternative HTTP port <code>8080</code>, as some systems require full administrative privileges to access port numbers lower than <code>1024</code> (like the HTTP port <code>80</code>, for example).
+  </div>
+</div>
+<p>Now we can freely manage the firewall through the web interface! You can either reboot the router or run <code>pfctrl -e</code> to bring the firewall back online.</p>
+<h2 id="creating-the-internal-network">Creating the internal network</h2>
+<p>We&rsquo;re now going to create two CentOS VMs: a client VM and server VM. In reality they will be pretty much identical (save for their NIC MAC addresses) but they will play certain roles as I learn the ropes of system administration. I will then configure pfSense to assign each VM with an IP address that allows them to communicate.</p>
+<p>Setting up a CentOS VM is pretty straightforward. The first one will have the hostname <code>centos-server</code>. It will have 1 CPU, 2 GiB RAM, 20 GiB of hard disk space, and be connected to <code>vmbr1</code>. Here we will choose a <em>non-paravirtualized</em> NIC model, the Intel E1000.</p>
+<div class="alert alert-warning">
+  <div>
+    Make sure you <strong>do not</strong> choose the VirtIO network device! With that NIC, I could <code>ping google.com</code> but could not <code>curl google.com</code>. This was the cause of hours of madness, until <a href="https://forum.netgate.com/topic/79004/pfsense-2-2-not-passing-traffic-but-ping-does-get-through/23">this forum post</a> gave me a hint. There is apparently an issue with a VM using paravirtualized network drivers to communicate with pfSense, but it&rsquo;s not at all clear why.
+  </div>
+</div>
+<p>Once you&rsquo;ve run through the installation and logged in, you should be able to access the internet through the VM (provided you&rsquo;ve got a working DNS configuration). Now the VM can be cloned to yield <code>centos-client</code> and there will be two functional VMs on the internal network, with full internet connectivity.</p>
+<h3 id="restricting-access">Restricting access</h3>
+<p>We&rsquo;re pretty close to achieving the design goal. The main issue is that right now, the firewall isn&rsquo;t really doing much. Now I want to restrict access to whitelist these two CentOS VMs and nothing more. To do this, I&rsquo;ll make use of pfSense&rsquo;s DHCP service to map each MAC address to a static IP address on the internal network segment.</p>
+<h4 id="mapping-vms-to-ip-addresses">Mapping VMs to IP addresses</h4>
+<p>The MAC address of a given VM can be accessed by selecting the VM in the Proxmox resource tree <i class="fas fa-angle-double-right"></i> <em>Hardware</em> tab and double-clicking the <em>Network Device</em> row associated with <code>vmbr1</code>. Grab the server and client MAC addresses and keep them handy. Incidentally, I&rsquo;ll be assigning <code>centos-server</code> to <code>192.168.1.101</code> and <code>centos-client</code> to <code>192.168.1.102</code>.</p>
+<p>Let&rsquo;s head back into the pfSense web interface and click the <em>Services</em> header menu <i class="fas fa-angle-double-right"></i> <em>DHCP Server</em>. At the moment, the VMs are getting their IP addresses from the available range indicated at the bottom of the <em>General Options</em> section. Set the range to <code>192.168.1.220</code> to <code>192.168.1.240</code> and click <strong>Save</strong>. The specific range isn&rsquo;t too important &ndash; we just want the range not to include any of the static VM addresses.</p>
+<p>At the bottom of the page there&rsquo;s a section called <em>DHCP Static Mappings for this Interface</em>, which sounds like what we want. Click <strong>Add</strong> to add a mapping for both VMs, filling out the MAC address, client identifier, IP address, and hostname for each mapping (Fig. 5).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-5b-specifying-dhcp-static-mappings-for-the-centos-vms">
+
+
+  <a data-fancybox="" href="/homelab/pfsense-mappings.png" data-caption="&lt;b&gt;Fig. 5&lt;/b&gt;. Specifying DHCP static mappings for the CentOS VMs.">
+
+
+  <img src="/homelab/pfsense-mappings.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 5</b>. Specifying DHCP static mappings for the CentOS VMs.
+  </figcaption>
+
+
+</figure>
+
+<p>We can now bring a VM&rsquo;s interface down and back up again to reassign the IP address, confirming the change with the last command:</p>
+<pre><code class="language-bash">nmcli connection down ens18
+nmcli connection up ens18
+ip address show ens18
+</code></pre>
+<h4 id="blacklisting-unknown-devices">Blacklisting unknown devices</h4>
+<p>For our final act, we are going to block traffic leaving the internal network from all unauthorized devices, i.e., anything other than <code>centos-server</code> and <code>centos-client</code>. This can be done by whitelisting the network <code>192.168.1.100/30</code> and blocking everything else.</p>
+<p>In the pfSense interface, click the <em>Firewall</em> header menu <i class="fas fa-angle-double-right"></i> <em>Rules</em> <i class="fas fa-angle-double-right"></i> <em>LAN</em> tab. We will create a rule to pass IPv4 packets from <em>any</em> protocol with a source IP coming from the network <code>192.168.1.100/30</code>. After disabling any other rules and applying the changes, we have successfully locked down the internal network. You can confirm this by manually setting one of the VM&rsquo;s IP addresses to a non-whitelisted address and running <code>curl google.com</code>.</p>
+<h1 id="summary">Summary</h1>
+<p>At last, the homelab is up and running! There is of course a lot that can be done to improve this setup, particularly in the way of security. I think it would be a great idea to configure VLANs and enable SSH access for firewall management in the next homelab iteration, but for now it can serve as a testbed for all sorts of administrative tasks.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>Another solution would be to implement the lab on a 
+<a href="https://cloud.google.com/" target="_blank" rel="noopener">cloud platform</a>. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>A cross-platform alternative to Rufus is 
+<a href="https://www.balena.io/etcher/" target="_blank" rel="noopener">Etcher</a>. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3" role="doc-endnote">
+<p>See 
+<a href="https://access.redhat.com/articles/3129891" target="_blank" rel="noopener">this article</a> from Red Hat for a good discussion about how to choose a file system (although they conspicuously do not mention ZFS). <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/homelab/">homelab</a>
+  
+  <a class="badge badge-light" href="/tag/pfsense/">pfsense</a>
+  
+  <a class="badge badge-light" href="/tag/proxmox/">proxmox</a>
+  
+  <a class="badge badge-light" href="/tag/sysadmin/">sysadmin</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/homelab/&amp;text=Building%20a%20homelab%20with%20Proxmox" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/homelab/&amp;t=Building%20a%20homelab%20with%20Proxmox" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Building%20a%20homelab%20with%20Proxmox&amp;body=https://www.remotelycurious.net/post/homelab/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/homelab/&amp;title=Building%20a%20homelab%20with%20Proxmox" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=Building%20a%20homelab%20with%20Proxmox%20https://www.remotelycurious.net/post/homelab/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/homelab/&amp;title=Building%20a%20homelab%20with%20Proxmox" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

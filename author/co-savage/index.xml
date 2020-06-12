@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CO Savage | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/author/co-savage/</link>
+      <atom:link href="https://www.remotelycurious.net/author/co-savage/index.xml" rel="self" type="application/rss+xml" />
+    <description>CO Savage</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Fri, 17 Oct 2014 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>CO Savage</title>
+      <link>https://www.remotelycurious.net/author/co-savage/</link>
+    </image>
+    
+    <item>
+      <title>Optimizing the electrical stimulation of retinal ganglion cells</title>
+      <link>https://www.remotelycurious.net/publication/tnsre-2014/</link>
+      <pubDate>Fri, 17 Oct 2014 00:00:00 +0000</pubDate>
+      <guid>https://www.remotelycurious.net/publication/tnsre-2014/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

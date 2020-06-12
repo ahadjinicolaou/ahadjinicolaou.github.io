@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>pytest | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/tag/pytest/</link>
+      <atom:link href="https://www.remotelycurious.net/tag/pytest/index.xml" rel="self" type="application/rss+xml" />
+    <description>pytest</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 30 Aug 2020 15:28:38 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>pytest</title>
+      <link>https://www.remotelycurious.net/tag/pytest/</link>
+    </image>
+    
+    <item>
+      <title>issues.app (1): Getting started with Flask and Pytest</title>
+      <link>https://www.remotelycurious.net/post/issues-app-01-intro/</link>
+      <pubDate>Sun, 30 Aug 2020 15:28:38 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-01-intro/</guid>
+      <description>&lt;p&gt;My biggest regret is not studying software design as an undergraduate.&lt;/p&gt;
+&lt;p&gt;Although I&amp;rsquo;ve been writing code for more than a decade, most of the code behind my programs tends to be stuffed into one or two files. This is fine when the programs are small, but a few months ago I had to fix a bug in one of my more complicated apps, which allows a user to load an audio file and manually annotate speech through a graphical interface. Having forgotten entirely about how my app is structured, I had no choice but to trace through the 3300+ lines of code just to reorient myself, before making what turned out to be a simple change. I have since decided that investing time into becoming a good software engineer will pay massive dividends and do wonders for my future sanity.&lt;/p&gt;
+&lt;p&gt;This is the start of what will become a series about web app development using Flask and Pytest. After some research, I singled out these frameworks because they are extensible, well-designed and don&amp;rsquo;t require loads of boilerplate code, which gets in the way of understanding. My main drive is to learn more about application architecture and test-driven development. Along the way I will distill what I learn into this guide, so that it can help other software engineering novices who have similar goals and working knowledge.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Speaking of knowledge, you should be comfortable with Python to get the most out of this guide. You should also be familiar with relational databases, client-server interactions, and the basics of web development (e.g., writing simple pages in HTTP/CSS/JavaScript).
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#resources&#34;&gt;Resources&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#overview&#34;&gt;Overview&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#codebase&#34;&gt;Codebase&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#project-structure&#34;&gt;Project structure&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#configuration&#34;&gt;Configuration&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#protecting-your-cookies&#34;&gt;Protecting your cookies&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#application&#34;&gt;Application&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#test-code&#34;&gt;Test code&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#execution&#34;&gt;Execution&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#virtual-environment&#34;&gt;Virtual environment&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#environment-variables&#34;&gt;Environment variables&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#launching-the-app&#34;&gt;Launching the app&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#running-some-tests&#34;&gt;Running some tests&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#test-driven-development&#34;&gt;Test-driven development&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#handling-route-requests&#34;&gt;Handling route requests&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;resources&#34;&gt;Resources&lt;/h1&gt;
+&lt;p&gt;I&amp;rsquo;m not a coding novice but there are a lot of uncharted waters here. Throughout the writeup I&amp;rsquo;ll reference docpages from both 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Flask&lt;/a&gt; and 
+&lt;a href=&#34;https://docs.pytest.org/en/stable/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Pytest&lt;/a&gt; as they are well presented and unusually helpful for those getting started. Aside from the documentation and the odd forum post, my primary resources are these two excellent books:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://www.amazon.com/Flask-Web-Development-Developing-Applications-dp-1491991739/dp/1491991739&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Flask Web Development&lt;/em&gt;&lt;/a&gt; by Miguel Grinberg,&lt;/li&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://www.amazon.com/Python-Testing-pytest-Effective-Scalable/dp/1680502409&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;Python Testing with Pytest&lt;/em&gt;&lt;/a&gt; by Brian Okken.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let&amp;rsquo;s get this show started.&lt;/p&gt;
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;My target application is a fully operational 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Issue_tracking_system&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;issue tracker&lt;/a&gt; (see 
+&lt;a href=&#34;https://www.youtube.com/watch?v=PQa3NFB_LRg&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;here&lt;/a&gt; for a slick tour through an established product). Sure, it&amp;rsquo;s not the most exciting idea, but getting an app like this up and running calls for a lot of design decisions. There&amp;rsquo;s also enough complexity to make test-driven development worth the effort. To get a feel for what we&amp;rsquo;re talking about, consider just two aspects of the final product:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;a clean and functional &lt;strong&gt;user interface&lt;/strong&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;data storage&lt;/strong&gt; to keep track of users, issues, projects, and their relationships.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The implementation of each of these will heavily depend on how we want to use the issue tracker. We also want some way to &lt;strong&gt;authenticate&lt;/strong&gt; users and securely handle their passwords. Basic account management (e.g. validating new accounts, resetting passwords) will be handled by &lt;strong&gt;email&lt;/strong&gt;. Each of these aspects will be the topic of a separate writeup that builds on the codebase from the previous writeup.&lt;/p&gt;
+&lt;h1 id=&#34;codebase&#34;&gt;Codebase&lt;/h1&gt;
+&lt;p&gt;It&amp;rsquo;s now time to introduce the initial codebase. The rest of this article goes over the details of how it works as well as the rationale behind its structure.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;re looking for a good IDE, I highly recommend &lt;a href=&#34;https://code.visualstudio.com/&#34;&gt;Visual Studio Code&lt;/a&gt;. It&amp;rsquo;s free, widely supported by an extensive list of add-ons, and easy to work with. It is truly a thing of beauty.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;project-structure&#34;&gt;Project structure&lt;/h2&gt;
+&lt;p&gt;Our starting codebase is held in the root directory &lt;code&gt;issues-project&lt;/code&gt; (Fig. 1). Inside we have the &lt;code&gt;src/main&lt;/code&gt; folder, containing three Python files that comprise our app&amp;rsquo;s source code. The &lt;code&gt;tests&lt;/code&gt; folder on the same level holds code that will be used to test the application. We also have &lt;code&gt;setup.py&lt;/code&gt;, which will be invoked to setup the virtual environment.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-directory-listing-for-issues-project&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-01-intro/filetree.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Directory listing for &amp;lt;code&amp;gt;issues-project&amp;lt;/code&amp;gt;.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-01-intro/filetree.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Directory listing for &lt;code&gt;issues-project&lt;/code&gt;.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;There are of course many ways to structure a project. This particular layout allows us to play nice with Pytest and build on the codebase without too much difficulty, but there are other advantages that you can read about in 
+&lt;a href=&#34;https://blog.ionelmc.ro/2014/05/25/python-packaging&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;this comprehensive post&lt;/a&gt;. As the application grows I will likely bundle unit tests and functional tests into separate folders, but for now this structure will do just fine.&lt;/p&gt;
+&lt;h2 id=&#34;configuration&#34;&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;Most large applications need some 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/config/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;configuration&lt;/a&gt;. Each instance of a Flask application comes with a &lt;code&gt;config&lt;/code&gt; attribute that can be modified as if it were a dictionary:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;app = Flask(__name__)
+app.config[&#39;TESTING&#39;] = True
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A few &lt;code&gt;config&lt;/code&gt; values that we use are listed below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;SECRET_KEY&lt;/code&gt;, used to encrypt session cookies (discussed later),&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;DEBUG&lt;/code&gt;, toggles debug mode, which shows an interactive debugger for unhandled exceptions and reloads the development server for code changes,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;TESTING&lt;/code&gt;, toggles testing mode, which tells the app to allow exceptions to propagate, such that they can be handled by a testing framework.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The configuration file is shown below. We have three different configuration structures: one for development, another for testing, and yet another for production. This is useful because often a developer will want to use separate resources for each of these activities. You probably don&amp;rsquo;t want to test CRUD operations on your production database!&lt;/p&gt;
+&lt;p&gt;Each configuration inherits from the base &lt;code&gt;Config&lt;/code&gt; class, which contains settings that are shared across all configuration types. The secret key is assumed to be stored as an environment variable.&lt;/p&gt;
+&lt;h4 id=&#34;srcmainconfigpy&#34;&gt;src/main/config.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import os
+
+class Config:
+    SECRET_KEY = os.environ.get(&#39;SECRET_KEY&#39;)
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+class TestingConfig(Config):
+    TESTING = True
+
+class ProductionConfig(Config):
+    PLACEHOLDER = True
+
+config = {
+    &#39;development&#39;: DevelopmentConfig,
+    &#39;testing&#39;: TestingConfig,
+    &#39;production&#39;: ProductionConfig,
+    &#39;default&#39;: DevelopmentConfig
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can now use the global &lt;code&gt;config&lt;/code&gt; dictionary to easily configure an instance of our application to suit our purpose, whether it be for testing or development:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;app = Flask(__name__)
+app.config.from_object(config[&#39;testing&#39;])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;protecting-your-cookies&#34;&gt;Protecting your cookies&lt;/h3&gt;
+&lt;p&gt;It&amp;rsquo;s worth talking a bit more about that secret key and how it affects the 
+&lt;a href=&#34;https://machinesaredigging.com/2013/10/29/how-does-a-web-session-work/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;user session&lt;/em&gt;&lt;/a&gt;. Most web applications need to maintain some kind of &lt;em&gt;state&lt;/em&gt; with each user without having to dive into (slower) persistent storage. While handling an HTTP request, Flask makes the user session available to the application using the 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/api/#flask.session&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;session&lt;/code&gt;&lt;/a&gt; object. This allows the application to keep track of information across multiple requests using key-value pairs called &lt;em&gt;cookies&lt;/em&gt;. We will see how these can be useful later when we start to use them.&lt;/p&gt;
+&lt;p&gt;For now, just know that Flask will not allow you to use user sessions without defining the secret key. This key should be a long string of text that is not easily guessable and sufficiently random. Flask will use this key to cryptographically sign each cookie, such that a bad actor cannot impersonate you (or the application server) by forging your signature.&lt;/p&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Do not store secrets in cookies. Although your signature cannot be (easily) forged, the cookie payload can be &lt;a href=&#34;https://blog.miguelgrinberg.com/post/how-secure-is-the-flask-user-session&#34;&gt;very easily decrypted&lt;/a&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Make sure that your secrets (including things like API keys) are securely stored outside of source code. Never commit your secrets to version control!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;application&#34;&gt;Application&lt;/h2&gt;
+&lt;p&gt;Here we have our application code. If you&amp;rsquo;re looking at this code and thinking there&amp;rsquo;s something missing, well&amp;hellip; alright. It&amp;rsquo;s quite spartan. What we &lt;em&gt;do&lt;/em&gt; have in our package constructor (&lt;code&gt;__init__.py&lt;/code&gt;) is a 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;factory function&lt;/em&gt;&lt;/a&gt;. We can use &lt;code&gt;create_app()&lt;/code&gt; to create multiple instances of our app and import different configuration sets for each one using &lt;code&gt;app.config.from_object()&lt;/code&gt;. This is great for unit testing, as you will soon see.&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py&#34;&gt;src/main/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import Flask
+from src.main.config import config
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;issues.py&lt;/code&gt; file is used to instantiate the application. It first looks for the &lt;code&gt;ISSUES_CONFIG&lt;/code&gt; environment variable to see which configuration to use, but if that fails, the application is configured with the default (development) settings.&lt;/p&gt;
+&lt;p&gt;Note that the &lt;code&gt;create_app()&lt;/code&gt; function has significance to Flask&amp;rsquo;s command line utility, which we will use to launch the app. We will discuss this shortly.&lt;/p&gt;
+&lt;h4 id=&#34;srcmainissuespy&#34;&gt;src/main/issues.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import os
+from . import create_app
+
+app = create_app(os.getenv(&#39;ISSUES_CONFIG&#39;) or &#39;default&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And there we have it. That&amp;rsquo;s the app. Take a moment to appreciate just how lean it is. It won&amp;rsquo;t always be this way!&lt;/p&gt;
+&lt;h2 id=&#34;test-code&#34;&gt;Test code&lt;/h2&gt;
+&lt;p&gt;We now turn our attention to Pytest and what it will do for us. Taking a look at &lt;code&gt;test_suite.py&lt;/code&gt;, we find a rag-tag collection of unit tests. The first test is not particularly useful, but Pytest doesn&amp;rsquo;t care. All it cares about is whether the logic after any &lt;code&gt;assert&lt;/code&gt; keyword evaluates to &lt;code&gt;True&lt;/code&gt;. If it doesn&amp;rsquo;t, any remaining code in that function is skipped, the function is failed, and Pytest moves on to the next function. If all assertions in the test function are true, the function is passed.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you have used other testing frameworks you will appreciate that this is an incredibly beautiful programming construct. You don&amp;rsquo;t need to use things like &lt;code&gt;assertLess(a, b)&lt;/code&gt;: just write &lt;code&gt;assert a &amp;lt; b&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h4 id=&#34;teststest_suitepy&#34;&gt;tests/test_suite.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def test_sanity():
+    assert 1 + 1 == 2
+
+def test_config(app):
+    assert app.config[&#39;TESTING&#39;]
+
+def test_response(client):
+    response = client.get(&#39;/&#39;)
+    assert response.status_code == 200
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The remaining two test functions have arguments that sound more relevant. Where do &lt;code&gt;app&lt;/code&gt; and &lt;code&gt;client&lt;/code&gt; come from? That brings us to our next file.&lt;/p&gt;
+&lt;p&gt;Within the &lt;code&gt;conftest.py&lt;/code&gt; file, Pytest expects to find 
+&lt;a href=&#34;https://docs.pytest.org/en/latest/fixture.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;fixtures&lt;/em&gt;&lt;/a&gt;. These are functions that can be used to prepare &lt;em&gt;something&lt;/em&gt; (data, initialization, teardown, etc.) for a test function. In the code below, the &lt;code&gt;pytest.fixture&lt;/code&gt; decorator is used to tell Pytest that the function &lt;code&gt;app()&lt;/code&gt; is a fixture. Now Pytest knows to run the function whenever it encounters &lt;code&gt;app&lt;/code&gt; in the argument list of a test function. The &lt;code&gt;test_config()&lt;/code&gt; function in our test suite, for example, gets a fresh instance of our application that has been configured for testing.&lt;/p&gt;
+&lt;h4 id=&#34;testsconftestpy&#34;&gt;tests/conftest.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from src.main import create_app
+import pytest
+
+@pytest.fixture
+def app():
+    # initializes the app with the testing config
+    app = create_app(&#39;testing&#39;)
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that there is another fixture called &lt;code&gt;client&lt;/code&gt; that hasn&amp;rsquo;t been defined. This fixture is automatically made available to us courtesy of the &lt;code&gt;pyflask-test&lt;/code&gt; package (installed in our upcoming virtual environment), which looks for an &lt;code&gt;app&lt;/code&gt; fixture and uses it to create a test client. We will use the test client to generate browser requests and see whether we are getting back an expected response from our application.&lt;/p&gt;
+&lt;h1 id=&#34;execution&#34;&gt;Execution&lt;/h1&gt;
+&lt;p&gt;Now that we have introduced the codebase, it&amp;rsquo;s time to fire it up. We will run &lt;code&gt;issues&lt;/code&gt; within a virtual environment that is managed by 
+&lt;a href=&#34;https://docs.conda.io/en/latest/miniconda.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Miniconda&lt;/a&gt;, a lightweight version of the Anaconda package management system.&lt;/p&gt;
+&lt;h2 id=&#34;virtual-environment&#34;&gt;Virtual environment&lt;/h2&gt;
+&lt;p&gt;We&amp;rsquo;ll go ahead and use Miniconda to create our Python 3.7 environment. Once it&amp;rsquo;s ready, activate and use &lt;code&gt;pip&lt;/code&gt; to install our requisite packages. Don&amp;rsquo;t forget that trailing period.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;ROOTDIR&amp;gt; conda create -n issues python=3.7
+ROOTDIR&amp;gt; conda activate issues
+(issues) ROOTDIR&amp;gt; pip install -e .
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;When invoked by the command above, pip will search the current directory for the &lt;code&gt;setup.py&lt;/code&gt; file, which includes a list of dependencies needed for &lt;code&gt;issues&lt;/code&gt; to run properly. Each package listed in &lt;code&gt;install_requires&lt;/code&gt; will be installed into the virtual environment.&lt;/p&gt;
+&lt;h4 id=&#34;setuppy&#34;&gt;setup.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from setuptools import setup, find_packages
+
+setup(
+    name=&#39;issues&#39;,
+    version=&#39;0.1&#39;,
+    packages=find_packages(),
+    install_requires=[&amp;quot;flask&amp;quot;, &amp;quot;pytest&amp;quot;, &amp;quot;pytest-flask&amp;quot;],
+)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;What about that &lt;code&gt;-e&lt;/code&gt;? Running &lt;code&gt;pip install&lt;/code&gt; with the &lt;em&gt;editable&lt;/em&gt; option installs a link within the virtual environment to each local package discovered by 
+&lt;a href=&#34;https://setuptools.readthedocs.io/en/latest/setuptools.html#using-find-packages&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;find_packages()&lt;/code&gt;&lt;/a&gt; (i.e., &lt;code&gt;main&lt;/code&gt;). One of the major benefits of installing our project packages in this way is that our test files can now import them without resorting to hacky system path workarounds. Even better, the editable option means that we can continue to change the source code without having to reinstall the packages.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    At first glance importing a package from a neighboring directory doesn&amp;rsquo;t seem to be such a big problem, but take a look at the age of &lt;a href=&#34;https://stackoverflow.com/questions/6323860/sibling-package-imports&#34;&gt;this Stack Overflow post&lt;/a&gt;. People have been dealing with this issue for a very long time&amp;hellip;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;environment-variables&#34;&gt;Environment variables&lt;/h2&gt;
+&lt;p&gt;Remember that we need to set up a couple of environment variables. The syntax used to do this will vary depending on your shell (see 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/tutorial/factory/#run-the-application&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;this link&lt;/a&gt; for some examples). I&amp;rsquo;m using Visual Studio Code on Windows, whose terminal uses PowerShell. Note that your secret key should be more complex than this random headline I took from the New York Times.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$env:FLASK_APP=&#39;src/main/issues.py&#39;
+$env:ISSUES_CONFIG=&#39;development&#39;
+$env:SECRET_KEY=&#39;Are you overpraising your child?&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There&amp;rsquo;s a variable here that has not yet been introduced to us. As you might suspect, &lt;code&gt;FLASK_APP&lt;/code&gt; holds the location of our app. We&amp;rsquo;ll see how Flask uses this variable in the next section.&lt;/p&gt;
+&lt;h2 id=&#34;launching-the-app&#34;&gt;Launching the app&lt;/h2&gt;
+&lt;p&gt;Once installed inside the virtual environment, Flask gives us access to 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/cli/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;flask&lt;/code&gt;&lt;/a&gt;, a command line utility. Entering &lt;code&gt;flask run&lt;/code&gt; will first query the &lt;code&gt;FLASK_APP&lt;/code&gt; variable to discover our application. Since we have specified a path to a Python file, Flask will look for the &lt;code&gt;create_app()&lt;/code&gt; factory function in this file and use it to instantiate the application. Flask will then start up a development server and host the app on &lt;code&gt;http://localhost:5000/&lt;/code&gt;. You can find other ways to configure &lt;code&gt;FLASK_APP&lt;/code&gt; 
+&lt;a href=&#34;https://www.twilio.com/blog/how-run-flask-application&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;in this writeup&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If you visit the server right now, you will be greeted with a &lt;strong&gt;404 Not Found&lt;/strong&gt; error. That&amp;rsquo;s expected, since we haven&amp;rsquo;t yet told Flask how to handle any request. We&amp;rsquo;ll get to that shortly but for now let&amp;rsquo;s kill the server and see how to run our test suite.&lt;/p&gt;
+&lt;h2 id=&#34;running-some-tests&#34;&gt;Running some tests&lt;/h2&gt;
+&lt;p&gt;We are going to invoke Pytest through &lt;code&gt;pytest-flask&lt;/code&gt;, which gives us access to the test client, as described earlier. We can run the test suite with this command:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;(issues) ROOTDIR&amp;gt; py.test
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Pytest will now go off and search through any test code (i.e. files that look like &lt;code&gt;test_*.py&lt;/code&gt; or &lt;code&gt;*_test.py&lt;/code&gt;) within your current directory and all subdirectories. Test functions should start with &amp;ldquo;test&amp;rdquo;, like &lt;code&gt;test_response()&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Running &lt;code&gt;py.test&lt;/code&gt; results in a big chunk of text that starts with the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;============================= test session starts =============================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+plugins: flask-1.0.0
+collected 3 items
+
+tests\test_suite.py ..F   
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The last line tells the story: Pytest found three tests in &lt;code&gt;test_suite.py&lt;/code&gt;, of which two tests passed (indicated with a &lt;code&gt;.&lt;/code&gt;) and one test failed (&lt;code&gt;F&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;At the end of the test output, we see the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;=========================== short test summary info ===========================
+FAILED tests/test_suite.py::test_response - AssertionError: assert 404 == 200
+========================= 1 failed, 2 passed in 0.08s =========================
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Seems like &lt;code&gt;test_response()&lt;/code&gt; failed. Let&amp;rsquo;s take another look at the function:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def test_response(client):
+    response = client.get(&#39;/&#39;)
+    assert response.status_code == 200
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Pytest is telling us that after our test client made a GET request for the server&amp;rsquo;s root URL, the server did not return with a successful (&lt;strong&gt;200 OK&lt;/strong&gt;) response. We were expecting this since the server gave our browser a &lt;strong&gt;404 Not Found&lt;/strong&gt; response earlier. Since the returned status code was not equal to 200, the assertion failed and caused our test function to fail.&lt;/p&gt;
+&lt;h1 id=&#34;test-driven-development&#34;&gt;Test-driven development&lt;/h1&gt;
+&lt;p&gt;We have now set ourselves up to do some 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Test-driven_development&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;test-driven development&lt;/em&gt;&lt;/a&gt;. Under this methodology, each new feature in our application begins life as a test. The goal is then to implement the feature by writing as little code as possible so as to pass the test. This extremely short development cycle of writing and passing tests is repeated many times until you have yourself an application.&lt;/p&gt;
+&lt;p&gt;Our first &amp;ldquo;feature&amp;rdquo; is very simple: deliver a successful response to the client that requests the root URL.&lt;/p&gt;
+&lt;h2 id=&#34;handling-route-requests&#34;&gt;Handling route requests&lt;/h2&gt;
+&lt;p&gt;While the web server is running, it passes all received requests to &lt;code&gt;app&lt;/code&gt;, the Flask application instance. The app needs to know how to respond to each requested URL. More specifically, Flask needs to know what function to use to create the response. This is achieved using &lt;em&gt;routes&lt;/em&gt;, which associate a URL with a response function. We can use the &lt;code&gt;app.route&lt;/code&gt; decorator to specify a route for the root URL:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&#39;/&#39;)
+def index():
+    return &#39;&amp;lt;h1&amp;gt;Show me the money!&amp;lt;/h1&amp;gt;&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this way, the &lt;code&gt;index()&lt;/code&gt; function has now been assigned to handle the response for the root URL. We will add this code to the &lt;code&gt;create_app()&lt;/code&gt; function within the &lt;code&gt;issues&lt;/code&gt; package constructor:&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py-1&#34;&gt;src/main/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import Flask
+from src.main.config import config
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+
+    @app.route(&#39;/&#39;)
+    def index():
+       return &#39;&amp;lt;h1&amp;gt;Show me the money!&amp;lt;/h1&amp;gt;&#39;
+
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After revising the code and launching the app with &lt;code&gt;flask run&lt;/code&gt;, you will find that a trip to the server root no longer results in a 404 Not Found.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-success&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-01-intro/200-OK.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Success!&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-01-intro/200-OK.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Success!
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Let&amp;rsquo;s run pytest once more.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;(issues) ROOTDIR&amp;gt; py.test
+============================= test session starts =============================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+plugins: flask-1.0.0
+collected 3 items
+
+tests\test_suite.py ...                                                  [100%]
+
+============================== 3 passed in 0.06s ==============================
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As expected, we have passed the tests and restored order to the universe.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;ve cloned the &lt;a href=&#34;https://github.com/ahadjinicolaou/issues.app&#34;&gt;project repository&lt;/a&gt;, you can run &lt;code&gt;git checkout fe2b7ce&lt;/code&gt; to get the current version of the source code.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;That concludes the initialization of the issue tracker project. Although it takes a bit more work to distribute a Flask application over several source files, this modular design should allow for a more streamlined development and testing experience.&lt;/p&gt;
+&lt;p&gt;There is a lot of code between what we have and a working issue tracker. In the next article I&amp;rsquo;ll create a basic user interface for the app and motivate the use of &lt;em&gt;templates&lt;/em&gt;, which allow for the clean separation of presentation logic and application data.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

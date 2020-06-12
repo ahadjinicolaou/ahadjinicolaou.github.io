@@ -1,0 +1,1422 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="The beginning of my journey into the world of web app development.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/issues-app-01-intro/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.f72481ea6518a9efe938e95819339e7a.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/issues-app-01-intro/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/issues-app-01-intro/">
+  <meta property="og:title" content="issues.app (1): Getting started with Flask and Pytest | Remotely Curious">
+  <meta property="og:description" content="The beginning of my journey into the world of web app development."><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-08-30T15:28:38-04:00">
+    
+    <meta property="article:modified_time" content="2020-08-30T15:28:38-04:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/issues-app-01-intro/"
+  },
+  "headline": "issues.app (1): Getting started with Flask and Pytest",
+  
+  "datePublished": "2020-08-30T15:28:38-04:00",
+  "dateModified": "2020-08-30T15:28:38-04:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "The beginning of my journey into the world of web app development."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>issues.app (1): Getting started with Flask and Pytest | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>issues.app (1): Getting started with Flask and Pytest</h1>
+
+  
+  <p class="page-subtitle">The beginning of my journey into the world of web app development.</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Aug 30, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    14 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/development/">development</a>, <a href="/category/issues.app/">issues.app</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>My biggest regret is not studying software design as an undergraduate.</p>
+<p>Although I&rsquo;ve been writing code for more than a decade, most of the code behind my programs tends to be stuffed into one or two files. This is fine when the programs are small, but a few months ago I had to fix a bug in one of my more complicated apps, which allows a user to load an audio file and manually annotate speech through a graphical interface. Having forgotten entirely about how my app is structured, I had no choice but to trace through the 3300+ lines of code just to reorient myself, before making what turned out to be a simple change. I have since decided that investing time into becoming a good software engineer will pay massive dividends and do wonders for my future sanity.</p>
+<p>This is the start of what will become a series about web app development using Flask and Pytest. After some research, I singled out these frameworks because they are extensible, well-designed and don&rsquo;t require loads of boilerplate code, which gets in the way of understanding. My main drive is to learn more about application architecture and test-driven development. Along the way I will distill what I learn into this guide, so that it can help other software engineering novices who have similar goals and working knowledge.</p>
+<div class="alert alert-note">
+  <div>
+    Speaking of knowledge, you should be comfortable with Python to get the most out of this guide. You should also be familiar with relational databases, client-server interactions, and the basics of web development (e.g., writing simple pages in HTTP/CSS/JavaScript).
+  </div>
+</div>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#resources">Resources</a></li>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#codebase">Codebase</a>
+      <ul>
+        <li><a href="#project-structure">Project structure</a></li>
+        <li><a href="#configuration">Configuration</a>
+          <ul>
+            <li></li>
+            <li><a href="#protecting-your-cookies">Protecting your cookies</a></li>
+          </ul>
+        </li>
+        <li><a href="#application">Application</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#test-code">Test code</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#execution">Execution</a>
+      <ul>
+        <li><a href="#virtual-environment">Virtual environment</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#environment-variables">Environment variables</a></li>
+        <li><a href="#launching-the-app">Launching the app</a></li>
+        <li><a href="#running-some-tests">Running some tests</a></li>
+      </ul>
+    </li>
+    <li><a href="#test-driven-development">Test-driven development</a>
+      <ul>
+        <li><a href="#handling-route-requests">Handling route requests</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="resources">Resources</h1>
+<p>I&rsquo;m not a coding novice but there are a lot of uncharted waters here. Throughout the writeup I&rsquo;ll reference docpages from both 
+<a href="https://flask.palletsprojects.com/en/1.1.x/" target="_blank" rel="noopener">Flask</a> and 
+<a href="https://docs.pytest.org/en/stable/" target="_blank" rel="noopener">Pytest</a> as they are well presented and unusually helpful for those getting started. Aside from the documentation and the odd forum post, my primary resources are these two excellent books:</p>
+<ul>
+<li>
+<a href="https://www.amazon.com/Flask-Web-Development-Developing-Applications-dp-1491991739/dp/1491991739" target="_blank" rel="noopener"><em>Flask Web Development</em></a> by Miguel Grinberg,</li>
+<li>
+<a href="https://www.amazon.com/Python-Testing-pytest-Effective-Scalable/dp/1680502409" target="_blank" rel="noopener"><em>Python Testing with Pytest</em></a> by Brian Okken.</li>
+</ul>
+<p>Let&rsquo;s get this show started.</p>
+<h1 id="overview">Overview</h1>
+<p>My target application is a fully operational 
+<a href="https://en.wikipedia.org/wiki/Issue_tracking_system" target="_blank" rel="noopener">issue tracker</a> (see 
+<a href="https://www.youtube.com/watch?v=PQa3NFB_LRg" target="_blank" rel="noopener">here</a> for a slick tour through an established product). Sure, it&rsquo;s not the most exciting idea, but getting an app like this up and running calls for a lot of design decisions. There&rsquo;s also enough complexity to make test-driven development worth the effort. To get a feel for what we&rsquo;re talking about, consider just two aspects of the final product:</p>
+<ul>
+<li>a clean and functional <strong>user interface</strong>,</li>
+<li><strong>data storage</strong> to keep track of users, issues, projects, and their relationships.</li>
+</ul>
+<p>The implementation of each of these will heavily depend on how we want to use the issue tracker. We also want some way to <strong>authenticate</strong> users and securely handle their passwords. Basic account management (e.g. validating new accounts, resetting passwords) will be handled by <strong>email</strong>. Each of these aspects will be the topic of a separate writeup that builds on the codebase from the previous writeup.</p>
+<h1 id="codebase">Codebase</h1>
+<p>It&rsquo;s now time to introduce the initial codebase. The rest of this article goes over the details of how it works as well as the rationale behind its structure.</p>
+<div class="alert alert-note">
+  <div>
+    If you&rsquo;re looking for a good IDE, I highly recommend <a href="https://code.visualstudio.com/">Visual Studio Code</a>. It&rsquo;s free, widely supported by an extensive list of add-ons, and easy to work with. It is truly a thing of beauty.
+  </div>
+</div>
+<h2 id="project-structure">Project structure</h2>
+<p>Our starting codebase is held in the root directory <code>issues-project</code> (Fig. 1). Inside we have the <code>src/main</code> folder, containing three Python files that comprise our app&rsquo;s source code. The <code>tests</code> folder on the same level holds code that will be used to test the application. We also have <code>setup.py</code>, which will be invoked to setup the virtual environment.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-directory-listing-for-issues-project">
+
+
+  <a data-fancybox="" href="/issues-app-01-intro/filetree.png" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; Directory listing for &lt;code&gt;issues-project&lt;/code&gt;.">
+
+
+  <img src="/issues-app-01-intro/filetree.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> Directory listing for <code>issues-project</code>.
+  </figcaption>
+
+
+</figure>
+
+<p>There are of course many ways to structure a project. This particular layout allows us to play nice with Pytest and build on the codebase without too much difficulty, but there are other advantages that you can read about in 
+<a href="https://blog.ionelmc.ro/2014/05/25/python-packaging" target="_blank" rel="noopener">this comprehensive post</a>. As the application grows I will likely bundle unit tests and functional tests into separate folders, but for now this structure will do just fine.</p>
+<h2 id="configuration">Configuration</h2>
+<p>Most large applications need some 
+<a href="https://flask.palletsprojects.com/en/1.1.x/config/" target="_blank" rel="noopener">configuration</a>. Each instance of a Flask application comes with a <code>config</code> attribute that can be modified as if it were a dictionary:</p>
+<pre><code class="language-python">app = Flask(__name__)
+app.config['TESTING'] = True
+</code></pre>
+<p>A few <code>config</code> values that we use are listed below:</p>
+<ul>
+<li><code>SECRET_KEY</code>, used to encrypt session cookies (discussed later),</li>
+<li><code>DEBUG</code>, toggles debug mode, which shows an interactive debugger for unhandled exceptions and reloads the development server for code changes,</li>
+<li><code>TESTING</code>, toggles testing mode, which tells the app to allow exceptions to propagate, such that they can be handled by a testing framework.</li>
+</ul>
+<p>The configuration file is shown below. We have three different configuration structures: one for development, another for testing, and yet another for production. This is useful because often a developer will want to use separate resources for each of these activities. You probably don&rsquo;t want to test CRUD operations on your production database!</p>
+<p>Each configuration inherits from the base <code>Config</code> class, which contains settings that are shared across all configuration types. The secret key is assumed to be stored as an environment variable.</p>
+<h4 id="srcmainconfigpy">src/main/config.py</h4>
+<pre><code class="language-python">import os
+
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+class TestingConfig(Config):
+    TESTING = True
+
+class ProductionConfig(Config):
+    PLACEHOLDER = True
+
+config = {
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
+    'production': ProductionConfig,
+    'default': DevelopmentConfig
+}
+</code></pre>
+<p>We can now use the global <code>config</code> dictionary to easily configure an instance of our application to suit our purpose, whether it be for testing or development:</p>
+<pre><code class="language-python">app = Flask(__name__)
+app.config.from_object(config['testing'])
+</code></pre>
+<h3 id="protecting-your-cookies">Protecting your cookies</h3>
+<p>It&rsquo;s worth talking a bit more about that secret key and how it affects the 
+<a href="https://machinesaredigging.com/2013/10/29/how-does-a-web-session-work/" target="_blank" rel="noopener"><em>user session</em></a>. Most web applications need to maintain some kind of <em>state</em> with each user without having to dive into (slower) persistent storage. While handling an HTTP request, Flask makes the user session available to the application using the 
+<a href="https://flask.palletsprojects.com/en/1.1.x/api/#flask.session" target="_blank" rel="noopener"><code>session</code></a> object. This allows the application to keep track of information across multiple requests using key-value pairs called <em>cookies</em>. We will see how these can be useful later when we start to use them.</p>
+<p>For now, just know that Flask will not allow you to use user sessions without defining the secret key. This key should be a long string of text that is not easily guessable and sufficiently random. Flask will use this key to cryptographically sign each cookie, such that a bad actor cannot impersonate you (or the application server) by forging your signature.</p>
+<div class="alert alert-warning">
+  <div>
+    Do not store secrets in cookies. Although your signature cannot be (easily) forged, the cookie payload can be <a href="https://blog.miguelgrinberg.com/post/how-secure-is-the-flask-user-session">very easily decrypted</a>.
+  </div>
+</div>
+<div class="alert alert-warning">
+  <div>
+    Make sure that your secrets (including things like API keys) are securely stored outside of source code. Never commit your secrets to version control!
+  </div>
+</div>
+<h2 id="application">Application</h2>
+<p>Here we have our application code. If you&rsquo;re looking at this code and thinking there&rsquo;s something missing, well&hellip; alright. It&rsquo;s quite spartan. What we <em>do</em> have in our package constructor (<code>__init__.py</code>) is a 
+<a href="https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/" target="_blank" rel="noopener"><em>factory function</em></a>. We can use <code>create_app()</code> to create multiple instances of our app and import different configuration sets for each one using <code>app.config.from_object()</code>. This is great for unit testing, as you will soon see.</p>
+<h4 id="srcmain__init__py">src/main/__init__.py</h4>
+<pre><code class="language-python">from flask import Flask
+from src.main.config import config
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    return app
+</code></pre>
+<p>The <code>issues.py</code> file is used to instantiate the application. It first looks for the <code>ISSUES_CONFIG</code> environment variable to see which configuration to use, but if that fails, the application is configured with the default (development) settings.</p>
+<p>Note that the <code>create_app()</code> function has significance to Flask&rsquo;s command line utility, which we will use to launch the app. We will discuss this shortly.</p>
+<h4 id="srcmainissuespy">src/main/issues.py</h4>
+<pre><code class="language-python">import os
+from . import create_app
+
+app = create_app(os.getenv('ISSUES_CONFIG') or 'default')
+</code></pre>
+<p>And there we have it. That&rsquo;s the app. Take a moment to appreciate just how lean it is. It won&rsquo;t always be this way!</p>
+<h2 id="test-code">Test code</h2>
+<p>We now turn our attention to Pytest and what it will do for us. Taking a look at <code>test_suite.py</code>, we find a rag-tag collection of unit tests. The first test is not particularly useful, but Pytest doesn&rsquo;t care. All it cares about is whether the logic after any <code>assert</code> keyword evaluates to <code>True</code>. If it doesn&rsquo;t, any remaining code in that function is skipped, the function is failed, and Pytest moves on to the next function. If all assertions in the test function are true, the function is passed.</p>
+<div class="alert alert-note">
+  <div>
+    If you have used other testing frameworks you will appreciate that this is an incredibly beautiful programming construct. You don&rsquo;t need to use things like <code>assertLess(a, b)</code>: just write <code>assert a &lt; b</code>.
+  </div>
+</div>
+<h4 id="teststest_suitepy">tests/test_suite.py</h4>
+<pre><code class="language-python">def test_sanity():
+    assert 1 + 1 == 2
+
+def test_config(app):
+    assert app.config['TESTING']
+
+def test_response(client):
+    response = client.get('/')
+    assert response.status_code == 200
+</code></pre>
+<p>The remaining two test functions have arguments that sound more relevant. Where do <code>app</code> and <code>client</code> come from? That brings us to our next file.</p>
+<p>Within the <code>conftest.py</code> file, Pytest expects to find 
+<a href="https://docs.pytest.org/en/latest/fixture.html" target="_blank" rel="noopener"><em>fixtures</em></a>. These are functions that can be used to prepare <em>something</em> (data, initialization, teardown, etc.) for a test function. In the code below, the <code>pytest.fixture</code> decorator is used to tell Pytest that the function <code>app()</code> is a fixture. Now Pytest knows to run the function whenever it encounters <code>app</code> in the argument list of a test function. The <code>test_config()</code> function in our test suite, for example, gets a fresh instance of our application that has been configured for testing.</p>
+<h4 id="testsconftestpy">tests/conftest.py</h4>
+<pre><code class="language-python">from src.main import create_app
+import pytest
+
+@pytest.fixture
+def app():
+    # initializes the app with the testing config
+    app = create_app('testing')
+    return app
+</code></pre>
+<p>Note that there is another fixture called <code>client</code> that hasn&rsquo;t been defined. This fixture is automatically made available to us courtesy of the <code>pyflask-test</code> package (installed in our upcoming virtual environment), which looks for an <code>app</code> fixture and uses it to create a test client. We will use the test client to generate browser requests and see whether we are getting back an expected response from our application.</p>
+<h1 id="execution">Execution</h1>
+<p>Now that we have introduced the codebase, it&rsquo;s time to fire it up. We will run <code>issues</code> within a virtual environment that is managed by 
+<a href="https://docs.conda.io/en/latest/miniconda.html" target="_blank" rel="noopener">Miniconda</a>, a lightweight version of the Anaconda package management system.</p>
+<h2 id="virtual-environment">Virtual environment</h2>
+<p>We&rsquo;ll go ahead and use Miniconda to create our Python 3.7 environment. Once it&rsquo;s ready, activate and use <code>pip</code> to install our requisite packages. Don&rsquo;t forget that trailing period.</p>
+<pre><code class="language-bash">ROOTDIR&gt; conda create -n issues python=3.7
+ROOTDIR&gt; conda activate issues
+(issues) ROOTDIR&gt; pip install -e .
+</code></pre>
+<p>When invoked by the command above, pip will search the current directory for the <code>setup.py</code> file, which includes a list of dependencies needed for <code>issues</code> to run properly. Each package listed in <code>install_requires</code> will be installed into the virtual environment.</p>
+<h4 id="setuppy">setup.py</h4>
+<pre><code class="language-python">from setuptools import setup, find_packages
+
+setup(
+    name='issues',
+    version='0.1',
+    packages=find_packages(),
+    install_requires=[&quot;flask&quot;, &quot;pytest&quot;, &quot;pytest-flask&quot;],
+)
+</code></pre>
+<p>What about that <code>-e</code>? Running <code>pip install</code> with the <em>editable</em> option installs a link within the virtual environment to each local package discovered by 
+<a href="https://setuptools.readthedocs.io/en/latest/setuptools.html#using-find-packages" target="_blank" rel="noopener"><code>find_packages()</code></a> (i.e., <code>main</code>). One of the major benefits of installing our project packages in this way is that our test files can now import them without resorting to hacky system path workarounds. Even better, the editable option means that we can continue to change the source code without having to reinstall the packages.</p>
+<div class="alert alert-note">
+  <div>
+    At first glance importing a package from a neighboring directory doesn&rsquo;t seem to be such a big problem, but take a look at the age of <a href="https://stackoverflow.com/questions/6323860/sibling-package-imports">this Stack Overflow post</a>. People have been dealing with this issue for a very long time&hellip;
+  </div>
+</div>
+<h2 id="environment-variables">Environment variables</h2>
+<p>Remember that we need to set up a couple of environment variables. The syntax used to do this will vary depending on your shell (see 
+<a href="https://flask.palletsprojects.com/en/1.1.x/tutorial/factory/#run-the-application" target="_blank" rel="noopener">this link</a> for some examples). I&rsquo;m using Visual Studio Code on Windows, whose terminal uses PowerShell. Note that your secret key should be more complex than this random headline I took from the New York Times.</p>
+<pre><code class="language-bash">$env:FLASK_APP='src/main/issues.py'
+$env:ISSUES_CONFIG='development'
+$env:SECRET_KEY='Are you overpraising your child?'
+</code></pre>
+<p>There&rsquo;s a variable here that has not yet been introduced to us. As you might suspect, <code>FLASK_APP</code> holds the location of our app. We&rsquo;ll see how Flask uses this variable in the next section.</p>
+<h2 id="launching-the-app">Launching the app</h2>
+<p>Once installed inside the virtual environment, Flask gives us access to 
+<a href="https://flask.palletsprojects.com/en/1.1.x/cli/" target="_blank" rel="noopener"><code>flask</code></a>, a command line utility. Entering <code>flask run</code> will first query the <code>FLASK_APP</code> variable to discover our application. Since we have specified a path to a Python file, Flask will look for the <code>create_app()</code> factory function in this file and use it to instantiate the application. Flask will then start up a development server and host the app on <code>http://localhost:5000/</code>. You can find other ways to configure <code>FLASK_APP</code> 
+<a href="https://www.twilio.com/blog/how-run-flask-application" target="_blank" rel="noopener">in this writeup</a>.</p>
+<p>If you visit the server right now, you will be greeted with a <strong>404 Not Found</strong> error. That&rsquo;s expected, since we haven&rsquo;t yet told Flask how to handle any request. We&rsquo;ll get to that shortly but for now let&rsquo;s kill the server and see how to run our test suite.</p>
+<h2 id="running-some-tests">Running some tests</h2>
+<p>We are going to invoke Pytest through <code>pytest-flask</code>, which gives us access to the test client, as described earlier. We can run the test suite with this command:</p>
+<pre><code class="language-bash">(issues) ROOTDIR&gt; py.test
+</code></pre>
+<p>Pytest will now go off and search through any test code (i.e. files that look like <code>test_*.py</code> or <code>*_test.py</code>) within your current directory and all subdirectories. Test functions should start with &ldquo;test&rdquo;, like <code>test_response()</code>.</p>
+<p>Running <code>py.test</code> results in a big chunk of text that starts with the following:</p>
+<pre><code class="language-bash">============================= test session starts =============================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+plugins: flask-1.0.0
+collected 3 items
+
+tests\test_suite.py ..F   
+</code></pre>
+<p>The last line tells the story: Pytest found three tests in <code>test_suite.py</code>, of which two tests passed (indicated with a <code>.</code>) and one test failed (<code>F</code>).</p>
+<p>At the end of the test output, we see the following:</p>
+<pre><code class="language-bash">=========================== short test summary info ===========================
+FAILED tests/test_suite.py::test_response - AssertionError: assert 404 == 200
+========================= 1 failed, 2 passed in 0.08s =========================
+</code></pre>
+<p>Seems like <code>test_response()</code> failed. Let&rsquo;s take another look at the function:</p>
+<pre><code class="language-python">def test_response(client):
+    response = client.get('/')
+    assert response.status_code == 200
+</code></pre>
+<p>Pytest is telling us that after our test client made a GET request for the server&rsquo;s root URL, the server did not return with a successful (<strong>200 OK</strong>) response. We were expecting this since the server gave our browser a <strong>404 Not Found</strong> response earlier. Since the returned status code was not equal to 200, the assertion failed and caused our test function to fail.</p>
+<h1 id="test-driven-development">Test-driven development</h1>
+<p>We have now set ourselves up to do some 
+<a href="https://en.wikipedia.org/wiki/Test-driven_development" target="_blank" rel="noopener"><em>test-driven development</em></a>. Under this methodology, each new feature in our application begins life as a test. The goal is then to implement the feature by writing as little code as possible so as to pass the test. This extremely short development cycle of writing and passing tests is repeated many times until you have yourself an application.</p>
+<p>Our first &ldquo;feature&rdquo; is very simple: deliver a successful response to the client that requests the root URL.</p>
+<h2 id="handling-route-requests">Handling route requests</h2>
+<p>While the web server is running, it passes all received requests to <code>app</code>, the Flask application instance. The app needs to know how to respond to each requested URL. More specifically, Flask needs to know what function to use to create the response. This is achieved using <em>routes</em>, which associate a URL with a response function. We can use the <code>app.route</code> decorator to specify a route for the root URL:</p>
+<pre><code class="language-python">@app.route('/')
+def index():
+    return '&lt;h1&gt;Show me the money!&lt;/h1&gt;'
+</code></pre>
+<p>In this way, the <code>index()</code> function has now been assigned to handle the response for the root URL. We will add this code to the <code>create_app()</code> function within the <code>issues</code> package constructor:</p>
+<h4 id="srcmain__init__py-1">src/main/__init__.py</h4>
+<pre><code class="language-python">from flask import Flask
+from src.main.config import config
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+
+    @app.route('/')
+    def index():
+       return '&lt;h1&gt;Show me the money!&lt;/h1&gt;'
+
+    return app
+</code></pre>
+<p>After revising the code and launching the app with <code>flask run</code>, you will find that a trip to the server root no longer results in a 404 Not Found.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-success">
+
+
+  <a data-fancybox="" href="/issues-app-01-intro/200-OK.png" data-caption="&lt;b&gt;Fig. 2.&lt;/b&gt; Success!">
+
+
+  <img src="/issues-app-01-intro/200-OK.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2.</b> Success!
+  </figcaption>
+
+
+</figure>
+
+<p>Let&rsquo;s run pytest once more.</p>
+<pre><code class="language-bash">(issues) ROOTDIR&gt; py.test
+============================= test session starts =============================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+plugins: flask-1.0.0
+collected 3 items
+
+tests\test_suite.py ...                                                  [100%]
+
+============================== 3 passed in 0.06s ==============================
+</code></pre>
+<p>As expected, we have passed the tests and restored order to the universe.</p>
+<div class="alert alert-note">
+  <div>
+    If you&rsquo;ve cloned the <a href="https://github.com/ahadjinicolaou/issues.app">project repository</a>, you can run <code>git checkout fe2b7ce</code> to get the current version of the source code.
+  </div>
+</div>
+<h1 id="summary">Summary</h1>
+<p>That concludes the initialization of the issue tracker project. Although it takes a bit more work to distribute a Flask application over several source files, this modular design should allow for a more streamlined development and testing experience.</p>
+<p>There is a lot of code between what we have and a working issue tracker. In the next article I&rsquo;ll create a basic user interface for the app and motivate the use of <em>templates</em>, which allow for the clean separation of presentation logic and application data.</p>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/flask/">flask</a>
+  
+  <a class="badge badge-light" href="/tag/python/">python</a>
+  
+  <a class="badge badge-light" href="/tag/pytest/">pytest</a>
+  
+  <a class="badge badge-light" href="/tag/tdd/">TDD</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/issues-app-01-intro/&amp;text=issues.app%20%281%29:%20Getting%20started%20with%20Flask%20and%20Pytest" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/issues-app-01-intro/&amp;t=issues.app%20%281%29:%20Getting%20started%20with%20Flask%20and%20Pytest" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=issues.app%20%281%29:%20Getting%20started%20with%20Flask%20and%20Pytest&amp;body=https://www.remotelycurious.net/post/issues-app-01-intro/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/issues-app-01-intro/&amp;title=issues.app%20%281%29:%20Getting%20started%20with%20Flask%20and%20Pytest" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=issues.app%20%281%29:%20Getting%20started%20with%20Flask%20and%20Pytest%20https://www.remotelycurious.net/post/issues-app-01-intro/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/issues-app-01-intro/&amp;title=issues.app%20%281%29:%20Getting%20started%20with%20Flask%20and%20Pytest" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/issues-app-02-templates/">issues.app (2): Making templates with Bootstrap</a></li>
+      
+      <li><a href="/post/issues-app-03-blueprints/">issues.app (3): Modularity with Blueprints</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

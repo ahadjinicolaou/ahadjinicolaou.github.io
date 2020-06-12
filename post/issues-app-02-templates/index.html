@@ -1,0 +1,1485 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="A step towards developing interfaces that don&#39;t remind you of Geocities.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/issues-app-02-templates/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.f72481ea6518a9efe938e95819339e7a.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/issues-app-02-templates/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/issues-app-02-templates/">
+  <meta property="og:title" content="issues.app (2): Making templates with Bootstrap | Remotely Curious">
+  <meta property="og:description" content="A step towards developing interfaces that don&#39;t remind you of Geocities."><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-09-13T20:21:12-04:00">
+    
+    <meta property="article:modified_time" content="2020-09-13T20:21:12-04:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/issues-app-02-templates/"
+  },
+  "headline": "issues.app (2): Making templates with Bootstrap",
+  
+  "datePublished": "2020-09-13T20:21:12-04:00",
+  "dateModified": "2020-09-13T20:21:12-04:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "A step towards developing interfaces that don't remind you of Geocities."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>issues.app (2): Making templates with Bootstrap | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>issues.app (2): Making templates with Bootstrap</h1>
+
+  
+  <p class="page-subtitle">A step towards developing interfaces that don&rsquo;t remind you of Geocities.</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Sep 13, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    11 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/development/">development</a>, <a href="/category/issues.app/">issues.app</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <div class="alert alert-note">
+  <div>
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find <a href="/post/issues-app-01-intro/">here</a>. Any code documented here may change significantly in the future. <strong>Be warned!</strong>
+  </div>
+</div>
+<p>The last article ended with a quick mention about how Python functions can be assigned to handle browser requests in a Flask application. It&rsquo;s a topic that is definitely worth more of our time. We are going to talk about <em>templates</em>: what they are, how they work, and how they can integrate with Bootstrap to make life easier for developers.</p>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#view-decorators">View decorators</a>
+      <ul>
+        <li><a href="#static-routes">Static routes</a></li>
+        <li><a href="#dynamic-routes">Dynamic routes</a></li>
+        <li><a href="#error-handlers">Error handlers</a></li>
+      </ul>
+    </li>
+    <li><a href="#templates">Templates</a>
+      <ul>
+        <li><a href="#jinja-templates">Jinja templates</a>
+          <ul>
+            <li><a href="#variables-and-expressions">Variables and expressions</a></li>
+            <li><a href="#filters">Filters</a></li>
+            <li><a href="#statements">Statements</a></li>
+            <li><a href="#template-inheritance">Template inheritance</a></li>
+          </ul>
+        </li>
+        <li><a href="#using-templates">Using templates</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#templates-with-bootstrap">Templates with Bootstrap</a>
+      <ul>
+        <li><a href="#plugging-bootstrap-into-flask">Plugging Bootstrap into Flask</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#making-nicer-templates">Making nicer templates</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="view-decorators">View decorators</h1>
+<p>In general, decorators are Python constructs that allow you to inject functions with additional capabilities. Flask provides a number of 
+<a href="https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/" target="_blank" rel="noopener"><em>view decorators</em></a> that can be used to conveniently enable web-specific functionality, making it easy to get things done with minimal code. What follows is a quick tour of some of the most common view decorators you will find in a Flask application.</p>
+<h2 id="static-routes">Static routes</h2>
+<p>We&rsquo;ve already seen one of these. A static route can be implemented with the <code>app.route</code> decorator to handle a browser request for a single URL. Here&rsquo;s what that looks like:</p>
+<pre><code class="language-python">@app.route('/')
+def index():
+    return '&lt;h1&gt;Show me the money!&lt;/h1&gt;'
+</code></pre>
+<div class="alert alert-note">
+  <div>
+    Officially, functions that respond to requests are called <em>view functions</em>.
+  </div>
+</div>
+<h2 id="dynamic-routes">Dynamic routes</h2>
+<p>We can write another function that uses a <em>dynamic route</em> to serve a customized greeting to the user, using the <code>name</code> argument. Angle brackets are used in the decorator argument to indicate how the function argument should be parsed from the requested URL.</p>
+<pre><code class="language-python">@app.route('/greeting/&lt;name&gt;')
+def greeting(name):
+    return f&quot;&lt;h1&gt;Hi {name.capitalize()}!&lt;/h1&gt;&quot;
+</code></pre>
+<p>After adding this to <code>src/main/__init__.py</code> and running the server, a trip to <code>/greeting/fred</code> would serve you with the following:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-a-personalized-greeting">
+
+
+  <a data-fancybox="" href="/issues-app-02-templates/greeting.png" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; A personalized greeting.">
+
+
+  <img src="/issues-app-02-templates/greeting.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> A personalized greeting.
+  </figcaption>
+
+
+</figure>
+
+<h2 id="error-handlers">Error handlers</h2>
+<p>Sometimes it&rsquo;s nice to provide a customized error page. This can be achieved using the <code>app.errorhandler</code> decorator. The decorated function must have an error object argument. It&rsquo;s good practice to return the matching error code together with the response.</p>
+<pre><code class="language-python">@app.errorhandler(404)
+def not_found(e):
+    return &quot;&lt;h1&gt;Looks like I can't find that page...&lt;/h1&gt;&quot;, 404
+</code></pre>
+<h1 id="templates">Templates</h1>
+<p>Handling chunks of web code amid our Python source feels a bit dirty. It&rsquo;s probably not a big deal if our view function is returning a one-line response, but imagine the kind of content that Facebook is serving. We&rsquo;re talking reams of HTML, stitched together from different sources that need to be filtered and processed according to the user&rsquo;s data. Sorting this out with a little string interpolation isn&rsquo;t going to cut it. We need a bigger gun.</p>
+<p>This is where <em>templates</em> come in. A template is a like a mold that is used to mass produce web pages. The mold is made out of standard HTML elements like <code>body</code> and <code>div</code> and has slots reserved for data that will become available in the future. When the data is ready, a template engine can take a template, fill the data slots, and <em>render</em> the complete page. This allows for presentation logic to be isolated from the rest of the code, simplifying application maintenance and making debugging a bit less painful.</p>
+<h2 id="jinja-templates">Jinja templates</h2>
+<p>Flask uses a template engine called 
+<a href="https://palletsprojects.com/p/jinja/" target="_blank" rel="noopener">Jinja2</a> to <em>render</em> templates with data. Jinja templates are usually just HTML files (although 
+<a href="https://jinja.palletsprojects.com/en/2.11.x/templates/" target="_blank" rel="noopener">other file formats</a> are supported). They will typically contain HTML as well as <em>variables</em> and <em>expressions</em> that are recognized by Jinja and replaced when rendered.</p>
+<p>We will now explore some basic Jinja template constructs, with an eye towards making better (or at least more flexible) versions of our greeting functions.</p>
+<h3 id="variables-and-expressions">Variables and expressions</h3>
+<p>Let&rsquo;s say Jinja is told to render the template below using a <code>name</code> variable equal to <code>'fred'</code>.</p>
+<pre><code class="language-html">&lt;h1&gt;Hi {{ name }}!&lt;/h1&gt;
+</code></pre>
+<p>The <code>{{ ... }}</code> delimiters indicate an <em>expression</em> that Jinja will replace with some kind of output, which in this case is a string literal. Jinja will output <strong>Hi fred!</strong> after rendering this template.</p>
+<p>Variables can also be more complex objects like lists and dictionaries. We&rsquo;ll see an example of this very soon when we introduce <em>statements</em>.</p>
+<h3 id="filters">Filters</h3>
+<p>Jinja has <em>filters</em> that can be applied to modify variables using the pipe (<code>|</code>) operator. Below are a few examples of templates with their rendered output:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Template</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name='fred'</code></td>
+<td><code>Hi {{ name | upper }}!</code></td>
+<td>Hi FRED!</td>
+</tr>
+<tr>
+<td><code>name='emma'</code></td>
+<td><code>Hi {{ name | capitalize }}!</code></td>
+<td>Hi Emma!</td>
+</tr>
+<tr>
+<td><code>name=None</code></td>
+<td><code>Hi {{ name | default('Stranger')}}!</code></td>
+<td>Hi Stranger!</td>
+</tr>
+<tr>
+<td><code>price=7.283</code></td>
+<td><code>That is ${{ price | round(2, 'floor') }}.</code></td>
+<td>That is $7.28.</td>
+</tr>
+</tbody>
+</table>
+<div class="alert alert-note">
+  <div>
+    Multiple filters can also be chained together, but keep in mind the order of operations. As a contrived example, consider the effect of <code>{{ name | default('stranger') | upper }}</code> versus that of <code>{{ name | upper | default('stranger') }}</code> when <code>name=None</code>.
+  </div>
+</div>
+<h3 id="statements">Statements</h3>
+<p>Jinja becomes considerably more powerful when using <em>statements</em> to control the specific elements that are rendered. Statements are indicated by <code>{% ... %}</code> delimiters.</p>
+<p>Imagine we have some kind of shopping list. We can use Jinja to create a bulleted list of our items with the following code:</p>
+<pre><code>&lt;ul&gt;
+{% for item in shopping_list %}
+    &lt;li&gt;{{ item }}&lt;/li&gt;
+{% endfor %}
+&lt;/ul&gt;
+</code></pre>
+<p>Now if the shopping list contains <code>[&quot;bread&quot;, &quot;milk&quot;, &quot;eggs&quot;, &quot;toy dinosaur&quot;]</code>, Jinja will render it as a nice bulleted list (simulated with Markdown):</p>
+<ul>
+<li>bread</li>
+<li>milk</li>
+<li>eggs</li>
+<li>toy dinosaur</li>
+</ul>
+<p>Think about our app for a second. Suppose we want to offer up a VIP version of our greeting to users that know the right URL. We can get fancy with our template and have it render a greeting that is sensitive to the time of day, using Jinja to temporarily store different greetings inside variables.</p>
+<pre><code>{% if hour &gt;= 0 and hour &lt; 12 %}
+    {% set greeting = 'Good morning' %}
+{% elif hour &gt;= 12 and hour &lt; 17 %}
+    {% set greeting = 'Good afternoon' %}
+{% else %}
+    {% set greeting = 'Good evening' %}
+{% endif %}
+
+&lt;h1&gt;{{ greeting }}, {{ name | capitalize }}.&lt;/h1&gt;
+</code></pre>
+<p>In this case the template engine would be dealing with three variables:</p>
+<ul>
+<li><code>name</code> and <code>hour</code>, supplied by the application, and</li>
+<li><code>greeting</code>, set within the template.</li>
+</ul>
+<h3 id="template-inheritance">Template inheritance</h3>
+<p>Before we get our hands on some templates, we should talk about <em>template inheritance</em>. As plain and unexciting as that sounds, you should know that this is the most powerful part of Jinja<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>. Template inheritance allows you to create a &ldquo;master template&rdquo; that holds all of the common web elements of your site as well as <em>blocks</em> that child templates can either build on or completely replace.</p>
+<div class="alert alert-note">
+  <div>
+    If you&rsquo;re following the project, note that the templates in this section are just provided to illustrate the concepts. They will not be included in the codebase.
+  </div>
+</div>
+<p>To get a better understanding of what we&rsquo;re talking about, let&rsquo;s use an example pair of templates: one base, one child. Below is <code>base.html</code>.</p>
+<h4 id="basehtml">base.html</h4>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    {% block head %}
+    &lt;style type=&quot;text/css&quot;&gt;
+        .important { color: #FF0000; }
+    &lt;/style&gt;
+    &lt;title&gt;{% block title %}{% endblock %} :: ACME LLC&lt;/title&gt;
+    {% endblock %}
+&lt;/head&gt;
+&lt;body&gt;
+    {% block content %}{% endblock %}
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>It looks like a regular HTML page seasoned with some Jinja statements. The base template defines three blocks: <code>head</code>, <code>title</code> and <code>content</code>. Each of these can be overridden by a derived template, like the one below:</p>
+<h4 id="childhtml">child.html</h4>
+<pre><code class="language-html">{% extends &quot;base.html&quot; %}
+{% block title %}Goods and Services{% endblock %}
+{% block head %}
+    {{ super() }}
+    &lt;style type=&quot;text/css&quot;&gt;
+        .special { color: #0000FF; }
+    &lt;/style&gt;
+{% endblock %}
+{% block content %}
+    &lt;h1&gt;Goods and Services&lt;/h1&gt;
+    &lt;ul&gt;
+        &lt;li&gt;Bread&lt;/li&gt;
+        &lt;li&gt;Milk&lt;/li&gt;
+        &lt;li class=&quot;important&quot;&gt;Eggs&lt;/li&gt;
+        &lt;li class=&quot;special&quot;&gt;Toy dinosaur&lt;/li&gt;
+    &lt;/ul&gt;
+{% endblock %}
+</code></pre>
+<p>The line that makes it a child template is the very first one. With the <code>{% extends &quot;base.html&quot; %}</code> statement, we are telling Jinja that the current template is inheriting from <code>base.html</code>. When the base and derived templates both contain a nonempty block, the content in the derived block takes precedence.</p>
+<p>Note the use of <code>super()</code> within the head block. This tells Jinja to append the block&rsquo;s content to the corresponding block content in the base template. Without the <code>super()</code> call, the child template would completely replace the base template block and we would lose the <code>important</code> CSS class defined in the base template.</p>
+<p>Jinja is capable of a lot more. We will cover more of its features in later articles, but for now let&rsquo;s make some templates and refactor the codebase to make use of them.</p>
+<h2 id="using-templates">Using templates</h2>
+<p>First we should designate a folder to keep our templates. This will be <code>src/templates</code>. We are going to make two templates: one for the plain greeting and another for the VIP greeting (we&rsquo;ll leave the 404 and index view functions &ldquo;template-less&rdquo; for now). The plain template is shown below.</p>
+<h4 id="srctemplatesgreetinghtml">src/templates/greeting.html</h4>
+<pre><code>&lt;h1&gt;Hi {{ name | capitalize }}!&lt;/h1&gt;
+</code></pre>
+<p>And here&rsquo;s the fancy one.</p>
+<h4 id="srctemplatesfancy-greetinghtml">src/templates/fancy-greeting.html</h4>
+<pre><code>{# time-sensitive greeting #}
+{% if hour &gt;= 0 and hour &lt; 12 %}
+    {% set greeting = 'Good morning' %}
+{% elif hour &gt;= 12 and hour &lt; 17 %}
+    {% set greeting = 'Good afternoon' %}
+{% else %}
+    {% set greeting = 'Good evening' %}
+{% endif %}
+
+&lt;h1&gt;{{ greeting }}, {{ name | capitalize }}.&lt;/h1&gt;
+&lt;p&gt;GreetMaster™: delivering you the finest of greetings.&lt;/p&gt;
+</code></pre>
+<p>Now we need a way to engage the template engine in our app. This is done using <code>render_template()</code>, which comes from the <code>flask</code> package. Each view function supplies <code>render_template()</code> with the appropriate template filename and any keyword arguments that Jinja needs to populate the corresponding variables in the template.</p>
+<h4 id="srcmain__init__py">src/main/<strong>init</strong>.py</h4>
+<pre><code class="language-python"># ...
+from flask import render_template
+from datetime import datetime
+
+def create_app(config_name):
+    # ...
+    @app.route('/greeting/&lt;name&gt;')
+    def greeting(name):
+        return render_template('greeting.html', name=name)
+
+    @app.route('/fancy-greeting/&lt;name&gt;')
+    def fancy_greeting(name):
+        return render_template('fancy_greeting.html',
+                name=name,
+                hour=datetime.now().hour)
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return &quot;&lt;h1&gt;Looks like I can't find that page...&lt;/h1&gt;&quot;, 404
+    
+    return app
+</code></pre>
+<p>Finally, Flask needs to be told where we are keeping the templates (otherwise, Flask will assume they are in a <code>templates</code> folder that sits in the same directory as the app&rsquo;s instantiating file). The <code>create_app()</code> function is changed like this:</p>
+<h4 id="srcmain__init__py-1">src/main/<strong>init</strong>.py</h4>
+<pre><code class="language-python">def create_app(config_name):
+    app = Flask(__name__, template_folder='../templates')
+    # ...
+</code></pre>
+<p>Now we can fire up the server and serve ourselves with a magnificent greeting page. Since I&rsquo;m typing this up at ~10 PM, I am treated with an evening salutation.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-a-greetmaster-greeting">
+
+
+  <a data-fancybox="" href="/issues-app-02-templates/fancy-greeting.png" data-caption="&lt;b&gt;Fig. 3.&lt;/b&gt; A GreetMaster™ greeting.">
+
+
+  <img src="/issues-app-02-templates/fancy-greeting.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3.</b> A GreetMaster™ greeting.
+  </figcaption>
+
+
+</figure>
+
+<h1 id="templates-with-bootstrap">Templates with Bootstrap</h1>
+<p>Our templates are handy but they&rsquo;re ugly. Fortunately, a bunch of people at Twitter came up with 
+<a href="https://getbootstrap.com/" target="_blank" rel="noopener">Bootstrap</a>, an open-source front-end framework that can integrate with Flask and style our templates. We can plug it into our app as a Flask extension with minimal fuss. That&rsquo;s a big reason you&rsquo;re reading about it right now.</p>
+<h2 id="plugging-bootstrap-into-flask">Plugging Bootstrap into Flask</h2>
+<p>Adding support for Bootstrap within Flask is easy, thanks to the 
+<a href="https://pythonhosted.org/Flask-Bootstrap/" target="_blank" rel="noopener">Flask-Bootstrap</a> extension. Below we&rsquo;ll add <code>flask-bootstrap</code> as a project dependency. Make sure to install it in your virtual environment.</p>
+<h4 id="setuppy">setup.py</h4>
+<pre><code class="language-python">from setuptools import setup, find_packages
+
+setup(
+    name='issues',
+    version='0.2',
+    packages=find_packages(),
+    install_requires=[&quot;flask&quot;, &quot;pytest&quot;, &quot;pytest-flask&quot;, &quot;flask-bootstrap&quot;],
+)
+</code></pre>
+<p>Bootstrap can now be installed as an app extension using the <code>init_app()</code> instance method within the main package constructor.</p>
+<h4 id="srcmain__init__py-2">src/main/<strong>init</strong>.py</h4>
+<pre><code class="language-python"># ...
+from flask import Flask
+from flask_bootstrap import Bootstrap
+
+bootstrap = Bootstrap()
+
+def create_app(config_name):
+    app = Flask(__name__, template_folder='../templates')
+    app.config.from_object(config[config_name])
+
+    bootstrap.init_app(app)
+    # ...
+</code></pre>
+<p>It turns out that 
+<a href="https://flask.palletsprojects.com/en/1.1.x/extensiondev/" target="_blank" rel="noopener">all approved Flask extensions</a> will implement the <code>init_app()</code> method. The major upshot of this (application factory) pattern is to allow multiple instances of our application to use a single extension instance. That&rsquo;s good news for people like us who are interested in using a test framework during development.</p>
+<h2 id="making-nicer-templates">Making nicer templates</h2>
+<p>With the help of Bootstrap, we are going to drag our templates out of the 90s and into the modern age. This is done by having our templates inherit from Flask-Bootstrap&rsquo;s base template. Let&rsquo;s see how this works with our fancy greeting template.</p>
+<h4 id="srctemplatesfancy_greetinghtml">src/templates/fancy_greeting.html</h4>
+<pre><code>{% extends &quot;bootstrap/base.html&quot; %}
+
+{# time-sensitive greeting #}
+{% if hour &gt;= 0 and hour &lt; 12 %}
+    {% set greeting = 'Good morning' %}
+{% elif hour &gt;= 12 and hour &lt; 17 %}
+    {% set greeting = 'Good afternoon' %}
+{% else %}
+    {% set greeting = 'Good evening' %}
+{% endif %}
+
+{% block title %}GreetMaster{% endblock %}
+
+{% block content %}
+&lt;div class=&quot;jumbotron jumbotron-fluid&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+        &lt;h1 class=&quot;display-4&quot;&gt;{{ greeting }}, {{ name | capitalize }}.&lt;/h1&gt;
+        &lt;p class=&quot;lead&quot;&gt;GreetMaster™: delivering you the finest of greetings.&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+{% endblock %}
+</code></pre>
+<p>Flask-Bootstrap&rsquo;s base template provides access to all of Bootstrap&rsquo;s gadgets, like the <strong>jumbotron</strong>. If you pull back the curtain and take a look at 
+<a href="https://github.com/mbr/flask-bootstrap/blob/master/flask_bootstrap/templates/bootstrap/base.html" target="_blank" rel="noopener">the base template</a>, you&rsquo;ll see that Bootstrap&rsquo;s files are sourced within the template blocks. After relaunching the server and visiting <code>localhost/fancy-greeting/fred</code>, we will now be greeted with a much nicer page.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-4b-our-greetmaster-greeting-spruced-up-with-bootstrap">
+
+
+  <a data-fancybox="" href="/issues-app-02-templates/bootstrap-template.png" data-caption="&lt;b&gt;Fig. 4.&lt;/b&gt; Our GreetMaster™ greeting, spruced up with Bootstrap.">
+
+
+  <img src="/issues-app-02-templates/bootstrap-template.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 4.</b> Our GreetMaster™ greeting, spruced up with Bootstrap.
+  </figcaption>
+
+
+</figure>
+
+<p>Alright, fine. It&rsquo;s still pretty plain. But moving away from Times New Roman has to count for something! Take it as one small step towards a modern interface for our app, which we will build up to as we move through the series.</p>
+<div class="alert alert-note">
+  <div>
+    If you&rsquo;ve cloned the <a href="https://github.com/ahadjinicolaou/issues.app">project repository</a>, you can run <code>git checkout ff8887e</code> to get the current version of the source code.
+  </div>
+</div>
+<h1 id="summary">Summary</h1>
+<p>At this stage you might already appreciate the convenience that templates have to offer us. If not, then that&rsquo;s entirely understandable. After all, we have been putting together some pretty simple pages up until now. Their convenience will be better appreciated once we start sinking our teeth into the prototype interface for the app, which I hope to cover in the next article.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>Don&rsquo;t take it from me. The developers say it 
+<a href="https://jinja.palletsprojects.com/en/2.11.x/templates/#template-inheritance" target="_blank" rel="noopener">right here</a> in their documentation! <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/bootstrap/">bootstrap</a>
+  
+  <a class="badge badge-light" href="/tag/flask/">flask</a>
+  
+  <a class="badge badge-light" href="/tag/jinja/">jinja</a>
+  
+  <a class="badge badge-light" href="/tag/python/">python</a>
+  
+  <a class="badge badge-light" href="/tag/templates/">templates</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/issues-app-02-templates/&amp;text=issues.app%20%282%29:%20Making%20templates%20with%20Bootstrap" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/issues-app-02-templates/&amp;t=issues.app%20%282%29:%20Making%20templates%20with%20Bootstrap" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=issues.app%20%282%29:%20Making%20templates%20with%20Bootstrap&amp;body=https://www.remotelycurious.net/post/issues-app-02-templates/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/issues-app-02-templates/&amp;title=issues.app%20%282%29:%20Making%20templates%20with%20Bootstrap" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=issues.app%20%282%29:%20Making%20templates%20with%20Bootstrap%20https://www.remotelycurious.net/post/issues-app-02-templates/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/issues-app-02-templates/&amp;title=issues.app%20%282%29:%20Making%20templates%20with%20Bootstrap" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/issues-app-01-intro/">issues.app (1): Getting started with Flask and Pytest</a></li>
+      
+      <li><a href="/post/issues-app-03-blueprints/">issues.app (3): Modularity with Blueprints</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ml.doc | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/category/ml.doc/</link>
+      <atom:link href="https://www.remotelycurious.net/category/ml.doc/index.xml" rel="self" type="application/rss+xml" />
+    <description>ml.doc</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 25 Oct 2020 19:03:33 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>ml.doc</title>
+      <link>https://www.remotelycurious.net/category/ml.doc/</link>
+    </image>
+    
+    <item>
+      <title>ml.doc (1.1): Learning from data</title>
+      <link>https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/</link>
+      <pubDate>Sun, 25 Oct 2020 19:03:33 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/</guid>
+      <description>&lt;!-- $\newcommand{\norm}[1]{\left\lVert#1\right\rVert}$ --&gt;
+&lt;p&gt;Over the last few weeks I&amp;rsquo;ve been working through MIT&amp;rsquo;s machine learning course 
+&lt;a href=&#34;https://www.edx.org/course/machine-learning-with-python-from-linear-models-to&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;(6.86x)&lt;/a&gt;. The course&amp;rsquo;s emphasis on understanding the core concepts really makes you think about the data and whether a given algorithm is the right tool for the job. This approach would benefit those who are new to machine learning and looking to employ ML algorithms in their own work. On the other hand, the course itself requires some mathematical maturity (not to mention a bucketload of undergraduate algebra and calculus) which can make the material hard to digest. A little exposition in the right places would go a long way towards helping new practitioners use these new tools more effectively in their projects.&lt;/p&gt;
+&lt;p&gt;To address this thought bubble (and reinforce my own understanding), I&amp;rsquo;ve decided to write up some key ideas introduced in MITx 6.86x so as to make them more accessible to a general audience. Think of each writeup as being inspired by the MIT approach, but with some extra material in places to help absorb the ideas.&lt;/p&gt;
+&lt;!-- To help others absorb some of the key ideas underlying ML (but also to reinforce my own understanding), I&#39;ve decided to write up a guide or two. Rather than a comprehensive introduction to machine learning, this series will focus on specific topics, taking occasional detours through related concepts whenever it might help the reader. --&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    To get the most out of these writeups, you should be familiar with basic machine learning concepts, including things such as the difference between supervised and unsupervised learning, and the importance of using separate training and testing datasets. It&amp;rsquo;s also useful to have at least some rusty linear algebra and calculus skills under your belt.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#overview&#34;&gt;Overview&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#measuring-error&#34;&gt;Measuring error&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#sketching-the-goal&#34;&gt;Sketching the goal&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#a-mathematical-translation&#34;&gt;A mathematical translation&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-decision-boundary&#34;&gt;The decision boundary&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-binary-linear-classifier&#34;&gt;The binary linear classifier&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#linear-separability&#34;&gt;Linear separability&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#teaching-the-classifier&#34;&gt;Teaching the classifier&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-perceptron&#34;&gt;The perceptron&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#number-of-iterations&#34;&gt;Number of iterations&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#the-offset-update&#34;&gt;The offset update&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;p&gt;The job of a classifier is to take some input data and figure out how to label it. Many successful applications of machine learning involve classification, ranging from recommender systems to spam and fraud detection to medical diagnosis. This writeup will be focused on classifiers that are both &lt;em&gt;binary&lt;/em&gt; (i.e., two output label choices) and &lt;em&gt;linear&lt;/em&gt;, where the label output is a linear function of the inputs.&lt;/p&gt;
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;A classifier $h$ is a function that maps an input &lt;em&gt;feature vector&lt;/em&gt; $x$ to a discrete output &lt;em&gt;label&lt;/em&gt;, $y = h(x)$. The function is discovered during a training period in which the classifier is exposed to data from a training set $S_{N}$, consisting of $N$ input examples and their labels,&lt;/p&gt;
+&lt;p&gt;$$S_{N} = \{ (x^{(i)}, y^{(i)}), i=1,&amp;hellip;,N \}.$$&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    It&amp;rsquo;s worth paying attention to the notation. The $k$-th component of a vector is indicated using a subscript, $x_{k}$. Subscripts will also be used to indicate a specific piece of information, like a positive training example, $x_+$. The $i$-th member of some collection is indicated by a superscript, e.g. the $i$-th feature vector, $x^{(i)}$. When in doubt, assume you are dealing with a vector.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Imagine you want to build a classifier that can predict whether you will like a brunch dish, based on its ingredients. You might consider a six-item ingredient list:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;🥔 potato&lt;/li&gt;
+&lt;li&gt;🥑 avocado&lt;/li&gt;
+&lt;li&gt;🍅 tomato&lt;/li&gt;
+&lt;li&gt;🥓 bacon&lt;/li&gt;
+&lt;li&gt;🍄 mushroom&lt;/li&gt;
+&lt;li&gt;🥫 baked beans&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We will represent each brunch dish as a 6-dimensional feature vector, $x^{(i)} \in \{0, 1\}^6$, with $x^{(i)}_{k} = 1$ indicating the presence of the $k$-th ingredient in the $i$-th dish. The label $y^{(i)}=1$ is used to indicate that you like the $i$-th dish (and $y^{(i)}=-1$ to encode the opposite).&lt;/p&gt;
+&lt;p&gt;An example training set $S_5$ containing five example brunch dishes is shown below. Each component of $x$ (in other words, each ingredient $x_k$) is known as a &lt;em&gt;feature&lt;/em&gt;.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;$i$&lt;/th&gt;
+&lt;th&gt;dish&lt;/th&gt;
+&lt;th&gt;🥔 $x^{(i)}_{1}$&lt;/th&gt;
+&lt;th&gt;🥑 $x^{(i)}_{2}$&lt;/th&gt;
+&lt;th&gt;🍅 $x^{(i)}_{3}$&lt;/th&gt;
+&lt;th&gt;🥓 $x^{(i)}_{4}$&lt;/th&gt;
+&lt;th&gt;🍄 $x^{(i)}_{5}$&lt;/th&gt;
+&lt;th&gt;🥫 $x^{(i)}_{6}$&lt;/th&gt;
+&lt;th&gt;$y^{(i)}$&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;avocado sandwich&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;huevos rancheros&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;3&lt;/td&gt;
+&lt;td&gt;bacon and eggs&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;english breakfast&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;-1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;5&lt;/td&gt;
+&lt;td&gt;mushroom chowder&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;-1&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;After training our brunch classifier $h_{brunch}$ on the training set, it will learn how to map each input vector to its corresponding label. We could then use it to predict whether we would like something new, like breakfast burritos.&lt;/p&gt;
+&lt;p&gt;$$ \textrm{breakfast burrito} = \{🥔, 🥑, 🍅, 🥫\} $$
+$$ h_{brunch}(\{🥔, 🥑, 🍅, 🥫\}) = h_{brunch}([1, 1, 1, 0, 0, 1]) = &amp;hellip; $$&lt;/p&gt;
+&lt;h2 id=&#34;measuring-error&#34;&gt;Measuring error&lt;/h2&gt;
+&lt;p&gt;Classifiers learn from their mistakes with the help of an &lt;em&gt;algorithm&lt;/em&gt;. With each example $(x^{(i)}, y^{(i)})$ considered during training, the algorithm checks to see whether the classifier maps the input to the right label. If $h(x^{(i)}) \neq y^{(i)}$, the classifier has made a mistake. We define the &lt;em&gt;training error&lt;/em&gt; $E_N$ as the average rate of mistakes over the training set,&lt;/p&gt;
+&lt;p&gt;$$ E_N(h) = \frac{1}{N} \sum_{i=1}^{N} [\![ h(x^{(i)}) \neq y^{(i)} ]\!],$$&lt;/p&gt;
+&lt;p&gt;where $ [\![ \textrm{something} ]\!] = 1$ if the thing inside is true, and $0$ otherwise. For example, $ [\![ 2 = 9 ]\!] = 0$ and $ [\![ 2 &amp;lt; 9 ]\!] = 1$. If our brunch classifier gets three of the five training labels wrong, then $E_N(h_{brunch}) = \frac{3}{5}$.&lt;/p&gt;
+&lt;p&gt;Knowing the training error is important, but we are usually more interested in how the classifier would perform in the real world, on data it has not seen before. Since we cannot know how well $h$ would work for every possible feature vector, we settle for knowing the &lt;em&gt;test error&lt;/em&gt; $E(h)$, which is computed in the same way as the training error, but with data that have been set aside for this purpose.&lt;/p&gt;
+&lt;h2 id=&#34;sketching-the-goal&#34;&gt;Sketching the goal&lt;/h2&gt;
+&lt;p&gt;We have talked about the idea of training a classifier to learn from mistakes, but what does that look like? Let&amp;rsquo;s use some sketches to visualize it.&lt;/p&gt;
+&lt;p&gt;Imagine we are midway through training a linear classifier on a set of $N=5$ two-dimensional feature vectors, $x \in \mathbb{R}^2$ (Fig. 1). Their labels, $y \in \{-1, 1\}$ are indicated by the plus/minus symbols. There is also a black line, running through the feature space and dividing it into two halves. This represents our linear classifier.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-a-linear-classifier-that-can-do-better-with-e_nh--15&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/poor-classifier.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; A linear classifier that can do better, with $E_N(h) = 1/5$.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/poor-classifier.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; A linear classifier that can do better, with $E_N(h) = 1/5$.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;On the blue half of the feature space, vectors map to $h(x) = 1$, and on the orange half, $h(x) = -1$. We can see that all but one of the training examples have been mapped correctly. Since we have five examples, the training error $E_N(h) = 1/5$.&lt;/p&gt;
+&lt;p&gt;Not bad, but looking at the plot, you can see some room for improvement. If we just bump the line, this &lt;em&gt;decision boundary&lt;/em&gt; a little bit, we can improve the classifier and achieve zero training error (Fig. 2).&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-after-nudging-the-decision-boundary-we-have-a-better-classifier-with-no-training-error&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/better-classifier.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; After nudging the decision boundary, we have a better classifier, with no training error.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/better-classifier.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; After nudging the decision boundary, we have a better classifier, with no training error.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;This, in a nutshell, is what training a classifier looks like. We start off with a function $h$ that is useless, but with each iteration of the algorithm, the decision boundary dividing each label region gets nudged and the function becomes slightly better at its job.&lt;/p&gt;
+&lt;h1 id=&#34;a-mathematical-translation&#34;&gt;A mathematical translation&lt;/h1&gt;
+&lt;p&gt;If you peer into the black box of a classifier and find out how it &amp;ldquo;learns&amp;rdquo;, you will be unsurprised to find some mathematics. What might surprise you is how little of it you need to know to more fully understand the general problem of classification. In this section we will motivate the use of linear algebra as a language to describe the problem at hand, using it to flesh out the ideas of the previous section.&lt;/p&gt;
+&lt;h2 id=&#34;the-decision-boundary&#34;&gt;The decision boundary&lt;/h2&gt;
+&lt;p&gt;A binary classifier splits the feature space into two, using a decision boundary. Before we can update the classifier, it needs to be described in language that a training algorithm can understand. That is, we need to parameterize the decision boundary. Once we have this, the algorithm can update the decision boundary parameters to improve the classifier.&lt;/p&gt;
+&lt;p&gt;In general, the decision boundary is a function of the inputs. A &lt;em&gt;linear&lt;/em&gt; classifier working in a $d$-dimensional feature space has a decision boundary that is a linear combination of the input features,&lt;/p&gt;
+&lt;p&gt;$$ x_1 \theta_1 + x_2 \theta_2 + &amp;hellip; + x_d \theta_d + \theta_0 = x \cdot \theta + \theta_0 = 0 $$&lt;/p&gt;
+&lt;p&gt;where $\theta = [\theta_1, \theta_2, &amp;hellip;, \theta_d] \in \mathbb{R}^d$ is a $d$-dimensional vector that determines the relative influence of each feature on the classification, and $\theta_0 \in \mathbb{R}$ is a scalar offset.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;Note that the dot in $x \cdot \theta$ denotes the &lt;em&gt;dot product&lt;/em&gt; of two vectors. Geometrically, this operation is defined by
+$\newcommand{\norm}[1]{|| #1 ||}$&lt;/p&gt;
+&lt;p&gt;$$ x \cdot \theta = \norm{x} \norm{\theta} \textrm{cos}\:\alpha, $$&lt;/p&gt;
+&lt;p&gt;where $\norm{x}$ is the &lt;em&gt;norm&lt;/em&gt; of $x$ and $\alpha$ is the angle between the two vectors. If this looks completely foreign to you, it&amp;rsquo;s probably a good idea to stop here and learn the geometric implications of $x \cdot \theta$ before continuing. Make some sketches!&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;To get comfortable with what exactly $\theta$ means here, let&amp;rsquo;s scale the feature space back to two dimensions and play around with the simplest linear classifier: one whose decision boundary passes through the origin, i.e. $\theta_0 = 0$ (Fig. 3). In this case, the decision boundary takes the form of a line,&lt;/p&gt;
+&lt;p&gt;$$ x_1 \theta_1 + x_2 \theta_2 = x \cdot \theta = 0. $$&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-a-linear-classifier-with-decision-boundary-x-cdot-theta--0-going-through-the-origin&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/classifier-thru-origin.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; A linear classifier, with decision boundary $x \cdot \theta = 0$ going through the origin.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/classifier-thru-origin.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; A linear classifier, with decision boundary $x \cdot \theta = 0$ going through the origin.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Let&amp;rsquo;s consider the geometry of our situation. This was not mentioned earlier, but by convention, $\theta = [\theta_1, \theta_2]$ is chosen such that it points towards the (blue) positively-labeled feature space, as indicated in the figure. Keep this in mind.&lt;/p&gt;
+&lt;p&gt;Now, any vector $x = [x_1, x_2]$ that lies exactly on the decision boundary satisfies $x \cdot \theta = 0$. That means $x$ and $\theta$ are perpendicular to each other, which makes sense. The other implication here is that the classifier has no idea what to do with these inputs: should it be unlucky enough to get them, it will map them to the label $y = h(x) = 0$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This means that although we are dealing with a binary classifier whose job is to map inputs to one of two output labels $\{-1, 1\}$, it is still technically possible for the classifier to map an input to a &lt;em&gt;third&lt;/em&gt; output. This is usually avoided in practice by mapping $h(x) = 0$ to one of the labels.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;How about some other options? Say we pick a positively-labeled vector $x = [-1.8, 2.6]$. Since the (smallest) angle between $x$ and $\theta$ is acute, we know that $x \cdot \theta &amp;gt; 0$ (Fig. 4, left). Now try a negatively-labeled one: $x = [-3.1, -1.7]$. This time, the dot product $x \cdot \theta &amp;lt; 0$ (Fig. 4, right). We are starting to see something useful here!&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-left-inputs-that-are-positively-labeled-ie-hx--1-have-a-positive-dot-product-ie-x-cdot-theta--0-right-negatively-labeled-inputs-have-a-negative-dot-product&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/dot-product.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4.&amp;lt;/b&amp;gt; Left: inputs that are positively labeled (i.e. $h(x) = 1$) have a positive dot product, i.e. $x \cdot \theta &amp;amp;gt; 0$. Right: negatively-labeled inputs have a negative dot product.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/dot-product.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4.&lt;/b&gt; Left: inputs that are positively labeled (i.e. $h(x) = 1$) have a positive dot product, i.e. $x \cdot \theta &amp;gt; 0$. Right: negatively-labeled inputs have a negative dot product.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;If we consider the general form of the classifier and add back the scalar offset, such that the decision boundary looks like $x \cdot \theta + \theta_0 = 0$, the key idea stays the same, e.g. if $x \cdot \theta + \theta_0 &amp;gt; 0$, the classifier assigns $x$ a positive label. In other words, $x$ gets mapped to the &lt;em&gt;sign&lt;/em&gt; of the quantity $x \cdot \theta + \theta_0$.&lt;/p&gt;
+&lt;h2 id=&#34;the-binary-linear-classifier&#34;&gt;The binary linear classifier&lt;/h2&gt;
+&lt;p&gt;At last, we are ready for a proper definition. A &lt;em&gt;binary linear classifier&lt;/em&gt; $h$ is a function that maps feature vectors $x$ to $h(x) \in \{-1, 0, 1\}$, where
+$$ h(x) = \textrm{sign}(\theta \cdot x + \theta_0).$$&lt;/p&gt;
+&lt;p&gt;The search for a good classifier now becomes a matter of finding values for the parameter vector $\theta$ and offset parameter $\theta_0,$ such that the classifier output or &lt;em&gt;prediction&lt;/em&gt; $h(x^{(i)})$ is equal to $y^{(i)}$ for a decent proportion of the training set. We will talk about &lt;strong&gt;how&lt;/strong&gt; we find these values very soon.&lt;/p&gt;
+&lt;p&gt;Although we have made use of two-dimensional examples, the same concepts hold in higher dimensions. In general, the decision boundary is a &lt;em&gt;hyperplane&lt;/em&gt; of the feature space. All that fancy word means is that for a $d$-dimensional feature space, the decision boundary is an $(d-1)$-dimensional subset of that space. You have already seen that for a two dimensional feature space, i.e. $x \in \mathbb{R}^2$, the decision boundary is a line. If we move up another dimension and consider features $x \in \mathbb{R}^3$, the decision boundary becomes a plane, as shown below.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-5b-within-a-three-dimensional-feature-space-the-decision-boundary-becomes-a-plane&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/decision-boundary-3d.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 5.&amp;lt;/b&amp;gt; Within a three-dimensional feature space, the decision boundary becomes a plane.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/decision-boundary-3d.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 5.&lt;/b&gt; Within a three-dimensional feature space, the decision boundary becomes a plane.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;linear-separability&#34;&gt;Linear separability&lt;/h2&gt;
+&lt;p&gt;As it turns out, there is a price to pay for this level of simplicity: linear classifiers of this type are quite constrained. Consider the following two-dimensional dataset (Fig. 6). It is an illustration of XOR, the boolean operation that says you can have either one of these two things $(x_1=1 \textrm{ or } x_2=1)$, but not both $(x_1=1 \textrm{ and } x_2=1)$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    XOR comes up often in life. As an example, let $x_1$ and $x_2$ be items on the dessert menu at a restaurant, i.e., $\{x_1, x_2 \} \in \{🍨,🍰,🥧,🍮\}.$
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-6b-a-dataset-that-is-not-linearly-separable&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/xor.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 6.&amp;lt;/b&amp;gt; A dataset that is not linearly separable.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-1-learning-from-data/xor.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 6.&lt;/b&gt; A dataset that is not linearly separable.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;No matter how you slice it, there is no way to draw a line through these training examples to perfectly group them by label. This is an example of a dataset that is not &lt;em&gt;linearly separable&lt;/em&gt;. More formally, the training dataset $S_N = \{(x^{(i)}, y^{(i)}), i=1,&amp;hellip;, N\}$ is said to be linearly separable if there exists a parameter vector $\hat{\theta}$ and offset vector $\hat{\theta_0}$ such that for all training examples $i=1,&amp;hellip;,N$,&lt;/p&gt;
+&lt;p&gt;$$ y^{(i)}(\hat{\theta} \cdot x + \hat{\theta_0}) &amp;gt; 0.$$&lt;/p&gt;
+&lt;p&gt;Take a moment to understand this expression. Imagine we have a pair of these special values $\hat{\theta}$ and $\hat{\theta_0}$ for some dataset. If we look at the above inequality for a positive example $x_+$, we know that $(\hat{\theta} \cdot x_+ + \hat{\theta_0})$ must be positive for it to hold, since $y_+=1$. Similarly, for a negative example $x_-$, the quantity $(\hat{\theta} \cdot x_- + \hat{\theta_0})$ must evaluate to a negative value.&lt;/p&gt;
+&lt;p&gt;What we can see here is that when $y^{(i)}(\theta \cdot x^{(i)} + \theta_0) &amp;gt; 0$, the label and classifier output for the $i$-th training example $x^{(i)}$ are in &lt;em&gt;agreement&lt;/em&gt;. When this equality is not true, the prediction does not match the label and the classifier has made a mistake.&lt;/p&gt;
+&lt;h1 id=&#34;teaching-the-classifier&#34;&gt;Teaching the classifier&lt;/h1&gt;
+&lt;p&gt;It is finally time to talk about how a classifier learns from experience. Until now there have been many mentions of an &amp;ldquo;algorithm&amp;rdquo;, which is vaguely understood to be used for training the classifier. Here we will introduce the &lt;em&gt;perceptron&lt;/em&gt;, a simple and elegant algorithm whose variants have been widely applied to solve all kinds of problems.&lt;/p&gt;
+&lt;p&gt;To train a classifier, an algorithm needs to recognize when the classifier makes a mistake. Recall that the training error for a linear classifier looks like this:&lt;/p&gt;
+&lt;p&gt;$$ E_N(h) = \frac{1}{N} \sum_{i=1}^{N} [\![ h(x^{(i)}) \neq y^{(i)} ]\!],$$&lt;/p&gt;
+&lt;p&gt;where $[\![ h(x^{(i)}) \neq y^{(i)} ]\!]$ equals one for a mistake, and zero otherwise. But thanks to our previous discussion, we know precisely how to express a mistake, i.e,&lt;/p&gt;
+&lt;p&gt;$$y^{(i)}(\theta \cdot x^{(i)} + \theta_0) \leq 0.$$&lt;/p&gt;
+&lt;p&gt;With that in mind, let&amp;rsquo;s take a stroll through the perceptron.&lt;/p&gt;
+&lt;h2 id=&#34;the-perceptron&#34;&gt;The perceptron&lt;/h2&gt;
+&lt;p&gt;The perceptron algorithm takes a training set $S_N$ input, and outputs the classifier parameters $\theta$ and $\theta_0$. The general principle is to find a mistake and then update the parameters to fix the mistake. As long as the training data are linearly separable, doing this for long enough will eventually result in some parameters that do the job.&lt;/p&gt;
+&lt;p&gt;It is typical to initialize $\theta$ to a $d$-dimensional zero vector (where $d$ is the number of features) and $\theta_0$ to a scalar zero. For now we will ignore $\theta_0$ and focus on training a linear classifier whose decision boundary runs through the origin. We begin the proceedings with the following items:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;theta&lt;/code&gt;, a $d$-element array of zeros,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;feature_matrix&lt;/code&gt;, a $d \times N$ feature matrix, with a training example on each row,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;labels&lt;/code&gt;, an array of $N$ labels for each training example.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;An incomplete Python (Numpy) implementation of the algorithm looks like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def incomplete_perceptron(feature_matrix, labels):
+    num_features, num_examples = feature_matrix.shape
+    theta = np.zeros(num_features)
+    
+    for i in range(num_examples):
+        x, y = feature_matrix[i, :], labels[i]
+        # update theta when we have made a mistake
+        if y * np.dot(theta, x) &amp;lt;= 0:
+            theta = theta + y * x
+
+    return theta
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;At the update step, the algorithm tests to see whether &lt;code&gt;theta&lt;/code&gt;, the current iteration of the classifier computes the wrong training label. When that happens, $\theta$ is updated by adding $y^{(i)} x^{(i)}$ to it.&lt;/p&gt;
+&lt;p&gt;To see why that should help things, let&amp;rsquo;s consider the scenario after one update, where $\theta = y^{(i)}x^{(i)}.$ Now imagine if the classifier saw the same training example. If we plugged our updated $\theta$ value into the &amp;ldquo;mistake detector&amp;rdquo;, we would get&lt;/p&gt;
+&lt;p&gt;$$ y^{(i)} (\theta \cdot x^{(i)}) = y^{(i)} ((y^{(i)}x^{(i)}) \cdot x^{(i)}) = x^{(i)} \cdot x^{(i)} = \norm{x^{(i)}}^2$$&lt;/p&gt;
+&lt;p&gt;Now unless you happen to have a row of zeros inside your feature matrix, the squared norm of $x$ is always greater than zero, and so the mistake has been corrected. We can see that the algorithm has somehow improved the situation.&lt;/p&gt;
+&lt;h3 id=&#34;number-of-iterations&#34;&gt;Number of iterations&lt;/h3&gt;
+&lt;p&gt;As we go through the training examples, the parameter vector $\theta$ will change rapidly, sometimes cancelling out the effect of previous examples. It is for this reason that the dataset is typically iterated over multiple times, ideally until the algorithm no longer finds a mistake.&lt;/p&gt;
+&lt;p&gt;To complete the algorithm, we will introduce a new input $T$ that specifies how many times to loop through the dataset, and factor the offset parameter &lt;code&gt;theta_0&lt;/code&gt; into our computation. The last change to make is a practical one: it is tricky to check whether a numerical computation equals an exact value, like zero. To avoid numerical instabilities, we will instead use a tolerance parameter $\epsilon$, such that if some result $|r| &amp;lt; \epsilon$, then $r = 0$.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def perceptron(feature_matrix, labels, T=1, tolerance=1e-6):
+    num_features, num_examples = feature_matrix.shape
+    theta = np.zeros(num_features)
+    theta_0 = 0
+
+    for t in range(T):
+        for i in range(num_examples):
+            x, y = feature_matrix[i, :], labels[i]
+            # update theta, theta_0 when we have made a mistake
+            if y * (np.dot(theta, x) + theta_0) &amp;lt; tolerance:
+                theta = theta + y * x
+                theta_0 = theta_0 + y
+
+    return theta, theta_0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;the-offset-update&#34;&gt;The offset update&lt;/h3&gt;
+&lt;p&gt;It is worth making a quick note about how the update for the offset parameter $\theta_0$ comes about. Consider a dataset that has been &amp;ldquo;extended&amp;rdquo;, such that $\theta_{ext} = [\theta, \theta_0]$ and $x_{ext} = [x, 1],$ where $x \in S_N$. If we want to update $\theta_{ext}$ using our extended training data, we use the same update rule as before,&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\theta_{ext} &amp;amp;= \theta_{ext} + y^{(i)} x_{ext}^{(i)} \\&lt;br&gt;
+\end{align*}
+$$&lt;/p&gt;
+&lt;p&gt;Expanding this out reveals the update for both parameters:&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\begin{bmatrix}
+\theta\\&lt;br&gt;
+\theta_0
+\end{bmatrix}
+&amp;amp;=
+\begin{bmatrix}
+\theta\\&lt;br&gt;
+\theta_0
+\end{bmatrix}
+\end{align*} + y^{(i)}
+\begin{bmatrix}
+x^{(i)}\\&lt;br&gt;
+1
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;p&gt;In other words, handling the extra offset parameter $\theta_0$ is just a matter of considering slightly different training examples.&lt;/p&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;Over the course of this writeup we have peeked behind the curtain and seen that machine learning, for all the hype and buzz, is not something overly mysterious. At heart, machine learning is the practice of identifying patterns in data using some kind of model, with the &amp;ldquo;learning&amp;rdquo; achieved through improving the model parameters.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

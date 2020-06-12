@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>homelab | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/tag/homelab/</link>
+      <atom:link href="https://www.remotelycurious.net/tag/homelab/index.xml" rel="self" type="application/rss+xml" />
+    <description>homelab</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Fri, 05 Jun 2020 23:13:08 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>homelab</title>
+      <link>https://www.remotelycurious.net/tag/homelab/</link>
+    </image>
+    
+    <item>
+      <title>Building a homelab with Proxmox</title>
+      <link>https://www.remotelycurious.net/post/homelab/</link>
+      <pubDate>Fri, 05 Jun 2020 23:13:08 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/homelab/</guid>
+      <description>&lt;p&gt;It turns out that the journey to setting up a homelab is filled with trapdoors and snake pits.&lt;/p&gt;
+&lt;p&gt;This writeup is largely for documentation purposes &amp;ndash; it&amp;rsquo;s written as a note to my future self who might look to recreate this setup and wonder why certain design decisions were made. My goal is to avoid having to rediscover all of the little hazards that can (and did) result in hours of frustration. That said, my hope is that other people with similar goals can learn from my experience and save themselves from navigating seas of browser tabs in search of enlightenment.&lt;/p&gt;
+&lt;p&gt;By the time my homelab took shape, I had made use of all sorts of resources on the topic. One of the best belongs to Dan Ford, whose excellent 
+&lt;a href=&#34;https://www.dlford.io/tag/how-to-home-lab-series/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;homelab writeup series&lt;/a&gt; really helped me to get started. The documentation for 
+&lt;a href=&#34;https://pve.proxmox.com/wiki/Main_Page&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Proxmox&lt;/a&gt; and 
+&lt;a href=&#34;https://docs.netgate.com/pfsense/en/latest/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;pfSense&lt;/a&gt; was also useful. Aside from these, there were also many valuable snippets of information, forum posts and docpages scattered throughout the internet, which have been cited where appropriate.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#objectives&#34;&gt;Objectives&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#requirements&#34;&gt;Requirements&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#hardware&#34;&gt;Hardware&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#hypervisor&#34;&gt;Hypervisor&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#network&#34;&gt;Network&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#installation&#34;&gt;Installation&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#installing-proxmox&#34;&gt;Installing Proxmox&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#file-system&#34;&gt;File system&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#network-configuration&#34;&gt;Network configuration&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#configuring-proxmox&#34;&gt;Configuring Proxmox&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#enabling-software-updates&#34;&gt;Enabling software updates&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#uploading-iso-images&#34;&gt;Uploading ISO images&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#configuring-the-virtual-network&#34;&gt;Configuring the virtual network&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#installing-pfsense&#34;&gt;Installing pfSense&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#configuring-pfsense&#34;&gt;Configuring pfSense&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#creating-the-internal-network&#34;&gt;Creating the internal network&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#restricting-access&#34;&gt;Restricting access&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;objectives&#34;&gt;Objectives&lt;/h1&gt;
+&lt;p&gt;There are a lot of reasons you might want to build a homelab. 
+&lt;a href=&#34;https://www.reddit.com/r/homelab/comments/4mc7sf/why_build_a_homelab_some_thoughts_for_beginners/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Many of them&lt;/a&gt; have to do with learning something. My short-term goal is to learn system administration (things like configuring firewalls and networks, managing security policy, etc) but eventually I want to learn more about network intrusion detection. I&amp;rsquo;d be curious to see if I could break into my own network &amp;ndash; and what that would look like from the perspective of a sysadmin.&lt;/p&gt;
+&lt;h1 id=&#34;requirements&#34;&gt;Requirements&lt;/h1&gt;
+&lt;p&gt;A homelab can take many forms, from an array of physical computers mounted on racks, to a book-sized unit hosting a virtualized computer network. In this section I discuss the major constraints and design decisions that guided my approach.&lt;/p&gt;
+&lt;h2 id=&#34;hardware&#34;&gt;Hardware&lt;/h2&gt;
+&lt;p&gt;Since I like quiet and despise both heat and clutter, the first major constraint was that this homelab needed to be virtual. This means the homelab is going to be implemented by a bare-metal hypervisor&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;, on a host computer with a low noise, power, and physical profile. In the end I went with the 
+&lt;a href=&#34;https://protectli.com/product/fw6b/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Protectli FW6B&lt;/a&gt;. It&amp;rsquo;s a silent, well-built unit that comes with a dual-core i3-7100U and 6x Intel Gigabit NICs. I opted to load it with 2x8 GiB of DDR4 RAM and 480 GiB of mSATA storage. This is definitely overkill for a bunch of lightweight VMs, but I&amp;rsquo;ll be putting this little box to good use in future projects.&lt;/p&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Whatever you do, make sure that your host CPU supports virtualization!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    According to &lt;a href=&#34;https://www.reddit.com/r/homelab/comments/7at38f/1gig_pcie_nic_recommendations/&#34;&gt;people who know better&lt;/a&gt;, Intel NICs seem to better support virtualization, compared with those from other manufacturers.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;hypervisor&#34;&gt;Hypervisor&lt;/h2&gt;
+&lt;p&gt;After a couple hours of internet research, I decided to run with 
+&lt;a href=&#34;https://www.proxmox.com/en/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Proxmox&lt;/a&gt; as my hypervisor. People also seem to be pretty happy with 
+&lt;a href=&#34;https://www.vmware.com/products/esxi-and-esx.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;ESXi&lt;/a&gt;, but my decision largely came down to favoring an unrestricted, open-source solution. I&amp;rsquo;m definitely not a seasoned practitioner, so it&amp;rsquo;s unlikely that I would really be able to appreciate the difference between the two products right now.&lt;/p&gt;
+&lt;h2 id=&#34;network&#34;&gt;Network&lt;/h2&gt;
+&lt;p&gt;To start with, having some virtual machines running on an internal network, isolated from the home network by a firewall, sounds like a good idea. 
+&lt;a href=&#34;https://www.pfsense.org/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;pfSense&lt;/a&gt; is a well-regarded firewall whose documentation specifically includes guidance on 
+&lt;a href=&#34;https://docs.netgate.com/pfsense/en/latest/virtualization/virtualizing-pfsense-with-proxmox.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;running it as a VM in Proxmox&lt;/a&gt;, which is exactly what I want to do. It also can be configured as an intrusion detection/prevention system by way of add-on packages like Suricata and Snort, something I&amp;rsquo;m keen to play around with in the future.&lt;/p&gt;
+&lt;p&gt;Although I&amp;rsquo;m generally comfortable with vanilla home networking, there&amp;rsquo;s a lot of uncharted territory for me in this project. To limit what could go wrong, I will keep things simple and just focus on getting a basic system up-and-running. This means leaving things like VLAN configuration and SSH access for another homelab iteration.&lt;/p&gt;
+&lt;p&gt;The schematic for the eventual homelab is shown below:&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-homelab-schematic-with-two-virtual-switches-vmbrx-and-three-vms&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/network-diagram.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1&amp;lt;/b&amp;gt;. Homelab schematic, with two virtual switches (&amp;lt;code&amp;gt;vmbrx&amp;lt;/code&amp;gt;) and three VMs.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/network-diagram.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1&lt;/b&gt;. Homelab schematic, with two virtual switches (&lt;code&gt;vmbrx&lt;/code&gt;) and three VMs.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
+&lt;p&gt;Before beginning, you should have the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;$\geq$8 GB USB flash drive&lt;/li&gt;
+&lt;li&gt;Rufus installer (&lt;code&gt;rufus-3.10.exe&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Proxmox VE ISO image (&lt;code&gt;proxmox-ve_6.2-1.iso&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;pfSense ISO image (&lt;code&gt;pfSense-CE-2.4.5-RELEASE-amd64.iso&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Linux ISO image (&lt;code&gt;CentOS-8.1.1911-x86_64-dvd1.iso&lt;/code&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+&lt;a href=&#34;https://rufus.ie/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Rufus&lt;/a&gt; will be used to wipe and format the USB drive as a bootable installation drive&lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;, so please make sure it&amp;rsquo;s not holding anything of value! Once you&amp;rsquo;ve selected the USB drive under &lt;em&gt;Device&lt;/em&gt; and the Proxmox ISO image under &lt;em&gt;Boot selection&lt;/em&gt;, go ahead and click Start. You might get a couple of prompts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;Download a newer version of GRUB?&amp;rdquo; → &lt;strong&gt;No&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;Write as an ISO image or DD image?&amp;rdquo; → &lt;strong&gt;Write in DD Image mode&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Once the disk is written, plug it into your homelab host and turn it on. Immediately hold down ESC or DEL and let go once you&amp;rsquo;ve entered the BIOS.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    At this point, you should probably enable &lt;a href=&#34;https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface&#34;&gt;UEFI&lt;/a&gt; mode. Most operating systems these days support UEFI, which allows for things like using a mouse in the installation GUI. The only reason to use legacy mode is for compatibility with ancient OS installation media.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    While we&amp;rsquo;re here, make sure that the relevant virtualization setting (Intel VT, AMD-V, SVM, etc) is enabled.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Within the BIOS, find the boot section and either reorder the device list such that your USB drive comes first, or if there&amp;rsquo;s an option to immediately boot from a selected device, use that to boot from the drive. Selecting &lt;strong&gt;Install Proxmox VE&lt;/strong&gt; from the menu that pops up will launch the installatoon process.&lt;/p&gt;
+&lt;h2 id=&#34;installing-proxmox&#34;&gt;Installing Proxmox&lt;/h2&gt;
+&lt;p&gt;While going through the 
+&lt;a href=&#34;https://pve.proxmox.com/wiki/Installation&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;installation process&lt;/a&gt;, you will have to make some important decisions. The first of these concerns what file system to use on the host.&lt;/p&gt;
+&lt;h3 id=&#34;file-system&#34;&gt;File system&lt;/h3&gt;
+&lt;p&gt;If we ignore Ext3, we have three choices: Ext4, XFS, and ZFS. The default file system, 
+&lt;a href=&#34;https://opensource.com/article/18/4/ext4-filesystem&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ext4&lt;/a&gt;, was designed to be backwards-compatible with older file systems. It&amp;rsquo;s known for stability, which is probably the reason why it&amp;rsquo;s the default file system on most Linux distributions. 
+&lt;a href=&#34;https://www.usenix.org/system/files/login/articles/140-hellwig.pdf&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;XFS&lt;/a&gt; is another mature solution that is particularly well-suited for servers that deal with many large (exbibytes) files.&lt;/p&gt;
+&lt;p&gt;
+&lt;a href=&#34;https://www.freebsd.org/doc/handbook/zfs.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;ZFS&lt;/a&gt; is a next-generation file system that was designed to eliminate many issues found in legacy file systems. ZFS is probably the way to go for someone who knows what they&amp;rsquo;re doing (and doesn&amp;rsquo;t need support for enormous files) &amp;ndash; you get great performance, configuration flexibility, and access to enterprise-level features, in return for a larger memory footprint and a bit more configuration.&lt;/p&gt;
+&lt;p&gt;Since I&amp;rsquo;m just learning the ropes and don&amp;rsquo;t really need advanced features and capabilities, I left Proxmox with Ext4 as the default choice. You would only see the option to change this by clicking &lt;em&gt;Options&lt;/em&gt; next to the Target Harddisk dropdown during the installation, so keep this in mind if you want to choose a different file system&lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;network-configuration&#34;&gt;Network configuration&lt;/h3&gt;
+&lt;p&gt;Proxmox will eventually ask you to confirm your network configuration. The IP address here will be accessed by a browser on another computer on your network, allowing you to perform hypervisor management through a web interface. Choose an IP address that is on the same network segment as your router (and home network). If your router is running DHCP, you want this management address to be outside of the DHCP pool.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ve selected &lt;code&gt;192.168.0.10/24&lt;/code&gt; as the management IP address, with the address of my router (&lt;code&gt;192.168.0.1&lt;/code&gt;) as the gateway. Keep the management address handy. I&amp;rsquo;ve also gone with a FQDN (fully-qualified domain name) of &lt;code&gt;pve.alex.home&lt;/code&gt;, which implies the hostname &lt;code&gt;pve&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you want to change the management IP address later, you will need to do it in &lt;em&gt;two&lt;/em&gt; places: (a) &lt;code&gt;/etc/hosts&lt;/code&gt; and (b) &lt;code&gt;/etc/network/interfaces&lt;/code&gt;. We&amp;rsquo;ll look at the latter configuration file later on.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;configuring-proxmox&#34;&gt;Configuring Proxmox&lt;/h2&gt;
+&lt;p&gt;After the installation has finished, remove the USB drive and reboot. You&amp;rsquo;ll eventually see a prompt that asks you to configure Proxmox by visiting &lt;code&gt;https://&amp;lt;MANAGEMENT-IP&amp;gt;:8006&lt;/code&gt;. Provided you&amp;rsquo;ve configured the network settings properly, you will be able to access the web GUI from another computer in your home network by entering that address in a browser. Once you&amp;rsquo;ve supplied your credentials (user &lt;code&gt;root&lt;/code&gt; and the password you specified earlier) and logged in, you are ready to start configuring the hypervisor.&lt;/p&gt;
+&lt;h3 id=&#34;enabling-software-updates&#34;&gt;Enabling software updates&lt;/h3&gt;
+&lt;p&gt;At this point, it&amp;rsquo;s a good idea to enable software updates. Proxmox is configured by default to access the software repositories for subscribed customers, which are not accessible to those without a subscription. We&amp;rsquo;re going to configure Proxmox to access the community repositories instead.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s take a quick look at the interface. On the left you&amp;rsquo;ve got the &lt;em&gt;resource tree&lt;/em&gt;, a column that gives you an overview of your hypervisor (Fig. 2, left column). Underneath &lt;em&gt;Datacenter&lt;/em&gt;, you&amp;rsquo;ve got a single &lt;em&gt;node&lt;/em&gt; with hostname &lt;code&gt;pve&lt;/code&gt;. One more level down lists all the VMs and logical storage devices associated with the node. At the moment there are no VMs and two shared storage objects called &lt;code&gt;local&lt;/code&gt; and &lt;code&gt;local-lvm&lt;/code&gt; that resulted from the default Proxmox installation options. The &lt;code&gt;local-lvm&lt;/code&gt; object holds VM disk images, while the &lt;code&gt;local&lt;/code&gt; object holds backup files and ISO images. We&amp;rsquo;ll be dealing with &lt;code&gt;local&lt;/code&gt; shortly.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-left-column-proxmox-resource-tree-showing-the-vms-and-storage-objects-available-to-the-node-pve-right-panel-iso-images-in-local-shared-storage-after-uploading-to-the-host&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/proxmox-storage.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2&amp;lt;/b&amp;gt;. Left column: Proxmox resource tree, showing the VMs and storage objects available to the node &amp;lt;code&amp;gt;pve&amp;lt;/code&amp;gt;. Right panel: ISO images in &amp;lt;code&amp;gt;local&amp;lt;/code&amp;gt; shared storage after uploading to the host.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/proxmox-storage.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2&lt;/b&gt;. Left column: Proxmox resource tree, showing the VMs and storage objects available to the node &lt;code&gt;pve&lt;/code&gt;. Right panel: ISO images in &lt;code&gt;local&lt;/code&gt; shared storage after uploading to the host.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;The toolbar in Fig. 2 above (with title &lt;em&gt;Storage &amp;lsquo;local&amp;rsquo; on node &amp;lsquo;pve&amp;rsquo;&lt;/em&gt; and button &lt;em&gt;Help&lt;/em&gt; on the right) will change according to the selected resource in the tree. Clicking the &lt;code&gt;pve&lt;/code&gt; node will bring up node-specific toolbar buttons, like &lt;em&gt;Reboot&lt;/em&gt;, &lt;em&gt;Shutdown&lt;/em&gt;, and &lt;em&gt;Shell&lt;/em&gt;. Go ahead and click that &lt;strong&gt;Shell&lt;/strong&gt; button.&lt;/p&gt;
+&lt;p&gt;Time to configure the software repositories. Debian (Proxmox&amp;rsquo;s underlying operating system) makes use of &lt;code&gt;apt&lt;/code&gt; (Advanced Package Tool) to manage and update software. We are going to navigate to the directory that holds the repository configuration, rename (and effectively disable) the config file, and create a new config file containing a link to the community repositories.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;cd /etc/apt/sources.list.d
+mv pve-enterprise.list pve-enterprise.list.original
+echo &#39;deb http://download.proxmox.com/debian/pve buster pve-no-subscription&#39; &amp;gt; pve-community.list
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;code&gt;buster&lt;/code&gt; is the name of the Debian release used by Proxmox 6. Make sure to use the release name for your version of Proxmox.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;You can now run &lt;code&gt;apt update&lt;/code&gt; and &lt;code&gt;apt dist-upgrade&lt;/code&gt; to download and install all available updates.&lt;/p&gt;
+&lt;h3 id=&#34;uploading-iso-images&#34;&gt;Uploading ISO images&lt;/h3&gt;
+&lt;p&gt;Before we can start making VMs, we need to upload the ISO installation media. Click the &lt;code&gt;local&lt;/code&gt; storage object &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Content&lt;/em&gt; tab to bring up a (currently empty) list of items sitting in the storage. After using the Upload button to store the pfSense and CentOS ISO images, the list will look like Fig. 2 (right panel).&lt;/p&gt;
+&lt;h3 id=&#34;configuring-the-virtual-network&#34;&gt;Configuring the virtual network&lt;/h3&gt;
+&lt;p&gt;As mentioned earlier, the host will have two network segments: one that allows the host to communicate with the home network, and an internal network segment, insulated by a firewall. This section talks about the configuration needed to prepare the virtualized network for the firewall.&lt;/p&gt;
+&lt;h4 id=&#34;virtual-switches&#34;&gt;Virtual switches&lt;/h4&gt;
+&lt;p&gt;The network components available to Proxmox can be found by clicking the &lt;code&gt;pve&lt;/code&gt; node &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;System&lt;/em&gt; tab group &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Network&lt;/em&gt; tab. The Protectli box has six NICs, which are listed as &lt;code&gt;enp[1-6]s0&lt;/code&gt; in Fig. 3 below as Network Devices.&lt;/p&gt;
+&lt;p&gt;You&amp;rsquo;ll also see something called a &lt;em&gt;Linux Bridge&lt;/em&gt;, named &lt;code&gt;vmbr0&lt;/code&gt;. This behaves like a network switch, allowing for communication between devices using both virtual and physical interfaces. Currently it&amp;rsquo;s associated with one physical interface (&lt;code&gt;enp1s0&lt;/code&gt;), through which the host is connected to the router. The bridge is also associated with Proxmox through its management IP address (&lt;code&gt;192.168.0.10/24&lt;/code&gt;). If we connected a VM to &lt;code&gt;vmbr0&lt;/code&gt; and gave it an IP address from the same subnet, that VM will gain access to both Proxmox&amp;rsquo;s management interface and the router. We&amp;rsquo;ll be doing exactly this for pfSense.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    A Linux Bridge &lt;a href=&#34;https://unix.stackexchange.com/questions/572261/virtual-network-bridge-why-does-it-have-to-have-an-ip-address-assigned-to-it&#34;&gt;does not necessarily need an IP address&lt;/a&gt;, but since we want to be able to manage Proxmox from the home network, we need &lt;code&gt;vmbr0&lt;/code&gt; to be bound to an IP address on the home network subnet, &lt;code&gt;192.168.0.0/24&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-proxmox-network-devices-shown-with-two-linux-bridges&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/proxmox-network.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3&amp;lt;/b&amp;gt;. Proxmox network devices, shown with two Linux Bridges.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/proxmox-network.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3&lt;/b&gt;. Proxmox network devices, shown with two Linux Bridges.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h4 id=&#34;forwarding-between-private-networks&#34;&gt;Forwarding between (private) networks&lt;/h4&gt;
+&lt;p&gt;Now we&amp;rsquo;re going to focus on the internal network segment, which needs its own Linux Bridge. Make one and call it &lt;code&gt;vmbr1&lt;/code&gt;, without assigning an IP address or any other settings to the bridge. The internal network will make use of the subnet &lt;code&gt;192.168.1.0/24&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;As useful as Proxmox&amp;rsquo;s web interface is, we cannot use it to completely configure the virtual network for our use case. To make this work, we need to directly edit the &lt;code&gt;/etc/network/interfaces&lt;/code&gt; file to ask Proxmox to do two things for us:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;forward IP packets across different network segments, and&lt;/li&gt;
+&lt;li&gt;use 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Network_address_translation&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;IP masquerading&lt;/a&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The effect of (2) will be to allow all devices in the internal network (each with their own private IP address on the internal subnet) to communicate with the outside world using a single &amp;ldquo;external&amp;rdquo; IP address &amp;ndash; the address of the host.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    I say &amp;ldquo;external&amp;rdquo; in quotes because often when we talk about NAT (network address translation), we&amp;rsquo;re mapping a private IP address to a &lt;em&gt;public&lt;/em&gt; IP address. Here we&amp;rsquo;re mapping private IP addresses to another private IP address.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;If we take a look at &lt;code&gt;/etc/network/interfaces&lt;/code&gt;, we will see the six physical interfaces, &lt;code&gt;enp[1-6]s0&lt;/code&gt;, as well as &lt;code&gt;vmbr0&lt;/code&gt; and &lt;code&gt;vmbr1&lt;/code&gt;. The configuration for the two Linux Bridges is shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;auto vmbr0
+iface vmbr0 inet static
+        address 192.168.0.10/24
+        gateway 192.168.0.1
+        bridge-ports enp1s0
+        bridge-stp off
+        bridge-fd 0
+
+auto vmbr1
+iface vmbr1 inet manual
+        bridge-ports none
+        bridge-stp off
+        bridge-fd 0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can confirm that only &lt;code&gt;vmbr0&lt;/code&gt; has an IP address and gateway, allowing for communication between the host, router, and firewall on the &lt;code&gt;192.168.0.0/24&lt;/code&gt; subnet.&lt;/p&gt;
+&lt;p&gt;At the end of the file, we will add the following three lines:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;post-up echo 1 &amp;gt; /proc/sys/net/ipv4/ip_forward
+post-up iptables -t nat -A POSTROUTING -s &#39;192.168.1.0/24&#39; -o vmbr0 -j MASQUERADE
+post-down iptables -t nat -D POSTROUTING -s &#39;192.168.1.0/24&#39; -o vmbr0 -j MASQUERADE
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The first line enables packet forwarding after the interface has been brought up, and the next two lines conditionally add/remove a rule for 
+&lt;a href=&#34;https://linux.die.net/man/8/iptables&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Proxmox&amp;rsquo;s firewall&lt;/a&gt;. Let&amp;rsquo;s break it down:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;-t nat -A POSTROUTING&lt;/code&gt;: the rule gets added to the POSTROUTING NAT table, to alter packets as they leave the interface,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-s &#39;192.168.1.0/24&#39;&lt;/code&gt;: the rule applies to any packet whose source IP belongs to the internal network,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-o vmbr0&lt;/code&gt;: matching packets get sent to interface &lt;code&gt;vmbr0&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-j MASQUERADE&lt;/code&gt;: matching packets get their source IP replaced by that of &lt;code&gt;vmbr0&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In the last line, instead of adding the rule after the interface is brought up, the rule is removed after the interface is brought down.&lt;/p&gt;
+&lt;p&gt;To summarize, the effect of this extra configuration is to take packets that are heading out from the internal network (e.g. with source IP &lt;code&gt;192.168.1.99&lt;/code&gt;), replace their source IPs with &lt;code&gt;192.168.0.10&lt;/code&gt;, and send them on their way. When an internal VM&amp;rsquo;s network request is reciprocated by a public server, the server will send packets that are addressed to Proxmox, which will intercept and redirect those packets back through the firewall.&lt;/p&gt;
+&lt;h2 id=&#34;installing-pfsense&#34;&gt;Installing pfSense&lt;/h2&gt;
+&lt;p&gt;We are finally ready to create our pfSense virtual machine! In this homelab iteration, the firewall is just going to have a small amount of configuration to control administrative access and configure DHCP to assign IP addresses to two CentOS VMs (a client and a server) using their MAC addresses.&lt;/p&gt;
+&lt;p&gt;Since there&amp;rsquo;s not going to be any heavy traffic processing going on here, I&amp;rsquo;ve opted for a single-core VM (hostname &lt;code&gt;pfsense&lt;/code&gt;) with pfSense&amp;rsquo;s minimum hardware requirements (512 MiB RAM and 4 GiB of disk space), using the Create Virtual Machine dialog to choose a VirtIO SCSI controller and VirtIO network device connected to the &lt;code&gt;vmbr0&lt;/code&gt; bridge.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    According to the &lt;a href=&#34;https://pve.proxmox.com/wiki/Qemu/KVM_Virtual_Machines&#34;&gt;documentation&lt;/a&gt;, we should use paravirtualized (VirtIO) devices where possible. Paravirtualization allows guest operating systems to talk directly to the hypervisor, which generally leads to improved performance and less virtualization overhead.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Now we&amp;rsquo;ll add another network device to the VM. In the resource tree, click the &lt;code&gt;pfsense&lt;/code&gt; VM &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Hardware&lt;/em&gt; tab &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Add&lt;/em&gt; dropdown button &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Network Device&lt;/em&gt;, to connect &lt;code&gt;vmbr1&lt;/code&gt;. Now the pfSense VM has two NICs: &lt;code&gt;net0&lt;/code&gt;, connected to &lt;code&gt;vmbr0&lt;/code&gt;, and &lt;code&gt;net1&lt;/code&gt;, connected to &lt;code&gt;vmbr1&lt;/code&gt;. Start up the VM and install pfSense with all of the defaults.&lt;/p&gt;
+&lt;h3 id=&#34;configuring-pfsense&#34;&gt;Configuring pfSense&lt;/h3&gt;
+&lt;p&gt;After installation and a reboot, pfSense will ask whether you want to set up VLANs. We&amp;rsquo;re not doing this, but before you proceed, make sure you see two valid interfaces, &lt;code&gt;vtnet0&lt;/code&gt; and &lt;code&gt;vtnet1&lt;/code&gt;, listed above the prompt. Next, you&amp;rsquo;ll get a couple more prompts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;Enter the WAN interface name&amp;rdquo; → &lt;strong&gt;&lt;code&gt;vtnetx&lt;/code&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;Enter the LAN interface name&amp;rdquo; → &lt;strong&gt;&lt;code&gt;vtnety&lt;/code&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Make sure that each interface corresponds to its Linux Bridge counterpart (e.g. &lt;code&gt;vtnet0&lt;/code&gt; is &lt;code&gt;vmbr0&lt;/code&gt;). Check that the listed MAC addresses match the ones found under &lt;em&gt;Datacenter&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;code&gt;pve&lt;/code&gt; node &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;code&gt;pfSense&lt;/code&gt; VM &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Hardware&lt;/em&gt; tab.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The WAN interface is the firewall&amp;rsquo;s untrusted entrance. If I were confident that these homelab shenanigans wouldn&amp;rsquo;t eventually disrupt my internet connectivity, I&amp;rsquo;d arrange for the firewall to handle internet traffic directly, before forwarding traffic to the home router and network through the firewall&amp;rsquo;s LAN interface. (But I&amp;rsquo;m not. At least, not yet!)&lt;/p&gt;
+&lt;p&gt;After confirming the above information, pfSense will continue booting and eventually present you with a menu (Fig. 3). In my case, the router has allocated pfSense&amp;rsquo;s WAN interface an IP address, &lt;code&gt;192.168.0.180/24&lt;/code&gt;. That is a nice gesture, but I want to give it a static IP address. After choosing option 2, enter the WAN&amp;rsquo;s new IP address as &lt;code&gt;192.168.0.11/24&lt;/code&gt; and a gateway of &lt;code&gt;192.168.0.1&lt;/code&gt;. Enter &lt;strong&gt;no&lt;/strong&gt; when asked to revert to HTTP as the webConfigurator protocol (this is unimportant right now). Time to reboot.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-pfsense-command-line-menu&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/pfsense-menu.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3&amp;lt;/b&amp;gt;. pfSense command line menu.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/pfsense-menu.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3&lt;/b&gt;. pfSense command line menu.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h4 id=&#34;using-the-setup-wizard&#34;&gt;Using the setup wizard&lt;/h4&gt;
+&lt;p&gt;Once we&amp;rsquo;re back at the menu, we can access the management GUI using the WAN interface IP address, although we need to temporarily disable the firewall to access it. Choose option 8 to enter the shell, run &lt;code&gt;pfctl -d&lt;/code&gt; to bring down the firewall, and then enter &lt;code&gt;192.168.0.11&lt;/code&gt; in a browser on your home network. After supplying the default credentials (username &lt;code&gt;admin&lt;/code&gt;, password &lt;code&gt;pfsense&lt;/code&gt;), you&amp;rsquo;ll be brought to pfSense&amp;rsquo;s setup wizard. I&amp;rsquo;ll highlight some important configuration below (with the steps in parentheses):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;(2/9)&lt;/strong&gt; &lt;em&gt;Hostname/domain&lt;/em&gt;: nice to make these match your Proxmox details,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(2/9)&lt;/strong&gt; &lt;em&gt;Primary/secondary&lt;/em&gt; DNS Server: as above,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(3/9)&lt;/strong&gt; &lt;em&gt;Timezone&lt;/em&gt;: choose yours,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(4/9)&lt;/strong&gt; &lt;em&gt;Static IP configuration&lt;/em&gt;: make sure these details are correct (&lt;code&gt;192.168.0.11/24&lt;/code&gt;, with gateway &lt;code&gt;192.168.0.1&lt;/code&gt;),&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(4/9)&lt;/strong&gt; &lt;em&gt;RFC1918/bogon networks&lt;/em&gt;: uncheck the two boxes to allow private/non-internet routed networks through the WAN interface &amp;ndash; this firewall will of course be dealing with these kinds of networks,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(5/9)&lt;/strong&gt; &lt;em&gt;Configure LAN interface&lt;/em&gt;: make sure these details are correct (&lt;code&gt;192.168.1.1/24&lt;/code&gt;) &amp;ndash; this will be the gateway for the VMs in the internal network,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(6/9)&lt;/strong&gt; &lt;em&gt;Set admin webGUI password&lt;/em&gt;: now&amp;rsquo;s a good time!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Setting the admin password will trigger an update, after which you will get kicked off the management GUI. Go ahead and reboot the pfSense VM. We haven&amp;rsquo;t yet made allowances for management access in the firewall, so once it&amp;rsquo;s ready you will have to once again disable the firewall (&lt;code&gt;pfctl -d&lt;/code&gt;) before logging back in with your new credentials.&lt;/p&gt;
+&lt;h4 id=&#34;playing-nice-with-virtio&#34;&gt;Playing nice with VirtIO&lt;/h4&gt;
+&lt;p&gt;If you try moving through different parts of the web interface, you might notice that it seems a bit sluggish. This comes about from an issue with using VirtIO network drivers to interface with pfSense, which can be resolved by changing a couple of settings as recommended by 
+&lt;a href=&#34;https://docs.netgate.com/pfsense/en/latest/virtualization/virtualizing-pfsense-with-proxmox.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;the documentation&lt;/a&gt; (section &lt;em&gt;Configuring pfSense Software to work with Proxmox VirtIO&lt;/em&gt;).&lt;/p&gt;
+&lt;p&gt;Click the &lt;em&gt;System&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Advanced&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Networking&lt;/em&gt; tab and scroll to the bottom to the &lt;em&gt;Network Interfaces&lt;/em&gt; section. Make sure these boxes below are checked:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; Disable hardware checksum offload&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; Disable hardware TCP segmentation offload&lt;/li&gt;
+&lt;li&gt;&lt;input checked=&#34;&#34; disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; Disable hardware large receive offload&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;allowing-administrative-access&#34;&gt;Allowing administrative access&lt;/h4&gt;
+&lt;p&gt;Our next order of business is to allow ourselves administrative access, so that we don&amp;rsquo;t have to tear down our firewall every time we need to perform some management. We are going to do a couple of things here:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;define &lt;em&gt;aliases&lt;/em&gt; to specify IP management ports,&lt;/li&gt;
+&lt;li&gt;use these aliases to allow pfSense management through those ports.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To define the aliases, click the &lt;em&gt;Firewall&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Aliases&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Ports&lt;/em&gt; tab, and then click &lt;em&gt;Add&lt;/em&gt;. We will allow management through ports 80 (HTTP) and 8080 (alt-HTTP). When you&amp;rsquo;ve got these ports listed as in Fig. 4 below, save and apply the changes when prompted.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-specifying-pfsense-aliases&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/pfsense-aliases.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4&amp;lt;/b&amp;gt;. Specifying pfSense aliases.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/pfsense-aliases.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4&lt;/b&gt;. Specifying pfSense aliases.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Now we will add a rule to allow management traffic through the WAN interface. The rule we add will act on inbound packets at the interface. Click the &lt;em&gt;Firewall&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Rules&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;WAN&lt;/em&gt; tab, and then click &lt;em&gt;Add&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Stepping through the configuration:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;Edit firewall rule&lt;/em&gt;: pass TCP IPv4 traffic through the WAN interface &amp;ndash; you will find that the default settings under this heading work for us,&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Source&lt;/em&gt;: allow access to home network devices, so specify &lt;em&gt;Network&lt;/em&gt; and enter &lt;code&gt;192.168.0.0/24&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Destination&lt;/em&gt;: match traffic headed for this firewall (select this in the destination dropdown) through the management ports (fill out the &lt;em&gt;Custom&lt;/em&gt; port ranges with the alias &lt;code&gt;pfsense_admin_ports&lt;/code&gt;),&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Extra options&lt;/em&gt;: fill out the description with something like &amp;ldquo;allow administrative access from home network&amp;rdquo;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After saving the new firewall rule, we will get pfSense to provide access to the management interface through the alternative HTTP port. Click the &lt;em&gt;System&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Advanced&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Admin Access&lt;/em&gt; tab, enter &lt;code&gt;8080&lt;/code&gt; in the &lt;em&gt;TCP port&lt;/em&gt; field, and apply the changes.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    A firewall will go through each of its rules until it finds a match, at which point it will act on the traffic according to the matching rule. If an inbound packet doesn&amp;rsquo;t match any rule, the packet gets dropped.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    It&amp;rsquo;s &lt;a href=&#34;https://www.w3.org/Daemon/User/Installation/PrivilegedPorts.html&#34;&gt;good practice&lt;/a&gt; to serve the web interface on alternative HTTP port &lt;code&gt;8080&lt;/code&gt;, as some systems require full administrative privileges to access port numbers lower than &lt;code&gt;1024&lt;/code&gt; (like the HTTP port &lt;code&gt;80&lt;/code&gt;, for example).
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Now we can freely manage the firewall through the web interface! You can either reboot the router or run &lt;code&gt;pfctrl -e&lt;/code&gt; to bring the firewall back online.&lt;/p&gt;
+&lt;h2 id=&#34;creating-the-internal-network&#34;&gt;Creating the internal network&lt;/h2&gt;
+&lt;p&gt;We&amp;rsquo;re now going to create two CentOS VMs: a client VM and server VM. In reality they will be pretty much identical (save for their NIC MAC addresses) but they will play certain roles as I learn the ropes of system administration. I will then configure pfSense to assign each VM with an IP address that allows them to communicate.&lt;/p&gt;
+&lt;p&gt;Setting up a CentOS VM is pretty straightforward. The first one will have the hostname &lt;code&gt;centos-server&lt;/code&gt;. It will have 1 CPU, 2 GiB RAM, 20 GiB of hard disk space, and be connected to &lt;code&gt;vmbr1&lt;/code&gt;. Here we will choose a &lt;em&gt;non-paravirtualized&lt;/em&gt; NIC model, the Intel E1000.&lt;/p&gt;
+&lt;div class=&#34;alert alert-warning&#34;&gt;
+  &lt;div&gt;
+    Make sure you &lt;strong&gt;do not&lt;/strong&gt; choose the VirtIO network device! With that NIC, I could &lt;code&gt;ping google.com&lt;/code&gt; but could not &lt;code&gt;curl google.com&lt;/code&gt;. This was the cause of hours of madness, until &lt;a href=&#34;https://forum.netgate.com/topic/79004/pfsense-2-2-not-passing-traffic-but-ping-does-get-through/23&#34;&gt;this forum post&lt;/a&gt; gave me a hint. There is apparently an issue with a VM using paravirtualized network drivers to communicate with pfSense, but it&amp;rsquo;s not at all clear why.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Once you&amp;rsquo;ve run through the installation and logged in, you should be able to access the internet through the VM (provided you&amp;rsquo;ve got a working DNS configuration). Now the VM can be cloned to yield &lt;code&gt;centos-client&lt;/code&gt; and there will be two functional VMs on the internal network, with full internet connectivity.&lt;/p&gt;
+&lt;h3 id=&#34;restricting-access&#34;&gt;Restricting access&lt;/h3&gt;
+&lt;p&gt;We&amp;rsquo;re pretty close to achieving the design goal. The main issue is that right now, the firewall isn&amp;rsquo;t really doing much. Now I want to restrict access to whitelist these two CentOS VMs and nothing more. To do this, I&amp;rsquo;ll make use of pfSense&amp;rsquo;s DHCP service to map each MAC address to a static IP address on the internal network segment.&lt;/p&gt;
+&lt;h4 id=&#34;mapping-vms-to-ip-addresses&#34;&gt;Mapping VMs to IP addresses&lt;/h4&gt;
+&lt;p&gt;The MAC address of a given VM can be accessed by selecting the VM in the Proxmox resource tree &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Hardware&lt;/em&gt; tab and double-clicking the &lt;em&gt;Network Device&lt;/em&gt; row associated with &lt;code&gt;vmbr1&lt;/code&gt;. Grab the server and client MAC addresses and keep them handy. Incidentally, I&amp;rsquo;ll be assigning &lt;code&gt;centos-server&lt;/code&gt; to &lt;code&gt;192.168.1.101&lt;/code&gt; and &lt;code&gt;centos-client&lt;/code&gt; to &lt;code&gt;192.168.1.102&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s head back into the pfSense web interface and click the &lt;em&gt;Services&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;DHCP Server&lt;/em&gt;. At the moment, the VMs are getting their IP addresses from the available range indicated at the bottom of the &lt;em&gt;General Options&lt;/em&gt; section. Set the range to &lt;code&gt;192.168.1.220&lt;/code&gt; to &lt;code&gt;192.168.1.240&lt;/code&gt; and click &lt;strong&gt;Save&lt;/strong&gt;. The specific range isn&amp;rsquo;t too important &amp;ndash; we just want the range not to include any of the static VM addresses.&lt;/p&gt;
+&lt;p&gt;At the bottom of the page there&amp;rsquo;s a section called &lt;em&gt;DHCP Static Mappings for this Interface&lt;/em&gt;, which sounds like what we want. Click &lt;strong&gt;Add&lt;/strong&gt; to add a mapping for both VMs, filling out the MAC address, client identifier, IP address, and hostname for each mapping (Fig. 5).&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-5b-specifying-dhcp-static-mappings-for-the-centos-vms&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/homelab/pfsense-mappings.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 5&amp;lt;/b&amp;gt;. Specifying DHCP static mappings for the CentOS VMs.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/homelab/pfsense-mappings.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 5&lt;/b&gt;. Specifying DHCP static mappings for the CentOS VMs.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;We can now bring a VM&amp;rsquo;s interface down and back up again to reassign the IP address, confirming the change with the last command:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;nmcli connection down ens18
+nmcli connection up ens18
+ip address show ens18
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;blacklisting-unknown-devices&#34;&gt;Blacklisting unknown devices&lt;/h4&gt;
+&lt;p&gt;For our final act, we are going to block traffic leaving the internal network from all unauthorized devices, i.e., anything other than &lt;code&gt;centos-server&lt;/code&gt; and &lt;code&gt;centos-client&lt;/code&gt;. This can be done by whitelisting the network &lt;code&gt;192.168.1.100/30&lt;/code&gt; and blocking everything else.&lt;/p&gt;
+&lt;p&gt;In the pfSense interface, click the &lt;em&gt;Firewall&lt;/em&gt; header menu &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;Rules&lt;/em&gt; &lt;i class=&#34;fas fa-angle-double-right&#34;&gt;&lt;/i&gt; &lt;em&gt;LAN&lt;/em&gt; tab. We will create a rule to pass IPv4 packets from &lt;em&gt;any&lt;/em&gt; protocol with a source IP coming from the network &lt;code&gt;192.168.1.100/30&lt;/code&gt;. After disabling any other rules and applying the changes, we have successfully locked down the internal network. You can confirm this by manually setting one of the VM&amp;rsquo;s IP addresses to a non-whitelisted address and running &lt;code&gt;curl google.com&lt;/code&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;At last, the homelab is up and running! There is of course a lot that can be done to improve this setup, particularly in the way of security. I think it would be a great idea to configure VLANs and enable SSH access for firewall management in the next homelab iteration, but for now it can serve as a testbed for all sorts of administrative tasks.&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Another solution would be to implement the lab on a 
+&lt;a href=&#34;https://cloud.google.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;cloud platform&lt;/a&gt;. &lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;A cross-platform alternative to Rufus is 
+&lt;a href=&#34;https://www.balena.io/etcher/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Etcher&lt;/a&gt;. &lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;See 
+&lt;a href=&#34;https://access.redhat.com/articles/3129891&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;this article&lt;/a&gt; from Red Hat for a good discussion about how to choose a file system (although they conspicuously do not mention ZFS). &lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
