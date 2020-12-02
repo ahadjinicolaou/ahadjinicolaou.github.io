@@ -1,0 +1,1524 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Finding a good classifier by stumbling in its general direction.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/">
+  <meta property="og:title" content="ml.doc (1.2): Learning as optimization | Remotely Curious">
+  <meta property="og:description" content="Finding a good classifier by stumbling in its general direction."><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-12-01T19:36:40-04:00">
+    
+    <meta property="article:modified_time" content="2020-12-01T19:36:40-04:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/"
+  },
+  "headline": "ml.doc (1.2): Learning as optimization",
+  
+  "datePublished": "2020-12-01T19:36:40-04:00",
+  "dateModified": "2020-12-01T19:36:40-04:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Finding a good classifier by stumbling in its general direction."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>ml.doc (1.2): Learning as optimization | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>ml.doc (1.2): Learning as optimization</h1>
+
+  
+  <p class="page-subtitle">Finding a good classifier by stumbling in its general direction.</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Dec 1, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    15 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/analysis/">analysis</a>, <a href="/category/ml.doc/">ml.doc</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <div class="alert alert-note">
+  <div>
+    This writeup belongs to a series of notes based on <a href="https://www.edx.org/course/machine-learning-with-python-from-linear-models-to">MITx 6.86x</a>, an introductory machine learning course. You can find the previous writeup <a href="/post/ml-doc-01-1-learning-from-data/">here</a>.
+  </div>
+</div>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#allowing-room-for-error">Allowing room for error</a>
+      <ul>
+        <li><a href="#margin-boundaries">Margin boundaries</a></li>
+        <li><a href="#the-signed-distance">The signed distance</a></li>
+        <li><a href="#signed-and-unsigned-distance">Signed and unsigned distance</a></li>
+      </ul>
+    </li>
+    <li><a href="#learning-as-optimization">Learning as optimization</a>
+      <ul>
+        <li><a href="#average-loss">Average loss</a></li>
+        <li><a href="#regularization">Regularization</a></li>
+        <li><a href="#the-objective-function">The objective function</a></li>
+        <li><a href="#bias-variance-trade-off">Bias-variance trade-off</a></li>
+        <li><a href="#gradient-descent">Gradient descent</a></li>
+        <li><a href="#stochastic-gradient-descent">Stochastic gradient descent</a></li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="allowing-room-for-error">Allowing room for error</h1>
+<p>While the perceptron algorithm is easy to understand, the fact that it only works for linearly separable data really limits its application. Data collected in the real world are often measured with some error. They are noisy. Sometimes training examples can be accidentally mislabeled. There are many good reasons for an algorithm to allow some room for error and not let &ldquo;the perfect be the enemy of the good&rdquo;.</p>
+<p>Let&rsquo;s take a look at two different linear classifiers (Fig. 1). On the left we have a decision boundary that is extremely close to one of the training examples. The two dashed lines on either side are <em>margin boundaries</em> that expand until one of them hits a training example.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-two-classifiers-each-with-different-margin-sizes">
+
+
+  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/small-large-margins.png" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; Two classifiers, each with different margin sizes.">
+
+
+  <img src="/ml-doc-01-2-learning-as-optimization/small-large-margins.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> Two classifiers, each with different margin sizes.
+  </figcaption>
+
+
+</figure>
+
+<p>If you were to choose which classifier you would prefer, you would probably choose the one on the right, the one with a <em>large margin</em>. You can see that if the $(x_1, x_2)$ coordinates had more jitter, the classifier on the left might misclassify the negative training example sitting on the negative margin boundary. With all else being equal, we would prefer to use <em>large margin classifiers</em> that are more tolerant of natural variation.</p>
+<p>To incorporate the idea of margins into our classification algorithms, we will formulate learning as an <em>optimization</em> problem that strikes a balance between two competing goals, the first of these being to achieve large classifier margins.</p>
+<h2 id="margin-boundaries">Margin boundaries</h2>
+<p>As seen earlier, linear margin boundaries are lines that sit on either side of the decision boundary, one for each label region in the feature space. Since the margins are parallel to the decision boundary $(\theta \cdot x + \theta_0 = 0),$ the margins take the form $\newcommand{\norm}[1]{|| #1 ||}$</p>
+<p>$$ \theta \cdot x + \theta_0 = d.$$</p>
+<p>The <em>positive margin boundary</em>, residing within the positive feature space region, is defined as $\theta \cdot x + \theta_0 = 1$ while the <em>negative</em> decision boundary on the other side is defined as $\theta \cdot x + \theta_0 = -1$. (Fig. 2).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-positive-and-negative-margin-boundaries">
+
+
+  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/margin-boundaries.png" data-caption="&lt;b&gt;Fig. 2.&lt;/b&gt; Positive and negative margin boundaries.">
+
+
+  <img src="/ml-doc-01-2-learning-as-optimization/margin-boundaries.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2.</b> Positive and negative margin boundaries.
+  </figcaption>
+
+
+</figure>
+
+<p>We can get a sense for how to control the width of the margins by considering the dynamics of $f(x) = \theta \cdot x + \theta_0$. As we move away from the decision boundary and towards the positive margin boundary, $f(x)$ increases at a rate proportional to $\norm{\theta}$, the <em>magnitude</em> of $\theta$. If we want to speed up how quickly we arrive at $f(x) = 1$ (and in doing so <em>reduce</em> the margin) we need to use larger values of $\norm{\theta}$.</p>
+<p>Earlier, I mentioned that our optimization process has two competing priorities, one of which is to use large margins. The other priority seems quite natural: to achieve the highest possible classification accuracy on the training set.</p>
+<h2 id="the-signed-distance">The signed distance</h2>
+<p>To optimize training set performance, it is not enough to simply know whether the prediction is right or wrong, as measured by the training error $E_N$. We need to somehow measure <em>how far away</em> each training example is from the decision boundary. That is, we need to consider and quantify the notion of <em>distance</em>.</p>
+<div class="alert alert-note">
+  <div>
+    What follows is a quick derivation of the signed distance from a point to a line. Try to follow the steps if you can, but otherwise feel free to skip to the next section.
+  </div>
+</div>
+<p>Imagine we have a training example $P$ sitting some distance $d$ away from the decision boundary (Fig. 3). The point $Q$ is any point $x'$ that sits on the decision boundary, such that $\theta \cdot x&rsquo; + \theta_0 = 0$.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-sketching-the-distance-d-between-the-line-and-point-p">
+
+
+  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/projection.png" data-caption="&lt;b&gt;Fig. 3.&lt;/b&gt; Sketching the distance $d$ between the line and point $P$.">
+
+
+  <img src="/ml-doc-01-2-learning-as-optimization/projection.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3.</b> Sketching the distance $d$ between the line and point $P$.
+  </figcaption>
+
+
+</figure>
+
+<p>Since $d$ is the smallest possible distance, the vector $\overrightarrow{RP}$ is perpendicular to $\overrightarrow{QR}$ and so the points $PQR$ form a right-angled triangle. The distance $d$ can then be expressed using basic trigonometry,</p>
+<p>$$d = \norm{\overrightarrow{RP}} = \norm{\overrightarrow{QP}} \textrm{ cos }\alpha.$$</p>
+<p>We also know the angle $\alpha$ is related to $\overrightarrow{QP}$ and $\theta$ by the dot product,</p>
+<p>$$ \theta \cdot \overrightarrow{QP} = \norm{\theta} \norm{\overrightarrow{QP}} \textrm{ cos }\alpha .$$</p>
+<p>Consolidating these two equations, together with the fact that $\overrightarrow{QP} = x - x&rsquo;,$ yields the final expression for the <em>signed distance</em>,</p>
+<p>$$d_s(x) = \frac{ \theta \cdot \overrightarrow{QP} }{\norm{ \theta} } = \frac{ \theta \cdot x - \theta \cdot x&rsquo; }{\norm{ \theta} } = \frac{ \theta \cdot x + \theta_0 }{\norm{ \theta} }. $$</p>
+<h2 id="signed-and-unsigned-distance">Signed and unsigned distance</h2>
+<p>What does it mean for $d$ to be signed? As a quick illustration, consider how a hypothetical classifier might deal with some positive training examples (Fig. 4). We can see that the points &ldquo;deepest&rdquo; within the positive region, $x_1$ and $x_2$, are sitting some positive distance from the decision boundary because $\theta \cdot x + \theta_0$ is positive for each point.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-4b-four-training-examples-with-varying-degrees-of-loss">
+
+
+  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/differing-loss.png" data-caption="&lt;b&gt;Fig. 4.&lt;/b&gt; Four training examples with varying degrees of loss.">
+
+
+  <img src="/ml-doc-01-2-learning-as-optimization/differing-loss.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 4.</b> Four training examples with varying degrees of loss.
+  </figcaption>
+
+
+</figure>
+
+<p>The example $x_2$ is sitting right on the positive margin boundary. Since any point on the positive margin boundary satisfies $\theta \cdot x + \theta_0 = 1$, this means</p>
+<p>$$d_s(x_2) = \frac{\theta \cdot x_2 + \theta_0}{\norm{\theta}} = \frac{1}{\norm{\theta}}.$$</p>
+<p>We can also see that $x_3$ sits right on the decision boundary, and so</p>
+<p>$$d_s(x_3) = 0.$$</p>
+<p>What about $x_4$? The dot product of $\theta$ and $x_4$ will be negative, as will be the distance. We know that its distance must be something between zero and $-1/\norm{\theta},$ the signed distance to the negative margin boundary.</p>
+<p>We can modify the signed distance slightly to form an expression for the <em>unsigned</em> distance of a training example from the decision boundary by using the example&rsquo;s label,</p>
+<p>$$d(x^{(i)}) = \frac{y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 )}{\norm{\theta}}.$$</p>
+<div class="alert alert-note">
+  <div>
+    When the training examples are correctly classified, the signs of the label $y^{(i)}$ and $\theta \cdot x^{(i)} + \theta_0$ will match, and their product will be positive. Otherwise, their product will be negative. This sign &ldquo;agreement&rdquo; will come up again very soon, where we discuss loss functions.
+  </div>
+</div>
+<p>It&rsquo;s time to put all the pieces together.</p>
+<h1 id="learning-as-optimization">Learning as optimization</h1>
+<p>There has been a lot of ground covered since we first brought up the idea of reframing the learning process as an optimization problem. To recap, there are two competing priorities:</p>
+<ul>
+<li>achieving high training set classification accuracy, and</li>
+<li>obtaining large classifier margins.</li>
+</ul>
+<p>We are going to formulate an <em>objective function</em> $J$ that incorporates these priorities as two separate components: (a) the <em>average loss</em>, and (b) the <em>regularization</em> component. The idea is then to find the classifier parameters $\theta$ and $\theta_0$ that minimize $J,$ where</p>
+<p>$$ J(\theta, \theta_0) = \textrm{average loss} + \lambda \cdot \textrm{regularization}.$$</p>
+<p>That lambda parameter $\lambda$ is the <em>regularization term</em>. This is an important parameter that we will soon discuss, but for now, think of it as a dial that we can tweak to balance our two priorities. Let&rsquo;s now talk about the first component.</p>
+<h2 id="average-loss">Average loss</h2>
+<p>The average loss component (oddly enough!) makes use of a <em>loss function</em>. The goal of a loss function is to quantify the error of a prediction. You have already seen the 0-1 loss function $f(z^{(i)}, y^{(i)}) = [\![ z^{(i)} \neq y^{(i)} ]\!],$ which takes the value 1 when the prediction $z^{(i)}$ doesn&rsquo;t match the example label $y^{(i)}$, and zero otherwise.</p>
+<div class="alert alert-note">
+  <div>
+    <p>The notation $z^{(i)}$ above is used to indicate an &ldquo;agreement&rdquo; term between the classifier output for the $i$-th training example and its corresponding label,</p>
+<p>$$z^{(i)} = y^{(i)} (\theta \cdot x^{(i)} + \theta_0).$$</p>
+  </div>
+</div>
+<p>Another common loss function is the <em>hinge loss</em> function,</p>
+<p>$$\textrm{Loss}_h(z) = \begin{cases}
+1-z &amp; \text{if $z&lt;1$} \\<br>
+0 &amp; \text{otherwise}
+\end{cases}$$</p>
+<p>Let&rsquo;s use the hinge loss function on our (positive) training examples from the last figure. Below we have a plot of the hinge loss function, with the loss of each example overlaid as a blue dot (Fig. 5). Points $x_1$ and $x_2$ incur zero loss, since $z^{(i)} = y^{(i)} (\theta \cdot x^{(i)} + \theta_0) \geq 1$ for both examples. The point $x_3$, sitting on the decision boundary, incurs an agreement value $z^{(3)} = 0$, which gets mapped to $\textrm{Loss}_h(z^{(3)}) = 1 - z^{(3)} = 1.$</p>
+<p>We can see that once a point starts to invade its corresponding margin boundary (located at $z=1$ for the positive label), the hinge loss increases linearly as a function of distance.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-5b-the-hinge-loss-function-thick-black-line-with-the-loss-values-for-each-training-example-in-fig-4-blue-shading-indicates-values-of-z-for-which-positive-training-examples-are-correctly-classified">
+
+
+  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/hinge-loss.png" data-caption="&lt;b&gt;Fig. 5.&lt;/b&gt; The hinge loss function (thick black line), with the loss values for each training example in Fig. 4. Blue shading indicates values of $z$ for which positive training examples are correctly classified.">
+
+
+  <img src="/ml-doc-01-2-learning-as-optimization/hinge-loss.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 5.</b> The hinge loss function (thick black line), with the loss values for each training example in Fig. 4. Blue shading indicates values of $z$ for which positive training examples are correctly classified.
+  </figcaption>
+
+
+</figure>
+
+<p>Using this loss function, the average loss can now be written as</p>
+<p>$$\textrm{average loss} = \frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}_h(y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 )).$$</p>
+<h2 id="regularization">Regularization</h2>
+<p>At this stage you may have a vague idea that large margin classifiers are a good thing, and that regularization is supposed to help find such classifiers. We will expand on these ideas in this section. The topic of regularization is definitely worth more coverage, since it is critical in helping us avoid the dreaded problem of <em>overfitting</em>.</p>
+<p>Models that suffer from overfitting are in a sense, too smart for their own good. Overfit models are too familiar with the training data, contorting themselves to minimize training errors at the expense of being useful for general application.</p>
+<p>We will illustrate this problem with some synthetic data: twenty points from a quadratic function, corrupted by some noise. Now let&rsquo;s fit three different polynomials to this data:</p>
+<ul>
+<li>a linear function,</li>
+<li>a quadratic function (i.e., a proper fit), and</li>
+<li>a 10th-order polynomial.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-6b-fitting-three-different-k-order-polynomials-to-data-generated-by-a-quadratic-function">
+
+
+  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/overfitting.png" data-caption="&lt;b&gt;Fig. 6.&lt;/b&gt; Fitting three different k-order polynomials to data generated by a quadratic function.">
+
+
+  <img src="/ml-doc-01-2-learning-as-optimization/overfitting.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 6.</b> Fitting three different k-order polynomials to data generated by a quadratic function.
+  </figcaption>
+
+
+</figure>
+
+<p>The overfit model has some issues. It is overly <em>complex</em> for the data: while the average error (or loss) across the training data might be quite low, it is completely useless beyond the limited range of our training data. The linear fit faces the same problem but for the opposite reason: it is too <em>simple</em> to capture the underlying signal.</p>
+<p>In the context of our optimization problem, classification accuracy for the training set is improved by minimizing the average loss component. How do we maximize the classifier margins? To do this, we need to minimize $\norm{\theta}$. This is the same task as minimizing $\norm{\theta}^2$. By convention, the regularization component is specified as</p>
+<p>$$\textrm{regularization} = \frac{1}{2} \norm{\theta}^2.$$</p>
+<h2 id="the-objective-function">The objective function</h2>
+<p>We are finally ready to look at the objective function in all its glory, the function that we are going to minimize to discover the parameters $\{\theta,\theta_0\}$ of our classifier:</p>
+<p>$$J(\theta,\theta_0) = \underbrace{\frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}(y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 ))}_{\textrm{average loss}} + \underbrace{ \vphantom{ \sum_{1}^{2} } \frac{\lambda}{2}\norm{\theta}^2.}_{\textrm{regularization}}$$</p>
+<p>Within the framework of our optimization problem, we need to strike the right balance between model complexity (minimizing training loss) and model utility (maximizing classifier margins), which is done by finding a good value of $\lambda$.</p>
+<!-- $$ J(\theta, \theta_0) = \frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}_h(y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 )) + \frac{\lambda}{2} \norm{\theta}^2$$ -->
+<div class="alert alert-note">
+  <div>
+    What happens if we set $\lambda=0$ and eliminate the regularization component? In this case, the optimization process results in a classifier that prioritizes low average loss above all else, which leads to overfitting. If we set $\lambda$ to a really big number, we get an overly simple model that won&rsquo;t learn enough from the training data to make useful predictions.
+  </div>
+</div>
+<p>Before we discuss how to minimize the objective function, it is worth taking a quick detour to talk about what it really means to find a &ldquo;good&rdquo; value of $\lambda$.</p>
+<h2 id="bias-variance-trade-off">Bias-variance trade-off</h2>
+<p>To get a feel for what we are trying to achieve here, let&rsquo;s frame our discussion around the idea of model &ldquo;complexity&rdquo;, $C = \frac{1}{\lambda}$. That makes the objective function look like this:</p>
+<p>$$J(\theta,\theta_0) = \frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}(y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 )) + \frac{1}{2C}\norm{\theta}^2.$$</p>
+<p>As we increase the model complexity, the regularization component becomes less influential, with more importance placed on minimizing the training error. A model that is too complex (like that tenth-order polynomial from the last figure) will be highly sensitive to the training data &ndash; if trained on another training set, the resulting model parameters and its corresponding predictions are likely to be very different. Such a model is said to exhibit high <em>variance</em> (Fig. 7, orange shading).</p>
+<p>It is also possible to use a model that is too simple, as you have seen earlier. Notice how smaller values of $C$ place more importance on finding large margin classifiers. An underfit model does not produce accurate predictions, indicating a large <em>bias</em> (Fig. 7, blue shading). You can think of bias as the error inherent to your model. For example, there is a hard limit on how well you can fit a linear function to quadratic-order training data (Fig. 6).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-7b-the-bias-variance-trade-off-selecting-the-right-level-of-complexity-cast-to-balance-bias-test-prediction-accuracy-and-variance-prediction-sensitivity-to-different-training-data-models-can-suffer-from-underfitting-if-c-is-too-small-blue-shading-or-overfitting-if-c-is-too-large-yellow-shading">
+
+
+  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/bias-variance-tradeoff.png" data-caption="&lt;b&gt;Fig. 7.&lt;/b&gt; The bias-variance trade-off: selecting the right level of complexity $(C^{\ast})$ to balance bias (test prediction accuracy) and variance (prediction sensitivity to different training data). Models can suffer from underfitting if $C$ is too small (blue shading) or overfitting if $C$ is too large (yellow shading).">
+
+
+  <img src="/ml-doc-01-2-learning-as-optimization/bias-variance-tradeoff.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 7.</b> The bias-variance trade-off: selecting the right level of complexity $(C^{\ast})$ to balance bias (test prediction accuracy) and variance (prediction sensitivity to different training data). Models can suffer from underfitting if $C$ is too small (blue shading) or overfitting if $C$ is too large (yellow shading).
+  </figcaption>
+
+
+</figure>
+
+<p>There is one more item of interest here: the test error (Fig. 7, black curve), which is comprised of the model bias and variance. If we can minimize the test error<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>, we could then find $C^{\ast}$, the optimal level of complexity that achieves low bias (high prediction accuracy on the test set) and low variance (model parameters that are not sensitive to the choice of training data). The balance between these two priorities is known as the <em>bias-variance trade-off</em>.</p>
+<h2 id="gradient-descent">Gradient descent</h2>
+<p>Let&rsquo;s return to our original discussion. The goal is to find the classifier parameters $\{\theta,\theta_0\}$ by minimizing $J$, the objective function. We will now introduce <em>gradient descent</em>, a well-known iterative algorithm for finding these parameters.</p>
+<p>To start with, we will look at what happens in a single iteration of the algorithm, for a single parameter $\theta$ and its associated objective function $J(\theta)$ (Fig. 8). The algorithm starts at some point $\theta_k = \theta'$, located to the right of the ideal value $\theta^*$. Next, the slope (or gradient) $\nabla_{\theta} J = \frac{\partial J}{\partial \theta}$ is evaluated at $\theta_k$. Finally, the algorithm computes $\theta_{k+1}$ by taking a step in the opposite direction of the slope, such that</p>
+<p>$$\theta_{k+1} = \theta_{k} - \eta \cdot [\nabla_{\theta} J] _{\theta_k},$$</p>
+<!-- $$\theta_{k+1} = \theta_{k} + \nu \cdot  \left.\frac{\partial J}{\partial \theta} \right |_{\theta'}$$ -->
+<p>where the learning rate $\eta$ determines the size of the step. With successive iterations, the parameter gets closer and closer to $\theta^{\ast}$, for which $J(\theta^\ast)$ is a (local) minimum.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-8b-sketch-of-an-objective-function-jtheta-and-its-derivative-nabla-jtheta-evaluated-at-point-theta">
+
+
+  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/derivative.png" data-caption="&lt;b&gt;Fig. 8.&lt;/b&gt; Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&amp;rsquo;.$">
+
+
+  <img src="/ml-doc-01-2-learning-as-optimization/derivative.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 8.</b> Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&rsquo;.$
+  </figcaption>
+
+
+</figure>
+
+<div class="alert alert-note">
+  <div>
+    <p>The notation for partial derivatives can be a little confusing at first. If we are dealing with a two-dimensional parameter vector $\theta = [\theta_1, \theta_2]$, the gradient of $J$ with respect to $\theta$ takes the form</p>
+<p>$$\nabla_{\theta} J = \begin{bmatrix}
+\frac{\partial J}{\partial \theta_1}\\<br>
+\frac{\partial J}{\partial \theta_2}\\<br>
+\end{bmatrix}_{(\theta_1^{'},\theta_2^{'})}$$</p>
+<p>where $\frac{\partial J}{\partial \theta_i}$ is the partial derivative of $J$ with respect to $\theta_i$. Each $\frac{\partial J}{\partial \theta_i}$ is evaluated at its corresponding parameter value $\theta_i^{'}.$</p>
+  </div>
+</div>
+<p>The same principles apply in higher dimensions. If we are trying to optimize two parameters $(x, y)$, then both parameters are updated simultaneously using the partial derivatives of $J,$ evaluated at the current parameter values $(x_k, y_k)$.</p>
+<p>$$\begin{align*}
+\begin{bmatrix}
+x_{k+1}\\<br>
+y_{k+1}\\<br>
+\end{bmatrix}
+&amp;=
+\begin{bmatrix}
+x_k\\<br>
+y_k\\<br>
+\end{bmatrix} - \eta
+\begin{bmatrix}
+\frac{\partial J}{\partial x}\\<br>
+\frac{\partial J}{\partial y}\\<br>
+\end{bmatrix}_{(x_k,y_k)}
+\end{align*}$$</p>
+<p>How do we actually compute the gradient? That depends on which loss function is being used. For now we will show the general expression for the gradient, leaving out the offset parameter for cleaner notation, but either way, we can see that the gradient is just a sum of functions.</p>
+<p>$$\begin{align*}
+\nabla_{\theta} J(\theta)
+&amp;= \nabla_{\theta} \left [  \frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}(y^{(i)} \theta \cdot x^{(i)} ) \right ] + \nabla_{\theta} \left [ \frac{\lambda}{2}\norm{\theta}^2 \right ]\\<br>
+&amp;= \frac{1}{N} \sum_{i=1}^{N} \nabla_{\theta} \left [   \textrm{Loss}(y^{(i)} \theta \cdot x^{(i)} ) \right ] + \lambda \theta
+\end{align*}$$</p>
+<p>Note that we need to iterate over the <em>entire dataset</em> for each gradient update, which can be resource-intensive and oftentimes inconvenient. It is largely for these reasons that we consider an alternative algorithm, one that has become a mainstay in the modern ML practitioner&rsquo;s toolbox.</p>
+<h2 id="stochastic-gradient-descent">Stochastic gradient descent</h2>
+<p>The basic idea behind <em>stochastic gradient descent</em> (SGD) is to approximate the objective function gradient $\nabla_{\theta} J(\theta)$ using a randomly selected sample $(x^{(i)}, y^{(i)})$ from the full dataset. The expression for the gradient then becomes</p>
+<p>$$\begin{align*}
+\nabla_{\theta} J_i(\theta)
+&amp;= \nabla_{\theta} \textrm{Loss}(y^{(i)} \theta \cdot x^{(i)} ) + \lambda \theta
+\end{align*}.$$</p>
+<div class="alert alert-note">
+  <div>
+    Remember the <a href="https://en.wikipedia.org/wiki/Chain_rule">chain rule</a>, which tells us that
+$\frac{dL}{d\theta} = \frac{dL}{dz}\frac{dz}{d\theta}.$
+  </div>
+</div>
+<p>Let&rsquo;s assume that we&rsquo;re dealing with hinge loss, whose derivative looks like this:</p>
+<p>$$ \nabla_z \textrm{Loss}_h(z) = \begin{cases}
+-1 &amp; \text{if $z&lt;1$} \\<br>
+0 &amp; \text{otherwise}
+\end{cases}$$</p>
+<p>The objective function gradient for the $i$-th example now takes the form</p>
+<p>$$\begin{align*}
+\nabla_{\theta} J_i(\theta)
+&amp;= \begin{cases}
+-y^{(i)} x^{(i)} + \lambda \theta &amp; \text{if loss &gt; 0}\\<br>
+\lambda \theta &amp; \text{if loss = 0}
+\end{cases}
+\end{align*}$$</p>
+<p>As you might guess, this &ldquo;cheap&rdquo; gradient tends to increase the number of iterations needed to converge on the optimized model parameters. On the other hand, each iteration can be computed much more rapidly, with especially good performance made possible on high-dimensional datasets.</p>
+<h1 id="summary">Summary</h1>
+<p>The objective function is an important construct that lets us reframe machine learning problems as optimization problems, which can be solved with the help of some calculus. We have discussed a handful of important considerations that apply to most (if not all) ML problems, but there is of course so much more to learn. For those wondering where to go from here, my suggestion would be to read up about different types of regularization and how they can be used to achieve different outcomes (e.g., lasso regularization can be used to eliminate unhelpful predictors in a regression model).</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>Although it is not possible to know the exact test error, there are ways to approximate it, such as through cross-validation. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/bias-variance-tradeoff/">bias-variance-tradeoff</a>
+  
+  <a class="badge badge-light" href="/tag/classification/">classification</a>
+  
+  <a class="badge badge-light" href="/tag/gradient-descent/">gradient-descent</a>
+  
+  <a class="badge badge-light" href="/tag/machine-learning/">machine-learning</a>
+  
+  <a class="badge badge-light" href="/tag/objective-function/">objective-function</a>
+  
+  <a class="badge badge-light" href="/tag/overfitting/">overfitting</a>
+  
+  <a class="badge badge-light" href="/tag/regularization/">regularization</a>
+  
+  <a class="badge badge-light" href="/tag/underfitting/">underfitting</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/&amp;text=ml.doc%20%281.2%29:%20Learning%20as%20optimization" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/&amp;t=ml.doc%20%281.2%29:%20Learning%20as%20optimization" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=ml.doc%20%281.2%29:%20Learning%20as%20optimization&amp;body=https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/&amp;title=ml.doc%20%281.2%29:%20Learning%20as%20optimization" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=ml.doc%20%281.2%29:%20Learning%20as%20optimization%20https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/&amp;title=ml.doc%20%281.2%29:%20Learning%20as%20optimization" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/ml-doc-01-1-learning-from-data/">ml.doc (1.1): Learning from data</a></li>
+      
+      <li><a href="/post/beware-linear-regression/">Beware those bearing linear regression models</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

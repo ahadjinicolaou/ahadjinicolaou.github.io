@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>gradient-descent | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/tag/gradient-descent/</link>
+      <atom:link href="https://www.remotelycurious.net/tag/gradient-descent/index.xml" rel="self" type="application/rss+xml" />
+    <description>gradient-descent</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Tue, 01 Dec 2020 19:36:40 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>gradient-descent</title>
+      <link>https://www.remotelycurious.net/tag/gradient-descent/</link>
+    </image>
+    
+    <item>
+      <title>ml.doc (1.2): Learning as optimization</title>
+      <link>https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/</link>
+      <pubDate>Tue, 01 Dec 2020 19:36:40 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/</guid>
+      <description>&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This writeup belongs to a series of notes based on &lt;a href=&#34;https://www.edx.org/course/machine-learning-with-python-from-linear-models-to&#34;&gt;MITx 6.86x&lt;/a&gt;, an introductory machine learning course. You can find the previous writeup &lt;a href=&#34;https://www.remotelycurious.net/post/ml-doc-01-1-learning-from-data/&#34;&gt;here&lt;/a&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#allowing-room-for-error&#34;&gt;Allowing room for error&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#margin-boundaries&#34;&gt;Margin boundaries&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-signed-distance&#34;&gt;The signed distance&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#signed-and-unsigned-distance&#34;&gt;Signed and unsigned distance&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#learning-as-optimization&#34;&gt;Learning as optimization&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#average-loss&#34;&gt;Average loss&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#regularization&#34;&gt;Regularization&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-objective-function&#34;&gt;The objective function&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#bias-variance-trade-off&#34;&gt;Bias-variance trade-off&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#gradient-descent&#34;&gt;Gradient descent&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#stochastic-gradient-descent&#34;&gt;Stochastic gradient descent&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;allowing-room-for-error&#34;&gt;Allowing room for error&lt;/h1&gt;
+&lt;p&gt;While the perceptron algorithm is easy to understand, the fact that it only works for linearly separable data really limits its application. Data collected in the real world are often measured with some error. They are noisy. Sometimes training examples can be accidentally mislabeled. There are many good reasons for an algorithm to allow some room for error and not let &amp;ldquo;the perfect be the enemy of the good&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s take a look at two different linear classifiers (Fig. 1). On the left we have a decision boundary that is extremely close to one of the training examples. The two dashed lines on either side are &lt;em&gt;margin boundaries&lt;/em&gt; that expand until one of them hits a training example.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-two-classifiers-each-with-different-margin-sizes&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/small-large-margins.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Two classifiers, each with different margin sizes.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/small-large-margins.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Two classifiers, each with different margin sizes.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;If you were to choose which classifier you would prefer, you would probably choose the one on the right, the one with a &lt;em&gt;large margin&lt;/em&gt;. You can see that if the $(x_1, x_2)$ coordinates had more jitter, the classifier on the left might misclassify the negative training example sitting on the negative margin boundary. With all else being equal, we would prefer to use &lt;em&gt;large margin classifiers&lt;/em&gt; that are more tolerant of natural variation.&lt;/p&gt;
+&lt;p&gt;To incorporate the idea of margins into our classification algorithms, we will formulate learning as an &lt;em&gt;optimization&lt;/em&gt; problem that strikes a balance between two competing goals, the first of these being to achieve large classifier margins.&lt;/p&gt;
+&lt;h2 id=&#34;margin-boundaries&#34;&gt;Margin boundaries&lt;/h2&gt;
+&lt;p&gt;As seen earlier, linear margin boundaries are lines that sit on either side of the decision boundary, one for each label region in the feature space. Since the margins are parallel to the decision boundary $(\theta \cdot x + \theta_0 = 0),$ the margins take the form $\newcommand{\norm}[1]{|| #1 ||}$&lt;/p&gt;
+&lt;p&gt;$$ \theta \cdot x + \theta_0 = d.$$&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;positive margin boundary&lt;/em&gt;, residing within the positive feature space region, is defined as $\theta \cdot x + \theta_0 = 1$ while the &lt;em&gt;negative&lt;/em&gt; decision boundary on the other side is defined as $\theta \cdot x + \theta_0 = -1$. (Fig. 2).&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-positive-and-negative-margin-boundaries&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/margin-boundaries.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Positive and negative margin boundaries.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/margin-boundaries.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Positive and negative margin boundaries.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;We can get a sense for how to control the width of the margins by considering the dynamics of $f(x) = \theta \cdot x + \theta_0$. As we move away from the decision boundary and towards the positive margin boundary, $f(x)$ increases at a rate proportional to $\norm{\theta}$, the &lt;em&gt;magnitude&lt;/em&gt; of $\theta$. If we want to speed up how quickly we arrive at $f(x) = 1$ (and in doing so &lt;em&gt;reduce&lt;/em&gt; the margin) we need to use larger values of $\norm{\theta}$.&lt;/p&gt;
+&lt;p&gt;Earlier, I mentioned that our optimization process has two competing priorities, one of which is to use large margins. The other priority seems quite natural: to achieve the highest possible classification accuracy on the training set.&lt;/p&gt;
+&lt;h2 id=&#34;the-signed-distance&#34;&gt;The signed distance&lt;/h2&gt;
+&lt;p&gt;To optimize training set performance, it is not enough to simply know whether the prediction is right or wrong, as measured by the training error $E_N$. We need to somehow measure &lt;em&gt;how far away&lt;/em&gt; each training example is from the decision boundary. That is, we need to consider and quantify the notion of &lt;em&gt;distance&lt;/em&gt;.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    What follows is a quick derivation of the signed distance from a point to a line. Try to follow the steps if you can, but otherwise feel free to skip to the next section.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Imagine we have a training example $P$ sitting some distance $d$ away from the decision boundary (Fig. 3). The point $Q$ is any point $x&#39;$ that sits on the decision boundary, such that $\theta \cdot x&amp;rsquo; + \theta_0 = 0$.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-sketching-the-distance-d-between-the-line-and-point-p&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/projection.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Sketching the distance $d$ between the line and point $P$.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/projection.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Sketching the distance $d$ between the line and point $P$.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Since $d$ is the smallest possible distance, the vector $\overrightarrow{RP}$ is perpendicular to $\overrightarrow{QR}$ and so the points $PQR$ form a right-angled triangle. The distance $d$ can then be expressed using basic trigonometry,&lt;/p&gt;
+&lt;p&gt;$$d = \norm{\overrightarrow{RP}} = \norm{\overrightarrow{QP}} \textrm{ cos }\alpha.$$&lt;/p&gt;
+&lt;p&gt;We also know the angle $\alpha$ is related to $\overrightarrow{QP}$ and $\theta$ by the dot product,&lt;/p&gt;
+&lt;p&gt;$$ \theta \cdot \overrightarrow{QP} = \norm{\theta} \norm{\overrightarrow{QP}} \textrm{ cos }\alpha .$$&lt;/p&gt;
+&lt;p&gt;Consolidating these two equations, together with the fact that $\overrightarrow{QP} = x - x&amp;rsquo;,$ yields the final expression for the &lt;em&gt;signed distance&lt;/em&gt;,&lt;/p&gt;
+&lt;p&gt;$$d_s(x) = \frac{ \theta \cdot \overrightarrow{QP} }{\norm{ \theta} } = \frac{ \theta \cdot x - \theta \cdot x&amp;rsquo; }{\norm{ \theta} } = \frac{ \theta \cdot x + \theta_0 }{\norm{ \theta} }. $$&lt;/p&gt;
+&lt;h2 id=&#34;signed-and-unsigned-distance&#34;&gt;Signed and unsigned distance&lt;/h2&gt;
+&lt;p&gt;What does it mean for $d$ to be signed? As a quick illustration, consider how a hypothetical classifier might deal with some positive training examples (Fig. 4). We can see that the points &amp;ldquo;deepest&amp;rdquo; within the positive region, $x_1$ and $x_2$, are sitting some positive distance from the decision boundary because $\theta \cdot x + \theta_0$ is positive for each point.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-four-training-examples-with-varying-degrees-of-loss&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/differing-loss.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4.&amp;lt;/b&amp;gt; Four training examples with varying degrees of loss.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/differing-loss.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4.&lt;/b&gt; Four training examples with varying degrees of loss.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;The example $x_2$ is sitting right on the positive margin boundary. Since any point on the positive margin boundary satisfies $\theta \cdot x + \theta_0 = 1$, this means&lt;/p&gt;
+&lt;p&gt;$$d_s(x_2) = \frac{\theta \cdot x_2 + \theta_0}{\norm{\theta}} = \frac{1}{\norm{\theta}}.$$&lt;/p&gt;
+&lt;p&gt;We can also see that $x_3$ sits right on the decision boundary, and so&lt;/p&gt;
+&lt;p&gt;$$d_s(x_3) = 0.$$&lt;/p&gt;
+&lt;p&gt;What about $x_4$? The dot product of $\theta$ and $x_4$ will be negative, as will be the distance. We know that its distance must be something between zero and $-1/\norm{\theta},$ the signed distance to the negative margin boundary.&lt;/p&gt;
+&lt;p&gt;We can modify the signed distance slightly to form an expression for the &lt;em&gt;unsigned&lt;/em&gt; distance of a training example from the decision boundary by using the example&amp;rsquo;s label,&lt;/p&gt;
+&lt;p&gt;$$d(x^{(i)}) = \frac{y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 )}{\norm{\theta}}.$$&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    When the training examples are correctly classified, the signs of the label $y^{(i)}$ and $\theta \cdot x^{(i)} + \theta_0$ will match, and their product will be positive. Otherwise, their product will be negative. This sign &amp;ldquo;agreement&amp;rdquo; will come up again very soon, where we discuss loss functions.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;It&amp;rsquo;s time to put all the pieces together.&lt;/p&gt;
+&lt;h1 id=&#34;learning-as-optimization&#34;&gt;Learning as optimization&lt;/h1&gt;
+&lt;p&gt;There has been a lot of ground covered since we first brought up the idea of reframing the learning process as an optimization problem. To recap, there are two competing priorities:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;achieving high training set classification accuracy, and&lt;/li&gt;
+&lt;li&gt;obtaining large classifier margins.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We are going to formulate an &lt;em&gt;objective function&lt;/em&gt; $J$ that incorporates these priorities as two separate components: (a) the &lt;em&gt;average loss&lt;/em&gt;, and (b) the &lt;em&gt;regularization&lt;/em&gt; component. The idea is then to find the classifier parameters $\theta$ and $\theta_0$ that minimize $J,$ where&lt;/p&gt;
+&lt;p&gt;$$ J(\theta, \theta_0) = \textrm{average loss} + \lambda \cdot \textrm{regularization}.$$&lt;/p&gt;
+&lt;p&gt;That lambda parameter $\lambda$ is the &lt;em&gt;regularization term&lt;/em&gt;. This is an important parameter that we will soon discuss, but for now, think of it as a dial that we can tweak to balance our two priorities. Let&amp;rsquo;s now talk about the first component.&lt;/p&gt;
+&lt;h2 id=&#34;average-loss&#34;&gt;Average loss&lt;/h2&gt;
+&lt;p&gt;The average loss component (oddly enough!) makes use of a &lt;em&gt;loss function&lt;/em&gt;. The goal of a loss function is to quantify the error of a prediction. You have already seen the 0-1 loss function $f(z^{(i)}, y^{(i)}) = [\![ z^{(i)} \neq y^{(i)} ]\!],$ which takes the value 1 when the prediction $z^{(i)}$ doesn&amp;rsquo;t match the example label $y^{(i)}$, and zero otherwise.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;The notation $z^{(i)}$ above is used to indicate an &amp;ldquo;agreement&amp;rdquo; term between the classifier output for the $i$-th training example and its corresponding label,&lt;/p&gt;
+&lt;p&gt;$$z^{(i)} = y^{(i)} (\theta \cdot x^{(i)} + \theta_0).$$&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Another common loss function is the &lt;em&gt;hinge loss&lt;/em&gt; function,&lt;/p&gt;
+&lt;p&gt;$$\textrm{Loss}_h(z) = \begin{cases}
+1-z &amp;amp; \text{if $z&amp;lt;1$} \\&lt;br&gt;
+0 &amp;amp; \text{otherwise}
+\end{cases}$$&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s use the hinge loss function on our (positive) training examples from the last figure. Below we have a plot of the hinge loss function, with the loss of each example overlaid as a blue dot (Fig. 5). Points $x_1$ and $x_2$ incur zero loss, since $z^{(i)} = y^{(i)} (\theta \cdot x^{(i)} + \theta_0) \geq 1$ for both examples. The point $x_3$, sitting on the decision boundary, incurs an agreement value $z^{(3)} = 0$, which gets mapped to $\textrm{Loss}_h(z^{(3)}) = 1 - z^{(3)} = 1.$&lt;/p&gt;
+&lt;p&gt;We can see that once a point starts to invade its corresponding margin boundary (located at $z=1$ for the positive label), the hinge loss increases linearly as a function of distance.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-5b-the-hinge-loss-function-thick-black-line-with-the-loss-values-for-each-training-example-in-fig-4-blue-shading-indicates-values-of-z-for-which-positive-training-examples-are-correctly-classified&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/hinge-loss.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 5.&amp;lt;/b&amp;gt; The hinge loss function (thick black line), with the loss values for each training example in Fig. 4. Blue shading indicates values of $z$ for which positive training examples are correctly classified.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/hinge-loss.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 5.&lt;/b&gt; The hinge loss function (thick black line), with the loss values for each training example in Fig. 4. Blue shading indicates values of $z$ for which positive training examples are correctly classified.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Using this loss function, the average loss can now be written as&lt;/p&gt;
+&lt;p&gt;$$\textrm{average loss} = \frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}_h(y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 )).$$&lt;/p&gt;
+&lt;h2 id=&#34;regularization&#34;&gt;Regularization&lt;/h2&gt;
+&lt;p&gt;At this stage you may have a vague idea that large margin classifiers are a good thing, and that regularization is supposed to help find such classifiers. We will expand on these ideas in this section. The topic of regularization is definitely worth more coverage, since it is critical in helping us avoid the dreaded problem of &lt;em&gt;overfitting&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Models that suffer from overfitting are in a sense, too smart for their own good. Overfit models are too familiar with the training data, contorting themselves to minimize training errors at the expense of being useful for general application.&lt;/p&gt;
+&lt;p&gt;We will illustrate this problem with some synthetic data: twenty points from a quadratic function, corrupted by some noise. Now let&amp;rsquo;s fit three different polynomials to this data:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;a linear function,&lt;/li&gt;
+&lt;li&gt;a quadratic function (i.e., a proper fit), and&lt;/li&gt;
+&lt;li&gt;a 10th-order polynomial.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-6b-fitting-three-different-k-order-polynomials-to-data-generated-by-a-quadratic-function&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/overfitting.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 6.&amp;lt;/b&amp;gt; Fitting three different k-order polynomials to data generated by a quadratic function.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/overfitting.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 6.&lt;/b&gt; Fitting three different k-order polynomials to data generated by a quadratic function.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;The overfit model has some issues. It is overly &lt;em&gt;complex&lt;/em&gt; for the data: while the average error (or loss) across the training data might be quite low, it is completely useless beyond the limited range of our training data. The linear fit faces the same problem but for the opposite reason: it is too &lt;em&gt;simple&lt;/em&gt; to capture the underlying signal.&lt;/p&gt;
+&lt;p&gt;In the context of our optimization problem, classification accuracy for the training set is improved by minimizing the average loss component. How do we maximize the classifier margins? To do this, we need to minimize $\norm{\theta}$. This is the same task as minimizing $\norm{\theta}^2$. By convention, the regularization component is specified as&lt;/p&gt;
+&lt;p&gt;$$\textrm{regularization} = \frac{1}{2} \norm{\theta}^2.$$&lt;/p&gt;
+&lt;h2 id=&#34;the-objective-function&#34;&gt;The objective function&lt;/h2&gt;
+&lt;p&gt;We are finally ready to look at the objective function in all its glory, the function that we are going to minimize to discover the parameters $\{\theta,\theta_0\}$ of our classifier:&lt;/p&gt;
+&lt;p&gt;$$J(\theta,\theta_0) = \underbrace{\frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}(y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 ))}_{\textrm{average loss}} + \underbrace{ \vphantom{ \sum_{1}^{2} } \frac{\lambda}{2}\norm{\theta}^2.}_{\textrm{regularization}}$$&lt;/p&gt;
+&lt;p&gt;Within the framework of our optimization problem, we need to strike the right balance between model complexity (minimizing training loss) and model utility (maximizing classifier margins), which is done by finding a good value of $\lambda$.&lt;/p&gt;
+&lt;!-- $$ J(\theta, \theta_0) = \frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}_h(y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 )) + \frac{\lambda}{2} \norm{\theta}^2$$ --&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    What happens if we set $\lambda=0$ and eliminate the regularization component? In this case, the optimization process results in a classifier that prioritizes low average loss above all else, which leads to overfitting. If we set $\lambda$ to a really big number, we get an overly simple model that won&amp;rsquo;t learn enough from the training data to make useful predictions.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Before we discuss how to minimize the objective function, it is worth taking a quick detour to talk about what it really means to find a &amp;ldquo;good&amp;rdquo; value of $\lambda$.&lt;/p&gt;
+&lt;h2 id=&#34;bias-variance-trade-off&#34;&gt;Bias-variance trade-off&lt;/h2&gt;
+&lt;p&gt;To get a feel for what we are trying to achieve here, let&amp;rsquo;s frame our discussion around the idea of model &amp;ldquo;complexity&amp;rdquo;, $C = \frac{1}{\lambda}$. That makes the objective function look like this:&lt;/p&gt;
+&lt;p&gt;$$J(\theta,\theta_0) = \frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}(y^{(i)} ( \theta \cdot x^{(i)} + \theta_0 )) + \frac{1}{2C}\norm{\theta}^2.$$&lt;/p&gt;
+&lt;p&gt;As we increase the model complexity, the regularization component becomes less influential, with more importance placed on minimizing the training error. A model that is too complex (like that tenth-order polynomial from the last figure) will be highly sensitive to the training data &amp;ndash; if trained on another training set, the resulting model parameters and its corresponding predictions are likely to be very different. Such a model is said to exhibit high &lt;em&gt;variance&lt;/em&gt; (Fig. 7, orange shading).&lt;/p&gt;
+&lt;p&gt;It is also possible to use a model that is too simple, as you have seen earlier. Notice how smaller values of $C$ place more importance on finding large margin classifiers. An underfit model does not produce accurate predictions, indicating a large &lt;em&gt;bias&lt;/em&gt; (Fig. 7, blue shading). You can think of bias as the error inherent to your model. For example, there is a hard limit on how well you can fit a linear function to quadratic-order training data (Fig. 6).&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-7b-the-bias-variance-trade-off-selecting-the-right-level-of-complexity-cast-to-balance-bias-test-prediction-accuracy-and-variance-prediction-sensitivity-to-different-training-data-models-can-suffer-from-underfitting-if-c-is-too-small-blue-shading-or-overfitting-if-c-is-too-large-yellow-shading&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/bias-variance-tradeoff.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 7.&amp;lt;/b&amp;gt; The bias-variance trade-off: selecting the right level of complexity $(C^{\ast})$ to balance bias (test prediction accuracy) and variance (prediction sensitivity to different training data). Models can suffer from underfitting if $C$ is too small (blue shading) or overfitting if $C$ is too large (yellow shading).&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/bias-variance-tradeoff.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 7.&lt;/b&gt; The bias-variance trade-off: selecting the right level of complexity $(C^{\ast})$ to balance bias (test prediction accuracy) and variance (prediction sensitivity to different training data). Models can suffer from underfitting if $C$ is too small (blue shading) or overfitting if $C$ is too large (yellow shading).
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;There is one more item of interest here: the test error (Fig. 7, black curve), which is comprised of the model bias and variance. If we can minimize the test error&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;, we could then find $C^{\ast}$, the optimal level of complexity that achieves low bias (high prediction accuracy on the test set) and low variance (model parameters that are not sensitive to the choice of training data). The balance between these two priorities is known as the &lt;em&gt;bias-variance trade-off&lt;/em&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;gradient-descent&#34;&gt;Gradient descent&lt;/h2&gt;
+&lt;p&gt;Let&amp;rsquo;s return to our original discussion. The goal is to find the classifier parameters $\{\theta,\theta_0\}$ by minimizing $J$, the objective function. We will now introduce &lt;em&gt;gradient descent&lt;/em&gt;, a well-known iterative algorithm for finding these parameters.&lt;/p&gt;
+&lt;p&gt;To start with, we will look at what happens in a single iteration of the algorithm, for a single parameter $\theta$ and its associated objective function $J(\theta)$ (Fig. 8). The algorithm starts at some point $\theta_k = \theta&#39;$, located to the right of the ideal value $\theta^*$. Next, the slope (or gradient) $\nabla_{\theta} J = \frac{\partial J}{\partial \theta}$ is evaluated at $\theta_k$. Finally, the algorithm computes $\theta_{k+1}$ by taking a step in the opposite direction of the slope, such that&lt;/p&gt;
+&lt;p&gt;$$\theta_{k+1} = \theta_{k} - \eta \cdot [\nabla_{\theta} J] _{\theta_k},$$&lt;/p&gt;
+&lt;!-- $$\theta_{k+1} = \theta_{k} + \nu \cdot  \left.\frac{\partial J}{\partial \theta} \right |_{\theta&#39;}$$ --&gt;
+&lt;p&gt;where the learning rate $\eta$ determines the size of the step. With successive iterations, the parameter gets closer and closer to $\theta^{\ast}$, for which $J(\theta^\ast)$ is a (local) minimum.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-8b-sketch-of-an-objective-function-jtheta-and-its-derivative-nabla-jtheta-evaluated-at-point-theta&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/derivative.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 8.&amp;lt;/b&amp;gt; Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&amp;amp;rsquo;.$&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/derivative.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 8.&lt;/b&gt; Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&amp;rsquo;.$
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;The notation for partial derivatives can be a little confusing at first. If we are dealing with a two-dimensional parameter vector $\theta = [\theta_1, \theta_2]$, the gradient of $J$ with respect to $\theta$ takes the form&lt;/p&gt;
+&lt;p&gt;$$\nabla_{\theta} J = \begin{bmatrix}
+\frac{\partial J}{\partial \theta_1}\\&lt;br&gt;
+\frac{\partial J}{\partial \theta_2}\\&lt;br&gt;
+\end{bmatrix}_{(\theta_1^{&#39;},\theta_2^{&#39;})}$$&lt;/p&gt;
+&lt;p&gt;where $\frac{\partial J}{\partial \theta_i}$ is the partial derivative of $J$ with respect to $\theta_i$. Each $\frac{\partial J}{\partial \theta_i}$ is evaluated at its corresponding parameter value $\theta_i^{&#39;}.$&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The same principles apply in higher dimensions. If we are trying to optimize two parameters $(x, y)$, then both parameters are updated simultaneously using the partial derivatives of $J,$ evaluated at the current parameter values $(x_k, y_k)$.&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\begin{bmatrix}
+x_{k+1}\\&lt;br&gt;
+y_{k+1}\\&lt;br&gt;
+\end{bmatrix}
+&amp;amp;=
+\begin{bmatrix}
+x_k\\&lt;br&gt;
+y_k\\&lt;br&gt;
+\end{bmatrix} - \eta
+\begin{bmatrix}
+\frac{\partial J}{\partial x}\\&lt;br&gt;
+\frac{\partial J}{\partial y}\\&lt;br&gt;
+\end{bmatrix}_{(x_k,y_k)}
+\end{align*}$$&lt;/p&gt;
+&lt;p&gt;How do we actually compute the gradient? That depends on which loss function is being used. For now we will show the general expression for the gradient, leaving out the offset parameter for cleaner notation, but either way, we can see that the gradient is just a sum of functions.&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\nabla_{\theta} J(\theta)
+&amp;amp;= \nabla_{\theta} \left [  \frac{1}{N} \sum_{i=1}^{N}\textrm{Loss}(y^{(i)} \theta \cdot x^{(i)} ) \right ] + \nabla_{\theta} \left [ \frac{\lambda}{2}\norm{\theta}^2 \right ]\\&lt;br&gt;
+&amp;amp;= \frac{1}{N} \sum_{i=1}^{N} \nabla_{\theta} \left [   \textrm{Loss}(y^{(i)} \theta \cdot x^{(i)} ) \right ] + \lambda \theta
+\end{align*}$$&lt;/p&gt;
+&lt;p&gt;Note that we need to iterate over the &lt;em&gt;entire dataset&lt;/em&gt; for each gradient update, which can be resource-intensive and oftentimes inconvenient. It is largely for these reasons that we consider an alternative algorithm, one that has become a mainstay in the modern ML practitioner&amp;rsquo;s toolbox.&lt;/p&gt;
+&lt;h2 id=&#34;stochastic-gradient-descent&#34;&gt;Stochastic gradient descent&lt;/h2&gt;
+&lt;p&gt;The basic idea behind &lt;em&gt;stochastic gradient descent&lt;/em&gt; (SGD) is to approximate the objective function gradient $\nabla_{\theta} J(\theta)$ using a randomly selected sample $(x^{(i)}, y^{(i)})$ from the full dataset. The expression for the gradient then becomes&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\nabla_{\theta} J_i(\theta)
+&amp;amp;= \nabla_{\theta} \textrm{Loss}(y^{(i)} \theta \cdot x^{(i)} ) + \lambda \theta
+\end{align*}.$$&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Remember the &lt;a href=&#34;https://en.wikipedia.org/wiki/Chain_rule&#34;&gt;chain rule&lt;/a&gt;, which tells us that
+$\frac{dL}{d\theta} = \frac{dL}{dz}\frac{dz}{d\theta}.$
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Let&amp;rsquo;s assume that we&amp;rsquo;re dealing with hinge loss, whose derivative looks like this:&lt;/p&gt;
+&lt;p&gt;$$ \nabla_z \textrm{Loss}_h(z) = \begin{cases}
+-1 &amp;amp; \text{if $z&amp;lt;1$} \\&lt;br&gt;
+0 &amp;amp; \text{otherwise}
+\end{cases}$$&lt;/p&gt;
+&lt;p&gt;The objective function gradient for the $i$-th example now takes the form&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+\nabla_{\theta} J_i(\theta)
+&amp;amp;= \begin{cases}
+-y^{(i)} x^{(i)} + \lambda \theta &amp;amp; \text{if loss &amp;gt; 0}\\&lt;br&gt;
+\lambda \theta &amp;amp; \text{if loss = 0}
+\end{cases}
+\end{align*}$$&lt;/p&gt;
+&lt;p&gt;As you might guess, this &amp;ldquo;cheap&amp;rdquo; gradient tends to increase the number of iterations needed to converge on the optimized model parameters. On the other hand, each iteration can be computed much more rapidly, with especially good performance made possible on high-dimensional datasets.&lt;/p&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;The objective function is an important construct that lets us reframe machine learning problems as optimization problems, which can be solved with the help of some calculus. We have discussed a handful of important considerations that apply to most (if not all) ML problems, but there is of course so much more to learn. For those wondering where to go from here, my suggestion would be to read up about different types of regularization and how they can be used to achieve different outcomes (e.g., lasso regularization can be used to eliminate unhelpful predictors in a regression model).&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Although it is not possible to know the exact test error, there are ways to approximate it, such as through cross-validation. &lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -3,37 +3,87 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://www.remotelycurious.net/category/analysis/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/bias-variance-tradeoff/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/categories/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/classification/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/gradient-descent/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/machine-learning/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/category/ml.doc/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/ml-doc-01-2-learning-as-optimization/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/objective-function/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/overfitting/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/regularization/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tags/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/underfitting/</loc>
+    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://www.remotelycurious.net/tag/algorithm/</loc>
     <lastmod>2020-10-25T19:03:33-04:00</lastmod>
   </url>
   
   <url>
-    <loc>https://www.remotelycurious.net/category/analysis/</loc>
-    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/categories/</loc>
-    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/tag/classification/</loc>
-    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://www.remotelycurious.net/tag/edx/</loc>
-    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/tag/machine-learning/</loc>
-    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/category/ml.doc/</loc>
     <lastmod>2020-10-25T19:03:33-04:00</lastmod>
   </url>
   
@@ -44,21 +94,6 @@
   
   <url>
     <loc>https://www.remotelycurious.net/tag/perceptron/</loc>
-    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/post/</loc>
-    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/</loc>
-    <lastmod>2020-10-25T19:03:33-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/tags/</loc>
     <lastmod>2020-10-25T19:03:33-04:00</lastmod>
   </url>
   
