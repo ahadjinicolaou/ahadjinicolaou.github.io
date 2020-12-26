@@ -1,0 +1,1536 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Learning about service management with the help of an unfriendly Python script.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/systemd-shenanigans/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/systemd-shenanigans/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/systemd-shenanigans/">
+  <meta property="og:title" content="Shenanigans with systemd | Remotely Curious">
+  <meta property="og:description" content="Learning about service management with the help of an unfriendly Python script."><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-12-26T10:11:54-05:00">
+    
+    <meta property="article:modified_time" content="2020-12-26T10:11:54-05:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/systemd-shenanigans/"
+  },
+  "headline": "Shenanigans with systemd",
+  
+  "datePublished": "2020-12-26T10:11:54-05:00",
+  "dateModified": "2020-12-26T10:11:54-05:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Learning about service management with the help of an unfriendly Python script."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Shenanigans with systemd | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Shenanigans with systemd</h1>
+
+  
+  <p class="page-subtitle">Service management with an unfriendly Python script.</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Dec 26, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    12 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/sysadmin/">sysadmin</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>A modern operating system is supported by hundreds of processes that handle communication between the user and the computer hardware. Most of the time, we deal with interactive processes (i.e., applications), but behind the curtain are a myriad of <em>services</em>; processes that run in the background and support various low-level functions of the operating system, such as logging and memory management.</p>
+<p>To better understand how services are managed in Linux, I decided to make my own service and manage it through <strong>systemd</strong>, the service manager used by CentOS 8. It&rsquo;s definitely not the most exciting topic in the world, so to make things fun, I decided to develop a Python script that monitors the keyboard for certain words (and delivers unwanted feedback) and make a service out of it.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-meet-judgy-the-service-that-has-an-opinion-about-your-browsing-habits">
+
+
+  <a data-fancybox="" href="/systemd-shenanigans/judgy.gif" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; Meet Judgy, the service that has an opinion about your browsing habits.">
+
+
+  <img src="/systemd-shenanigans/judgy.gif" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> Meet Judgy, the service that has an opinion about your browsing habits.
+  </figcaption>
+
+
+</figure>
+
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#understanding-systemd">Understanding systemd</a>
+      <ul>
+        <li><a href="#service-management">Service management</a></li>
+        <li><a href="#unit-files">Unit files</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#system-state">System state</a></li>
+      </ul>
+    </li>
+    <li><a href="#creating-services">Creating services</a>
+      <ul>
+        <li><a href="#a-quick-warmup">A quick warmup</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#unit-file-overrides">Unit file overrides</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#getting-judgy">Getting judgy</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="understanding-systemd">Understanding systemd</h1>
+<p>Systemd manages things called <em>units</em> that represent different kinds of system resources. Each type of resource is handled by a specific type of unit. Here are three examples:</p>
+<ul>
+<li><code>sshd.service</code>, the <em>service unit</em> which manages the 
+<a href="https://linux.die.net/man/8/sshd" target="_blank" rel="noopener">OpenSSH</a> service,</li>
+<li><code>boot.mount</code>, the <em>mount unit</em> that specifies which file system gets mounted to the <code>/boot</code> directory,</li>
+<li><code>dbus.socket</code>, the <em>socket unit</em> that activates the 
+<a href="https://linux.die.net/man/1/dbus-daemon" target="_blank" rel="noopener">D-Bus message bus</a> (a service that handles communication between applications) to process intercepted messages.</li>
+</ul>
+<p>Units can also describe devices, timers, and more abstract things, like targets (groups of units) and slices (reservations of CPU/RAM/storage/bandwidth for groups of processes). For now, just appreciate that the notion of a unit is a very broad one.</p>
+<div class="alert alert-note">
+  <div>
+    There are many units. Running <code># systemctl list-unit-files</code> on my system yields a total of 421 units, with roughly a third of these being service units.
+  </div>
+</div>
+<p>Although systemd is massively multi-purpose and capable of handling all kinds of system tasks (with perhaps the most important being 
+<a href="https://en.wikipedia.org/wiki/Init" target="_blank" rel="noopener">system initialization</a>), this writeup will focus on using systemd for service management.</p>
+<h2 id="service-management">Service management</h2>
+<p>Most of the time, a service will sit in the background and keep out of trouble. When issues do arise, we need a way to interact with the service by querying its status (e.g., &ldquo;are you still alive?&quot;) or by stopping and (re)starting the service.</p>
+<p>These are achieved with <code># systemctl &lt;verb&gt; &lt;name&gt;.service</code>, using the verb</p>
+<!-- ```# systemctl test ` *`verb`* *`name`*`.service`, using the verbs: -->
+<ul>
+<li><code>start</code>, to start a systemd service,</li>
+<li><code>stop</code>, to ask the service to stop (as opposed to killing it),</li>
+<li><code>status</code>, to get general information about the service,</li>
+<li><code>restart</code>, to stop and then start the service.</li>
+</ul>
+<p>We can check on the status of the OpenSSH service, for example, by running <code># systemctl status sshd.service</code>. The output (Fig. 2) gives us a lot of useful information, including some manpage references (Docs) and whether the service is</p>
+<ul>
+<li><strong>loaded</strong> (systemd has read the service&rsquo;s configuration file) versus <em>not-found</em>,</li>
+<li><strong>enabled</strong> (the service will run after booting the system) versus <em>disabled</em>,</li>
+<li><strong>active (running)</strong> versus <em>active (exited)</em> or <em>inactive (dead)</em>.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-querying-the-status-of-the-openssh-daemon">
+
+
+  <a data-fancybox="" href="/systemd-shenanigans/systemctl-status.png" data-caption="&lt;b&gt;Fig. 2.&lt;/b&gt; Querying the status of the OpenSSH daemon.">
+
+
+  <img src="/systemd-shenanigans/systemctl-status.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2.</b> Querying the status of the OpenSSH daemon.
+  </figcaption>
+
+
+</figure>
+
+<p>At the end of this output, you can see the last few lines of OpenSSH&rsquo;s logging output, which can often be helpful for diagnosing problems. The full session log can be viewed with <code># journalctl -u sshd.service</code>, which queries systemd&rsquo;s <em>journal</em>, a single binary file that collects all messages from the operating system and userland applications.</p>
+<div class="alert alert-note">
+  <div>
+    It&rsquo;s important to discriminate between an active service (i.e., running at the moment) and an <em>enabled</em> service, which runs at boot. To ensure that a service will start at boot, run <code># systemctl enable &lt;name&gt;.service</code>.
+  </div>
+</div>
+<h2 id="unit-files">Unit files</h2>
+<p>If you read the &lsquo;loaded&rsquo; line of the above output, you will find a reference to a file located in <code>/usr/lib/systemd/system/sshd.service</code>. This <em>unit file</em> defines the OpenSSH service, including how and when to start it, whether to restart it after failure, and important environment variables for configuration. Essentially, unit files are the means by which systemd understands system resources.</p>
+<p>Let&rsquo;s take a look.</p>
+<h4 id="usrlibsystemdsystemsshdservice">/usr/lib/systemd/system/sshd.service</h4>
+<pre><code class="language-toml">[Unit]
+Description=OpenSSH server daemon
+Documentation=man:sshd(8) man:sshd_config(5)
+After=network.target sshd-keygen.target
+Wants=sshd-keygen.target
+
+[Service]
+Type=notify
+EnvironmentFile=-/etc/crypto-policies/back-ends/opensshserver.config
+EnvironmentFile=-/etc/sysconfig/sshd
+ExecStart=/usr/sbin/sshd -D $OPTIONS $CRYPTOPOLICY
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>A service unit file consists of three sections, denoted using square brackets. The <code>[Unit]</code> section above contains four <em>directives</em> that together describe the unit and define its dependencies. In this section, the most important directives are</p>
+<ul>
+<li><code>After</code>, used to direct systemd to start the configured service <em>after</em> the listed units become fully functional, and</li>
+<li><code>Wants</code>, to list units that should be started together with the configured service.</li>
+</ul>
+<p>In our case, <code>After=network.target sshd-keygen.target</code> makes sure that OpenSSH is started after two (target unit) resources become available: (a) the 
+<a href="https://en.wikipedia.org/wiki/NetworkManager" target="_blank" rel="noopener">network management stack</a>, allowing applications to access the network, and (b) OpenSSH&rsquo;s keygen server, which is used by OpenSSH to generate keys for public key authentication.</p>
+<div class="alert alert-note">
+  <div>
+    Note that specifying <code>After=network.target</code> doesn&rsquo;t guarantee that your service will start after your network interfaces are online! The <a href="https://www.freedesktop.org/wiki/Software/systemd/NetworkTarget/">purpose of this directive value</a> is to allow your network-dependent service to terminate properly when the system is shutdown. To ensure a service starts after the network comes online, use <code>After=network-online.target</code>.
+  </div>
+</div>
+<p>The <code>[Service]</code> section describes how to (re)start and stop the service. Different <code>Type</code> directive values determine how the process should start, with <code>Type=notify</code> telling the service to send a signal to systemd when it is active. The <code>EnvironmentFile</code> directives are used to load variables (<code>OPTIONS</code>, <code>CRYPTOPOLICY</code>, <code>MAINPID</code>) contained in the listed files, which are used by <code>ExecStart</code> and <code>ExecReload</code> to configure the execution and termination of the service. If the service ends unexpectedly, <code>Restart=on-failure</code> tells systemd to restart the service, in this case after 42 seconds.</p>
+<div class="alert alert-note">
+  <div>
+    You may have noticed the hyphens preceding some directive values; these indicate &lsquo;optional&rsquo; directives. Normally, if any of the directives leads to an error (either because a listed file doesn&rsquo;t exist, or a listed process fails to execute), systemd will indicate that the service has failed. In our case, even if the files listed in the above <code>EnvironmentFile</code> directives are missing, the show will go on.
+  </div>
+</div>
+<p>Lastly, the <code>[Install]</code> section holds information about how to install the service, so that it can be started at boot. The directives in this section are processed when evoked by <code>systemctl enable</code> or <code>systemctl disable</code>. It is common to find <code>WantedBy=multi-user.target</code> here; this specifies that systemd should start the service only when the system has reached a certain state, defined by the <code>multi-user.target</code> unit. If the system cannot reach this state, the service will not automatically start, even if it has been enabled.</p>
+<h2 id="system-state">System state</h2>
+<p>It&rsquo;s worth expanding on what we mean by <em>state</em>. After powering on a CentOS Linux system and loading the kernel, systemd is the first process to start (
+<a href="https://en.wikipedia.org/wiki/Process_identifier" target="_blank" rel="noopener">PID</a> 1). Systemd will then proceed to activate services and other units until the system has reached some requested (default) state, represented by a systemd <em>target</em>. For example, if systemd achieves the <code>multi-user.target</code> state, multiple users can log into the system and access the network, but they are unable to start a graphical shell and are thus restricted to a text-based shell. Booting into the <code>rescue.target</code> state is usually reserved for emergency situations where the system cannot start normally. In this case, systemd will only start the bare minimum set of system resources, avoiding the activation of network interfaces and other nonessential peripheral devices. This allows the root user to try and reverse any changes that harmed the regular initialization process.</p>
+<p>The table below lists the available systemd targets in CentOS, together with their associated outcomes and 
+<a href="https://en.wikipedia.org/wiki/Runlevel" target="_blank" rel="noopener"><em>runlevels</em></a> (i.e., the equivalent of state in other init systems). By default, CentOS will attempt to achieve either the <code>multi-user.target</code> state or the <code>graphical.target</code> state, with the latter for GUI-based installations.</p>
+<!-- <p style="text-align: center; font-size: 80%;"><b>Table 1.</b> Systemd targets in CentOS.</p> -->
+<table>
+<thead>
+<tr>
+<th>Runlevel</th>
+<th>Target</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>poweroff.target</td>
+<td>🔌 System shutdown</td>
+</tr>
+<tr>
+<td>1</td>
+<td>rescue.target</td>
+<td>🚑 Single-user &ldquo;safe mode&rdquo; shell</td>
+</tr>
+<tr>
+<td>3</td>
+<td>multi-user.target</td>
+<td>⌨️ Non-graphical multi-user shell</td>
+</tr>
+<tr>
+<td>5</td>
+<td>graphical.target</td>
+<td>👨‍💻 Graphical multi-user shell</td>
+</tr>
+<tr>
+<td>6</td>
+<td>reboot.target</td>
+<td>⚡ System reboot</td>
+</tr>
+</tbody>
+</table>
+<p>These targets are special in that they can be used to switch the current state of the computer using the <code># systemctl isolate &lt;name&gt;.target</code> command. For instance, you can restart your computer with <code># systemctl isolate reboot.target</code>. This is made possible by the inclusion of the <code>AllowIsolate=yes</code> directive in each of these unit files.</p>
+<p>At this point we know enough to start playing around with our own services. Time to get your hands dirty!</p>
+<h1 id="creating-services">Creating services</h1>
+<p>We will deal with two custom services: (a) the Hello service, which will serve as a kind of warmup to reinforce some important concepts (while introducing some new ones), and (b) the Judgy service, the ultimate subject of this writeup.</p>
+<p>Before we get into things, a quick note about where systemd expects unit files:</p>
+<ul>
+<li><code>/usr/lib/systemd/system</code>, for default unit files that come with RPM packages,</li>
+<li><code>/etc/systemd/system</code>, for custom unit files (e.g., made using <code>systemctl edit</code>),</li>
+<li><code>/run/systemd/system</code>, for automatically generated unit files.</li>
+</ul>
+<p>That means our unit files are going in <code>/etc/systemd/system</code>. You can create the Hello unit file the old-fashioned way (e.g., via <code>vim</code>) or by running <code># systemctl edit --force --full &lt;name&gt;.service</code>, which will bring up a text editor for you to work with.</p>
+<div class="alert alert-note">
+  <div>
+    If units with identical names exist in more than one of the above locations, those in <code>/run</code> will take precedence over others. Next in line are unit files in <code>/etc</code>, with units in <code>/usr/lib</code> being of lowest priority.
+  </div>
+</div>
+<h2 id="a-quick-warmup">A quick warmup</h2>
+<p>Let&rsquo;s introduce the Hello service unit file. As you can see, there&rsquo;s not a lot to it.</p>
+<h4 id="etcsystemdsystemhelloservice">/etc/systemd/system/hello.service</h4>
+<pre><code class="language-toml">[Unit]
+Description=Hello service
+
+[Service]
+ExecStart=/usr/bin/bash /data/hello.sh 10 meepmeep
+</code></pre>
+<p>Once activated, the service will execute a script called <code>hello.sh</code>, shown below. When executed, it first lists any command line arguments, and if the first argument <code>ARG1</code> is a positive integer, sleeps for <code>ARG1</code> seconds. Simple enough.</p>
+<h4 id="datahellosh">/data/hello.sh</h4>
+<pre><code class="language-bash">HMS=$(date +&quot;%H:%M:%S&quot;)
+printf &quot;\n[%s] HELLO service came online.\n&quot; ${HMS}
+
+# print out command line arguments
+if [ &quot;$#&quot; -ge 1 ]; then
+    i=1;
+    printf &quot;Supplied arguments:\n&quot;
+    for ARG in &quot;$@&quot;; do
+        printf &quot;\targ%d: %s\n&quot; $i $ARG
+        i=$((i + 1));
+    done
+fi
+
+# sleep for ARG1 seconds if ARG1 is a positive integer
+if [ -n &quot;$1&quot; ] &amp;&amp; [ &quot;$1&quot; eq &quot;$1&quot; ] 2&gt;/dev/null; then
+    sleep $1
+fi
+
+HMS=$(date +&quot;%H:%M:%S&quot;)
+printf &quot;[%s] HELLO service is done.\n\n&quot; ${HMS}
+</code></pre>
+<p>Here&rsquo;s the output of the script if we run it normally:</p>
+<pre><code class="language-bash"># ./hello.sh 10 meepmeep
+[13:23:56] HELLO service is online.
+Supplied arguments:
+    arg1: 10
+    arg2: meepmeep
+[13:24:06] HELLO service is done.
+</code></pre>
+<p>If we start the service with <code># systemctl start hello.service</code> and quickly check its status, we can see the output of the script within the logging output.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-querying-the-hello-service-while-it-is-still-operational">
+
+
+  <a data-fancybox="" href="/systemd-shenanigans/hello-active.png" data-caption="&lt;b&gt;Fig. 3.&lt;/b&gt; Querying the Hello service while it is still operational.">
+
+
+  <img src="/systemd-shenanigans/hello-active.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3.</b> Querying the Hello service while it is still operational.
+  </figcaption>
+
+
+</figure>
+
+<p>After ten seconds of sleep, the script is done and the service becomes inactive.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-4b-the-hello-service-is-done">
+
+
+  <a data-fancybox="" href="/systemd-shenanigans/hello-inactive.png" data-caption="&lt;b&gt;Fig. 4.&lt;/b&gt; The Hello service is done.">
+
+
+  <img src="/systemd-shenanigans/hello-inactive.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 4.</b> The Hello service is done.
+  </figcaption>
+
+
+</figure>
+
+<p>That was a pretty straightforward example, so let&rsquo;s build on it to show something useful.</p>
+<h2 id="unit-file-overrides">Unit file overrides</h2>
+<p>We might not always want to start our service with the same directives and parameters. Indeed, there might be times where we want to override some of them while keeping others. This is where <em>drop-in units</em> come in handy.</p>
+<p>Here&rsquo;s the situation: we like our Hello service, but we want to make two changes:</p>
+<ul>
+<li>(a) we want to supply input arguments to <code>hello.sh</code> from a file,</li>
+<li>(b) once the service becomes inactive, it should restart after sixteen seconds.</li>
+</ul>
+<p>To achieve the first goal, we will make <code>hello.config</code>, a configuration file from which systemd will extract the script&rsquo;s input arguments, shown below.</p>
+<h4 id="datahelloconfig">/data/hello.config</h4>
+<pre><code class="language-toml">DELAY=16
+OTHERARG=testing.one.two.three
+</code></pre>
+<p>We will now create a drop-in unit that loads these variables with the <code>EnvironmentFile</code> directive (and uses them when overriding the previous <code>ExecStart</code> directive). The unit also injects two new directives that satisfy our second goal. You can use <code># systemctl edit hello.service</code> to create the drop-in file, nested in a <code>hello.service.d</code> folder.</p>
+<h4 id="etcsystemdsystemhelloservicedoverrideconf">/etc/systemd/system/hello.service.d/override.conf</h4>
+<pre><code class="language-toml">[Unit]
+Description=Hello service
+
+[Service]
+EnvironmentFile=/data/hello.config
+ExecStart=
+ExecStart=/usr/bin/bash /data/hello.sh $DELAY $OTHERARG
+Restart=always
+RestartSec=16s
+</code></pre>
+<p>Pay attention to the empty <code>ExecStart</code> directive. This is done to eliminate the parent directive; without it, the complete unit file (base plus override) would in effect have two <code>ExecStart</code> directives, leading to an error.</p>
+<div class="alert alert-note">
+  <div>
+    After making changes to your unit files, be sure to register them in systemd using <code>systemctl daemon-reload</code>.
+  </div>
+</div>
+<p>Now if we fire up our service, we will see that the script is now working with the new input arguments. Note the new Drop-In line, which lists the overriding unit file.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-5b-the-upgraded-hello-service-running-with-our-new-parameters">
+
+
+  <a data-fancybox="" href="/systemd-shenanigans/hello-v2-active.png" data-caption="&lt;b&gt;Fig. 5.&lt;/b&gt; The upgraded Hello service, running with our new parameters.">
+
+
+  <img src="/systemd-shenanigans/hello-v2-active.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 5.</b> The upgraded Hello service, running with our new parameters.
+  </figcaption>
+
+
+</figure>
+
+<p>If we query the service after it has expired, we can see that the Active line contains <strong>activating (auto-restart)</strong>. This indicates that the service is scheduled to be restarted, which is evidence that our new configuration has taken effect.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-6b-ill-be-back">
+
+
+  <a data-fancybox="" href="/systemd-shenanigans/hello-v2-inactive.png" data-caption="&lt;b&gt;Fig. 6.&lt;/b&gt; &amp;ldquo;I&amp;rsquo;ll be back.&amp;rdquo;">
+
+
+  <img src="/systemd-shenanigans/hello-v2-inactive.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 6.</b> &ldquo;I&rsquo;ll be back.&rdquo;
+  </figcaption>
+
+
+</figure>
+
+<h2 id="getting-judgy">Getting judgy</h2>
+<p>We have made it to the final act. The goal here, as mentioned at the outset, is to run a Python script that monitors a specific user&rsquo;s keypresses and delivers (juvenile) notifications to the user, depending on the content of the user input. The solution will, of course, be implemented as a systemd service.</p>
+<p>Judgy&rsquo;s source (shown below) makes use of two important resources:</p>
+<ul>
+<li>
+<a href="https://pypi.org/project/keyboard/" target="_blank" rel="noopener"><code>keyboard</code></a>, a lightweight event hook library written in Python, and</li>
+<li>
+<a href="https://manpages.ubuntu.com/manpages/xenial/man1/notify-send.1.html" target="_blank" rel="noopener"><code>notify-send</code></a>, a program to send desktop notifications, provided by 
+<a href="https://archlinux.org/packages/extra/x86_64/libnotify/" target="_blank" rel="noopener">libnotify</a>.</li>
+</ul>
+<p>After registering <code>process_key()</code> as the keypress callback, the script will indefinitely sleep and process keypresses, buffering all typed alphabetical characters. If the user presses a non-alphabetical key, Judgy will test the buffer for objectionable content (defined in the <code>*_words</code> wordlists) with <code>pass_judgement()</code> before clearing the buffer. Should the user have typed any words contained in these wordlists, judgement will be rendered in the form of a graphical notification delivered to the user with <code>send_notification()</code>. Judgy will continue to process keypresses until the user enters the safe word (scram).</p>
+<script src="https://gist.github.com/ahadjinicolaou/e5aacb2edccef0d0237d3a73f5767eda.js"></script>
+<p>Some important points:</p>
+<ul>
+<li><code>judgy</code> needs to be supplied with the username of the (logged-in) desktop user,</li>
+<li><code>notify-send</code> will not work without the 
+<a href="https://wiki.archlinux.org/index.php/Desktop_notifications#Usage_in_programming" target="_blank" rel="noopener">D-Bus address</a> of the desktop user,</li>
+<li><code>keyboard</code> (and therefore <code>judgy</code>) needs to be run as root.</li>
+</ul>
+<p>As for the service unit, we will opt for simplicity. Judgy is started using sudo and a Python interpreter (with <code>btables</code> being the username of the desktop user). You could add an <code>[Install]</code> section and start Judgy at boot, but that would likely get very irritating.</p>
+<h4 id="etcsystemdsystemjudgyservice">/etc/systemd/system/judgy.service</h4>
+<pre><code class="language-toml">[Unit]
+Description=Judgy service
+
+[Service]
+ExecStart=/usr/bin/sudo /usr/bin/python3 /data/judgy.py btables
+</code></pre>
+<p>Start the service via <code># systemctl start judgy.service</code> and you&rsquo;re in business. You can stop the service either through <code>systemctl</code> or by entering the safe word.</p>
+<h1 id="summary">Summary</h1>
+<p>If you made it through the writeup, congratulations! By now, you likely have a decent grasp of the basics of service management, as well as an appreciation for systemd&rsquo;s various capabilities. Although I am no sysadmin, the process of making this writeup has improved my understanding of how systemd operates under the hood, while at the same time making me realize how much more there is to this software monolith&hellip;</p>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/bash/">bash</a>
+  
+  <a class="badge badge-light" href="/tag/linux/">linux</a>
+  
+  <a class="badge badge-light" href="/tag/python/">python</a>
+  
+  <a class="badge badge-light" href="/tag/services/">services</a>
+  
+  <a class="badge badge-light" href="/tag/systemd/">systemd</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/systemd-shenanigans/&amp;text=Shenanigans%20with%20systemd" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/systemd-shenanigans/&amp;t=Shenanigans%20with%20systemd" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Shenanigans%20with%20systemd&amp;body=https://www.remotelycurious.net/post/systemd-shenanigans/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/systemd-shenanigans/&amp;title=Shenanigans%20with%20systemd" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=Shenanigans%20with%20systemd%20https://www.remotelycurious.net/post/systemd-shenanigans/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/systemd-shenanigans/&amp;title=Shenanigans%20with%20systemd" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/homelab/">Building a homelab with Proxmox</a></li>
+      
+      <li><a href="/post/issues-app-02-templates/">issues.app (2): Making templates with Bootstrap</a></li>
+      
+      <li><a href="/post/issues-app-01-intro/">issues.app (1): Getting started with Flask and Pytest</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

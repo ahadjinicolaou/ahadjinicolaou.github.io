@@ -5,12 +5,506 @@
     <link>https://www.remotelycurious.net/post/</link>
       <atom:link href="https://www.remotelycurious.net/post/index.xml" rel="self" type="application/rss+xml" />
     <description>Posts</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Tue, 01 Dec 2020 19:36:40 -0400</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sat, 26 Dec 2020 10:11:54 -0500</lastBuildDate>
     <image>
       <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
       <title>Posts</title>
       <link>https://www.remotelycurious.net/post/</link>
     </image>
+    
+    <item>
+      <title>Shenanigans with systemd</title>
+      <link>https://www.remotelycurious.net/post/systemd-shenanigans/</link>
+      <pubDate>Sat, 26 Dec 2020 10:11:54 -0500</pubDate>
+      <guid>https://www.remotelycurious.net/post/systemd-shenanigans/</guid>
+      <description>&lt;p&gt;A modern operating system is supported by hundreds of processes that handle communication between the user and the computer hardware. Most of the time, we deal with interactive processes (i.e., applications), but behind the curtain are a myriad of &lt;em&gt;services&lt;/em&gt;; processes that run in the background and support various low-level functions of the operating system, such as logging and memory management.&lt;/p&gt;
+&lt;p&gt;To better understand how services are managed in Linux, I decided to make my own service and manage it through &lt;strong&gt;systemd&lt;/strong&gt;, the service manager used by CentOS 8. It&amp;rsquo;s definitely not the most exciting topic in the world, so to make things fun, I decided to develop a Python script that monitors the keyboard for certain words (and delivers unwanted feedback) and make a service out of it.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-meet-judgy-the-service-that-has-an-opinion-about-your-browsing-habits&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/systemd-shenanigans/judgy.gif&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Meet Judgy, the service that has an opinion about your browsing habits.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/systemd-shenanigans/judgy.gif&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Meet Judgy, the service that has an opinion about your browsing habits.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#understanding-systemd&#34;&gt;Understanding systemd&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#service-management&#34;&gt;Service management&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#unit-files&#34;&gt;Unit files&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#system-state&#34;&gt;System state&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#creating-services&#34;&gt;Creating services&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#a-quick-warmup&#34;&gt;A quick warmup&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#unit-file-overrides&#34;&gt;Unit file overrides&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#getting-judgy&#34;&gt;Getting judgy&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;understanding-systemd&#34;&gt;Understanding systemd&lt;/h1&gt;
+&lt;p&gt;Systemd manages things called &lt;em&gt;units&lt;/em&gt; that represent different kinds of system resources. Each type of resource is handled by a specific type of unit. Here are three examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;sshd.service&lt;/code&gt;, the &lt;em&gt;service unit&lt;/em&gt; which manages the 
+&lt;a href=&#34;https://linux.die.net/man/8/sshd&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;OpenSSH&lt;/a&gt; service,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;boot.mount&lt;/code&gt;, the &lt;em&gt;mount unit&lt;/em&gt; that specifies which file system gets mounted to the &lt;code&gt;/boot&lt;/code&gt; directory,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dbus.socket&lt;/code&gt;, the &lt;em&gt;socket unit&lt;/em&gt; that activates the 
+&lt;a href=&#34;https://linux.die.net/man/1/dbus-daemon&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;D-Bus message bus&lt;/a&gt; (a service that handles communication between applications) to process intercepted messages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Units can also describe devices, timers, and more abstract things, like targets (groups of units) and slices (reservations of CPU/RAM/storage/bandwidth for groups of processes). For now, just appreciate that the notion of a unit is a very broad one.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    There are many units. Running &lt;code&gt;# systemctl list-unit-files&lt;/code&gt; on my system yields a total of 421 units, with roughly a third of these being service units.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Although systemd is massively multi-purpose and capable of handling all kinds of system tasks (with perhaps the most important being 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Init&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;system initialization&lt;/a&gt;), this writeup will focus on using systemd for service management.&lt;/p&gt;
+&lt;h2 id=&#34;service-management&#34;&gt;Service management&lt;/h2&gt;
+&lt;p&gt;Most of the time, a service will sit in the background and keep out of trouble. When issues do arise, we need a way to interact with the service by querying its status (e.g., &amp;ldquo;are you still alive?&amp;quot;) or by stopping and (re)starting the service.&lt;/p&gt;
+&lt;p&gt;These are achieved with &lt;code&gt;# systemctl &amp;lt;verb&amp;gt; &amp;lt;name&amp;gt;.service&lt;/code&gt;, using the verb&lt;/p&gt;
+&lt;!-- ```# systemctl test ` *`verb`* *`name`*`.service`, using the verbs: --&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;start&lt;/code&gt;, to start a systemd service,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;stop&lt;/code&gt;, to ask the service to stop (as opposed to killing it),&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;status&lt;/code&gt;, to get general information about the service,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;restart&lt;/code&gt;, to stop and then start the service.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We can check on the status of the OpenSSH service, for example, by running &lt;code&gt;# systemctl status sshd.service&lt;/code&gt;. The output (Fig. 2) gives us a lot of useful information, including some manpage references (Docs) and whether the service is&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;loaded&lt;/strong&gt; (systemd has read the service&amp;rsquo;s configuration file) versus &lt;em&gt;not-found&lt;/em&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;enabled&lt;/strong&gt; (the service will run after booting the system) versus &lt;em&gt;disabled&lt;/em&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;active (running)&lt;/strong&gt; versus &lt;em&gt;active (exited)&lt;/em&gt; or &lt;em&gt;inactive (dead)&lt;/em&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-querying-the-status-of-the-openssh-daemon&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/systemd-shenanigans/systemctl-status.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Querying the status of the OpenSSH daemon.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/systemd-shenanigans/systemctl-status.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Querying the status of the OpenSSH daemon.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;At the end of this output, you can see the last few lines of OpenSSH&amp;rsquo;s logging output, which can often be helpful for diagnosing problems. The full session log can be viewed with &lt;code&gt;# journalctl -u sshd.service&lt;/code&gt;, which queries systemd&amp;rsquo;s &lt;em&gt;journal&lt;/em&gt;, a single binary file that collects all messages from the operating system and userland applications.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    It&amp;rsquo;s important to discriminate between an active service (i.e., running at the moment) and an &lt;em&gt;enabled&lt;/em&gt; service, which runs at boot. To ensure that a service will start at boot, run &lt;code&gt;# systemctl enable &amp;lt;name&amp;gt;.service&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;unit-files&#34;&gt;Unit files&lt;/h2&gt;
+&lt;p&gt;If you read the &amp;lsquo;loaded&amp;rsquo; line of the above output, you will find a reference to a file located in &lt;code&gt;/usr/lib/systemd/system/sshd.service&lt;/code&gt;. This &lt;em&gt;unit file&lt;/em&gt; defines the OpenSSH service, including how and when to start it, whether to restart it after failure, and important environment variables for configuration. Essentially, unit files are the means by which systemd understands system resources.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s take a look.&lt;/p&gt;
+&lt;h4 id=&#34;usrlibsystemdsystemsshdservice&#34;&gt;/usr/lib/systemd/system/sshd.service&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;[Unit]
+Description=OpenSSH server daemon
+Documentation=man:sshd(8) man:sshd_config(5)
+After=network.target sshd-keygen.target
+Wants=sshd-keygen.target
+
+[Service]
+Type=notify
+EnvironmentFile=-/etc/crypto-policies/back-ends/opensshserver.config
+EnvironmentFile=-/etc/sysconfig/sshd
+ExecStart=/usr/sbin/sshd -D $OPTIONS $CRYPTOPOLICY
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A service unit file consists of three sections, denoted using square brackets. The &lt;code&gt;[Unit]&lt;/code&gt; section above contains four &lt;em&gt;directives&lt;/em&gt; that together describe the unit and define its dependencies. In this section, the most important directives are&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;After&lt;/code&gt;, used to direct systemd to start the configured service &lt;em&gt;after&lt;/em&gt; the listed units become fully functional, and&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Wants&lt;/code&gt;, to list units that should be started together with the configured service.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In our case, &lt;code&gt;After=network.target sshd-keygen.target&lt;/code&gt; makes sure that OpenSSH is started after two (target unit) resources become available: (a) the 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/NetworkManager&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;network management stack&lt;/a&gt;, allowing applications to access the network, and (b) OpenSSH&amp;rsquo;s keygen server, which is used by OpenSSH to generate keys for public key authentication.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Note that specifying &lt;code&gt;After=network.target&lt;/code&gt; doesn&amp;rsquo;t guarantee that your service will start after your network interfaces are online! The &lt;a href=&#34;https://www.freedesktop.org/wiki/Software/systemd/NetworkTarget/&#34;&gt;purpose of this directive value&lt;/a&gt; is to allow your network-dependent service to terminate properly when the system is shutdown. To ensure a service starts after the network comes online, use &lt;code&gt;After=network-online.target&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The &lt;code&gt;[Service]&lt;/code&gt; section describes how to (re)start and stop the service. Different &lt;code&gt;Type&lt;/code&gt; directive values determine how the process should start, with &lt;code&gt;Type=notify&lt;/code&gt; telling the service to send a signal to systemd when it is active. The &lt;code&gt;EnvironmentFile&lt;/code&gt; directives are used to load variables (&lt;code&gt;OPTIONS&lt;/code&gt;, &lt;code&gt;CRYPTOPOLICY&lt;/code&gt;, &lt;code&gt;MAINPID&lt;/code&gt;) contained in the listed files, which are used by &lt;code&gt;ExecStart&lt;/code&gt; and &lt;code&gt;ExecReload&lt;/code&gt; to configure the execution and termination of the service. If the service ends unexpectedly, &lt;code&gt;Restart=on-failure&lt;/code&gt; tells systemd to restart the service, in this case after 42 seconds.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    You may have noticed the hyphens preceding some directive values; these indicate &amp;lsquo;optional&amp;rsquo; directives. Normally, if any of the directives leads to an error (either because a listed file doesn&amp;rsquo;t exist, or a listed process fails to execute), systemd will indicate that the service has failed. In our case, even if the files listed in the above &lt;code&gt;EnvironmentFile&lt;/code&gt; directives are missing, the show will go on.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Lastly, the &lt;code&gt;[Install]&lt;/code&gt; section holds information about how to install the service, so that it can be started at boot. The directives in this section are processed when evoked by &lt;code&gt;systemctl enable&lt;/code&gt; or &lt;code&gt;systemctl disable&lt;/code&gt;. It is common to find &lt;code&gt;WantedBy=multi-user.target&lt;/code&gt; here; this specifies that systemd should start the service only when the system has reached a certain state, defined by the &lt;code&gt;multi-user.target&lt;/code&gt; unit. If the system cannot reach this state, the service will not automatically start, even if it has been enabled.&lt;/p&gt;
+&lt;h2 id=&#34;system-state&#34;&gt;System state&lt;/h2&gt;
+&lt;p&gt;It&amp;rsquo;s worth expanding on what we mean by &lt;em&gt;state&lt;/em&gt;. After powering on a CentOS Linux system and loading the kernel, systemd is the first process to start (
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Process_identifier&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;PID&lt;/a&gt; 1). Systemd will then proceed to activate services and other units until the system has reached some requested (default) state, represented by a systemd &lt;em&gt;target&lt;/em&gt;. For example, if systemd achieves the &lt;code&gt;multi-user.target&lt;/code&gt; state, multiple users can log into the system and access the network, but they are unable to start a graphical shell and are thus restricted to a text-based shell. Booting into the &lt;code&gt;rescue.target&lt;/code&gt; state is usually reserved for emergency situations where the system cannot start normally. In this case, systemd will only start the bare minimum set of system resources, avoiding the activation of network interfaces and other nonessential peripheral devices. This allows the root user to try and reverse any changes that harmed the regular initialization process.&lt;/p&gt;
+&lt;p&gt;The table below lists the available systemd targets in CentOS, together with their associated outcomes and 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Runlevel&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;runlevels&lt;/em&gt;&lt;/a&gt; (i.e., the equivalent of state in other init systems). By default, CentOS will attempt to achieve either the &lt;code&gt;multi-user.target&lt;/code&gt; state or the &lt;code&gt;graphical.target&lt;/code&gt; state, with the latter for GUI-based installations.&lt;/p&gt;
+&lt;!-- &lt;p style=&#34;text-align: center; font-size: 80%;&#34;&gt;&lt;b&gt;Table 1.&lt;/b&gt; Systemd targets in CentOS.&lt;/p&gt; --&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Runlevel&lt;/th&gt;
+&lt;th&gt;Target&lt;/th&gt;
+&lt;th&gt;Outcome&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;poweroff.target&lt;/td&gt;
+&lt;td&gt;🔌 System shutdown&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;rescue.target&lt;/td&gt;
+&lt;td&gt;🚑 Single-user &amp;ldquo;safe mode&amp;rdquo; shell&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;3&lt;/td&gt;
+&lt;td&gt;multi-user.target&lt;/td&gt;
+&lt;td&gt;⌨️ Non-graphical multi-user shell&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;5&lt;/td&gt;
+&lt;td&gt;graphical.target&lt;/td&gt;
+&lt;td&gt;👨‍💻 Graphical multi-user shell&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;6&lt;/td&gt;
+&lt;td&gt;reboot.target&lt;/td&gt;
+&lt;td&gt;⚡ System reboot&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;These targets are special in that they can be used to switch the current state of the computer using the &lt;code&gt;# systemctl isolate &amp;lt;name&amp;gt;.target&lt;/code&gt; command. For instance, you can restart your computer with &lt;code&gt;# systemctl isolate reboot.target&lt;/code&gt;. This is made possible by the inclusion of the &lt;code&gt;AllowIsolate=yes&lt;/code&gt; directive in each of these unit files.&lt;/p&gt;
+&lt;p&gt;At this point we know enough to start playing around with our own services. Time to get your hands dirty!&lt;/p&gt;
+&lt;h1 id=&#34;creating-services&#34;&gt;Creating services&lt;/h1&gt;
+&lt;p&gt;We will deal with two custom services: (a) the Hello service, which will serve as a kind of warmup to reinforce some important concepts (while introducing some new ones), and (b) the Judgy service, the ultimate subject of this writeup.&lt;/p&gt;
+&lt;p&gt;Before we get into things, a quick note about where systemd expects unit files:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;/usr/lib/systemd/system&lt;/code&gt;, for default unit files that come with RPM packages,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/etc/systemd/system&lt;/code&gt;, for custom unit files (e.g., made using &lt;code&gt;systemctl edit&lt;/code&gt;),&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/run/systemd/system&lt;/code&gt;, for automatically generated unit files.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That means our unit files are going in &lt;code&gt;/etc/systemd/system&lt;/code&gt;. You can create the Hello unit file the old-fashioned way (e.g., via &lt;code&gt;vim&lt;/code&gt;) or by running &lt;code&gt;# systemctl edit --force --full &amp;lt;name&amp;gt;.service&lt;/code&gt;, which will bring up a text editor for you to work with.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If units with identical names exist in more than one of the above locations, those in &lt;code&gt;/run&lt;/code&gt; will take precedence over others. Next in line are unit files in &lt;code&gt;/etc&lt;/code&gt;, with units in &lt;code&gt;/usr/lib&lt;/code&gt; being of lowest priority.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;a-quick-warmup&#34;&gt;A quick warmup&lt;/h2&gt;
+&lt;p&gt;Let&amp;rsquo;s introduce the Hello service unit file. As you can see, there&amp;rsquo;s not a lot to it.&lt;/p&gt;
+&lt;h4 id=&#34;etcsystemdsystemhelloservice&#34;&gt;/etc/systemd/system/hello.service&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;[Unit]
+Description=Hello service
+
+[Service]
+ExecStart=/usr/bin/bash /data/hello.sh 10 meepmeep
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Once activated, the service will execute a script called &lt;code&gt;hello.sh&lt;/code&gt;, shown below. When executed, it first lists any command line arguments, and if the first argument &lt;code&gt;ARG1&lt;/code&gt; is a positive integer, sleeps for &lt;code&gt;ARG1&lt;/code&gt; seconds. Simple enough.&lt;/p&gt;
+&lt;h4 id=&#34;datahellosh&#34;&gt;/data/hello.sh&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;HMS=$(date +&amp;quot;%H:%M:%S&amp;quot;)
+printf &amp;quot;\n[%s] HELLO service came online.\n&amp;quot; ${HMS}
+
+# print out command line arguments
+if [ &amp;quot;$#&amp;quot; -ge 1 ]; then
+    i=1;
+    printf &amp;quot;Supplied arguments:\n&amp;quot;
+    for ARG in &amp;quot;$@&amp;quot;; do
+        printf &amp;quot;\targ%d: %s\n&amp;quot; $i $ARG
+        i=$((i + 1));
+    done
+fi
+
+# sleep for ARG1 seconds if ARG1 is a positive integer
+if [ -n &amp;quot;$1&amp;quot; ] &amp;amp;&amp;amp; [ &amp;quot;$1&amp;quot; eq &amp;quot;$1&amp;quot; ] 2&amp;gt;/dev/null; then
+    sleep $1
+fi
+
+HMS=$(date +&amp;quot;%H:%M:%S&amp;quot;)
+printf &amp;quot;[%s] HELLO service is done.\n\n&amp;quot; ${HMS}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here&amp;rsquo;s the output of the script if we run it normally:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;# ./hello.sh 10 meepmeep
+[13:23:56] HELLO service is online.
+Supplied arguments:
+    arg1: 10
+    arg2: meepmeep
+[13:24:06] HELLO service is done.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If we start the service with &lt;code&gt;# systemctl start hello.service&lt;/code&gt; and quickly check its status, we can see the output of the script within the logging output.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-querying-the-hello-service-while-it-is-still-operational&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/systemd-shenanigans/hello-active.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Querying the Hello service while it is still operational.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/systemd-shenanigans/hello-active.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Querying the Hello service while it is still operational.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;After ten seconds of sleep, the script is done and the service becomes inactive.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-the-hello-service-is-done&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/systemd-shenanigans/hello-inactive.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4.&amp;lt;/b&amp;gt; The Hello service is done.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/systemd-shenanigans/hello-inactive.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4.&lt;/b&gt; The Hello service is done.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;That was a pretty straightforward example, so let&amp;rsquo;s build on it to show something useful.&lt;/p&gt;
+&lt;h2 id=&#34;unit-file-overrides&#34;&gt;Unit file overrides&lt;/h2&gt;
+&lt;p&gt;We might not always want to start our service with the same directives and parameters. Indeed, there might be times where we want to override some of them while keeping others. This is where &lt;em&gt;drop-in units&lt;/em&gt; come in handy.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s the situation: we like our Hello service, but we want to make two changes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;(a) we want to supply input arguments to &lt;code&gt;hello.sh&lt;/code&gt; from a file,&lt;/li&gt;
+&lt;li&gt;(b) once the service becomes inactive, it should restart after sixteen seconds.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To achieve the first goal, we will make &lt;code&gt;hello.config&lt;/code&gt;, a configuration file from which systemd will extract the script&amp;rsquo;s input arguments, shown below.&lt;/p&gt;
+&lt;h4 id=&#34;datahelloconfig&#34;&gt;/data/hello.config&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;DELAY=16
+OTHERARG=testing.one.two.three
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We will now create a drop-in unit that loads these variables with the &lt;code&gt;EnvironmentFile&lt;/code&gt; directive (and uses them when overriding the previous &lt;code&gt;ExecStart&lt;/code&gt; directive). The unit also injects two new directives that satisfy our second goal. You can use &lt;code&gt;# systemctl edit hello.service&lt;/code&gt; to create the drop-in file, nested in a &lt;code&gt;hello.service.d&lt;/code&gt; folder.&lt;/p&gt;
+&lt;h4 id=&#34;etcsystemdsystemhelloservicedoverrideconf&#34;&gt;/etc/systemd/system/hello.service.d/override.conf&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;[Unit]
+Description=Hello service
+
+[Service]
+EnvironmentFile=/data/hello.config
+ExecStart=
+ExecStart=/usr/bin/bash /data/hello.sh $DELAY $OTHERARG
+Restart=always
+RestartSec=16s
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Pay attention to the empty &lt;code&gt;ExecStart&lt;/code&gt; directive. This is done to eliminate the parent directive; without it, the complete unit file (base plus override) would in effect have two &lt;code&gt;ExecStart&lt;/code&gt; directives, leading to an error.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    After making changes to your unit files, be sure to register them in systemd using &lt;code&gt;systemctl daemon-reload&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Now if we fire up our service, we will see that the script is now working with the new input arguments. Note the new Drop-In line, which lists the overriding unit file.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-5b-the-upgraded-hello-service-running-with-our-new-parameters&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/systemd-shenanigans/hello-v2-active.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 5.&amp;lt;/b&amp;gt; The upgraded Hello service, running with our new parameters.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/systemd-shenanigans/hello-v2-active.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 5.&lt;/b&gt; The upgraded Hello service, running with our new parameters.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;If we query the service after it has expired, we can see that the Active line contains &lt;strong&gt;activating (auto-restart)&lt;/strong&gt;. This indicates that the service is scheduled to be restarted, which is evidence that our new configuration has taken effect.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-6b-ill-be-back&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/systemd-shenanigans/hello-v2-inactive.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 6.&amp;lt;/b&amp;gt; &amp;amp;ldquo;I&amp;amp;rsquo;ll be back.&amp;amp;rdquo;&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/systemd-shenanigans/hello-v2-inactive.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 6.&lt;/b&gt; &amp;ldquo;I&amp;rsquo;ll be back.&amp;rdquo;
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;getting-judgy&#34;&gt;Getting judgy&lt;/h2&gt;
+&lt;p&gt;We have made it to the final act. The goal here, as mentioned at the outset, is to run a Python script that monitors a specific user&amp;rsquo;s keypresses and delivers (juvenile) notifications to the user, depending on the content of the user input. The solution will, of course, be implemented as a systemd service.&lt;/p&gt;
+&lt;p&gt;Judgy&amp;rsquo;s source (shown below) makes use of two important resources:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://pypi.org/project/keyboard/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;keyboard&lt;/code&gt;&lt;/a&gt;, a lightweight event hook library written in Python, and&lt;/li&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://manpages.ubuntu.com/manpages/xenial/man1/notify-send.1.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;notify-send&lt;/code&gt;&lt;/a&gt;, a program to send desktop notifications, provided by 
+&lt;a href=&#34;https://archlinux.org/packages/extra/x86_64/libnotify/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;libnotify&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After registering &lt;code&gt;process_key()&lt;/code&gt; as the keypress callback, the script will indefinitely sleep and process keypresses, buffering all typed alphabetical characters. If the user presses a non-alphabetical key, Judgy will test the buffer for objectionable content (defined in the &lt;code&gt;*_words&lt;/code&gt; wordlists) with &lt;code&gt;pass_judgement()&lt;/code&gt; before clearing the buffer. Should the user have typed any words contained in these wordlists, judgement will be rendered in the form of a graphical notification delivered to the user with &lt;code&gt;send_notification()&lt;/code&gt;. Judgy will continue to process keypresses until the user enters the safe word (scram).&lt;/p&gt;
+&lt;script src=&#34;https://gist.github.com/ahadjinicolaou/e5aacb2edccef0d0237d3a73f5767eda.js&#34;&gt;&lt;/script&gt;
+&lt;p&gt;Some important points:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;judgy&lt;/code&gt; needs to be supplied with the username of the (logged-in) desktop user,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;notify-send&lt;/code&gt; will not work without the 
+&lt;a href=&#34;https://wiki.archlinux.org/index.php/Desktop_notifications#Usage_in_programming&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;D-Bus address&lt;/a&gt; of the desktop user,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;keyboard&lt;/code&gt; (and therefore &lt;code&gt;judgy&lt;/code&gt;) needs to be run as root.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;As for the service unit, we will opt for simplicity. Judgy is started using sudo and a Python interpreter (with &lt;code&gt;btables&lt;/code&gt; being the username of the desktop user). You could add an &lt;code&gt;[Install]&lt;/code&gt; section and start Judgy at boot, but that would likely get very irritating.&lt;/p&gt;
+&lt;h4 id=&#34;etcsystemdsystemjudgyservice&#34;&gt;/etc/systemd/system/judgy.service&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;[Unit]
+Description=Judgy service
+
+[Service]
+ExecStart=/usr/bin/sudo /usr/bin/python3 /data/judgy.py btables
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Start the service via &lt;code&gt;# systemctl start judgy.service&lt;/code&gt; and you&amp;rsquo;re in business. You can stop the service either through &lt;code&gt;systemctl&lt;/code&gt; or by entering the safe word.&lt;/p&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;If you made it through the writeup, congratulations! By now, you likely have a decent grasp of the basics of service management, as well as an appreciation for systemd&amp;rsquo;s various capabilities. Although I am no sysadmin, the process of making this writeup has improved my understanding of how systemd operates under the hood, while at the same time making me realize how much more there is to this software monolith&amp;hellip;&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>ml.doc (1.2): Learning as optimization</title>

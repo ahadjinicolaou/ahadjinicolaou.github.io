@@ -3,17 +3,67 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://www.remotelycurious.net/tag/bash/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/categories/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/linux/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/python/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/services/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/systemd-shenanigans/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/category/sysadmin/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/systemd/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tags/</loc>
+    <lastmod>2020-12-26T10:11:54-05:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://www.remotelycurious.net/category/analysis/</loc>
     <lastmod>2020-12-01T19:36:40-04:00</lastmod>
   </url>
   
   <url>
     <loc>https://www.remotelycurious.net/tag/bias-variance-tradeoff/</loc>
-    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/categories/</loc>
     <lastmod>2020-12-01T19:36:40-04:00</lastmod>
   </url>
   
@@ -53,22 +103,7 @@
   </url>
   
   <url>
-    <loc>https://www.remotelycurious.net/post/</loc>
-    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://www.remotelycurious.net/tag/regularization/</loc>
-    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/</loc>
-    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/tags/</loc>
     <lastmod>2020-12-01T19:36:40-04:00</lastmod>
   </url>
   
@@ -129,11 +164,6 @@
   
   <url>
     <loc>https://www.remotelycurious.net/tag/jinja/</loc>
-    <lastmod>2020-09-13T20:21:12-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/tag/python/</loc>
     <lastmod>2020-09-13T20:21:12-04:00</lastmod>
   </url>
   
@@ -233,22 +263,12 @@
   </url>
   
   <url>
-    <loc>https://www.remotelycurious.net/category/homelab/</loc>
-    <lastmod>2020-06-05T23:13:08-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://www.remotelycurious.net/tag/pfsense/</loc>
     <lastmod>2020-06-05T23:13:08-04:00</lastmod>
   </url>
   
   <url>
     <loc>https://www.remotelycurious.net/tag/proxmox/</loc>
-    <lastmod>2020-06-05T23:13:08-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/tag/sysadmin/</loc>
     <lastmod>2020-06-05T23:13:08-04:00</lastmod>
   </url>
   
