@@ -5,12 +5,464 @@
     <link>https://www.remotelycurious.net/category/issues.app/</link>
       <atom:link href="https://www.remotelycurious.net/category/issues.app/index.xml" rel="self" type="application/rss+xml" />
     <description>issues.app</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Fri, 25 Sep 2020 18:34:18 -0400</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sat, 06 Mar 2021 22:07:07 -0500</lastBuildDate>
     <image>
       <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
       <title>issues.app</title>
       <link>https://www.remotelycurious.net/category/issues.app/</link>
     </image>
+    
+    <item>
+      <title>issues.app (4): Authentication</title>
+      <link>https://www.remotelycurious.net/post/issues-app-04-auth/</link>
+      <pubDate>Sat, 06 Mar 2021 22:07:07 -0500</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-04-auth/</guid>
+      <description>&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find &lt;a href=&#34;https://www.remotelycurious.net/post/issues-app-03-blueprints/&#34;&gt;here&lt;/a&gt;. Any code documented here may change significantly in the future. &lt;strong&gt;Be warned!&lt;/strong&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;As of the last codebase revision, we have ourselves the skeleton of (what will hopefully become) a fully-fledged web application. This writeup will document the creation of an &lt;em&gt;authentication&lt;/em&gt; system that lets users use the application in certain ways, depending on whether the system can confirm their identity (e.g., with a username/password). The system is comprised of (a) a database (SQLite) that holds user credentials, and (b) user sessions in the browser to keep track of authenticated state.&lt;/p&gt;
+&lt;p&gt;Note that my approach mirrors that of Miguel Grinberg&amp;rsquo;s in his 
+&lt;a href=&#34;https://www.amazon.com/Flask-Web-Development-Developing-Applications/dp/1491991739&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Flask Web Development&lt;/a&gt; book. While there are a few moving parts to this solution, the Python packages involved are easy to use and work well together. Perfect for a webapp novice like myself.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#installing-a-database-framework&#34;&gt;Installing a database framework&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#configuring-sqlalchemy&#34;&gt;Configuring SQLAlchemy&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#defining-database-models&#34;&gt;Defining database models&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#creating-the-database&#34;&gt;Creating the database&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#implementing-password-hashes&#34;&gt;Implementing password hashes&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#testing-the-database&#34;&gt;Testing the database&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#implementing-user-authentication&#34;&gt;Implementing user authentication&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#login-form&#34;&gt;Login form&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#user-session-management&#34;&gt;User session management&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#view-functions&#34;&gt;View functions&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#grover-signs-in&#34;&gt;Grover signs in&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;installing-a-database-framework&#34;&gt;Installing a database framework&lt;/h1&gt;
+&lt;p&gt;To implement the database, we will be using 
+&lt;a href=&#34;https://www.sqlalchemy.org/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;SQLAlchemy&lt;/a&gt;. There are 
+&lt;a href=&#34;https://www.sqlalchemy.org/features.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;many advantages&lt;/a&gt; to using this high-level framework but perhaps the biggest one is that it allows for the definition of the database schema through Python classes. This is really convenient, as you will see later. SQLAlchemy gives us the choice of most popular database engines. For the sake of simplicity, I will run with SQLite.&lt;/p&gt;
+&lt;p&gt;As with many nice things, SQLAlchemy has a matching Flask extension: Flask-SQLAlchemy. This is installed in the usual way:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;pip install flask-sqlalchemy&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;configuring-sqlalchemy&#34;&gt;Configuring SQLAlchemy&lt;/h2&gt;
+&lt;p&gt;Flask-SQLAlchemy picks up its 
+&lt;a href=&#34;https://flask-sqlalchemy.palletsprojects.com/en/2.x/config/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;configuration&lt;/a&gt; from the Flask application instance. As was done for the Bootstrap object, we need to create the database object and bind it to the app instance with the &lt;code&gt;init_app()&lt;/code&gt; method.&lt;/p&gt;
+&lt;h4 id=&#34;src__init__py&#34;&gt;src/&lt;strong&gt;init&lt;/strong&gt;.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;...
+from flask_sqlalchemy import SQLAlchemy
+
+bootstrap = Bootstrap()
+db = SQLAlchemy()
+
+def create_app(config_name):
+    app = Flask(__name__, template_folder=&#39;./templates&#39;, static_folder=&#39;./static&#39;)
+    app.config.from_object(config[config_name])
+
+    bootstrap.init_app(app)
+    db.init_app(app)
+    ...
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we will configure Flask-SQLAlchemy. The most important parameter is &lt;code&gt;SQLALCHEMY_DATABASE_URI&lt;/code&gt;, which takes as its value the URL of the database file. It&amp;rsquo;s good practice to work on a separate database for each configuration &amp;ndash; an accidental modification of the production database could be painful.&lt;/p&gt;
+&lt;p&gt;On Windows, an SQLite URL take the form &lt;code&gt;sqlite:///&amp;lt;DATABASE-PATH&amp;gt;&lt;/code&gt;, like &lt;code&gt;sqlite:///c:/issues.app/data.sqlite&lt;/code&gt;. For testing instances, setting the URL to &lt;code&gt;sqlite://&lt;/code&gt; tells SQLAlchemy to create the database in memory, essentially as a throwaway database.&lt;/p&gt;
+&lt;h4 id=&#34;configpy&#34;&gt;config.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import os
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+class Config:
+    SECRET_KEY = os.environ.get(&#39;SECRET_KEY&#39;) # needed for tamper-proof session cookies
+    SQLALCHEMY_TRACK_MODIFICATIONS = False # disable event system and conserve memory
+
+class DevelopmentConfig(Config):
+    # enables interactive debugger on the development server
+    # also useful for monitoring code changes
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = &#39;sqlite:///&#39; + os.path.join(basedir, &#39;data-dev.sqlite&#39;)
+
+class TestingConfig(Config):
+    TESTING = True # disables error catching during request handling
+    SQLALCHEMY_DATABASE_URI = &#39;sqlite://&#39; # test data stored in memory
+
+class ProductionConfig(Config):
+    SQLALCHEMY_DATABASE_URI = &#39;sqlite:///&#39; + os.path.join(basedir, &#39;data.sqlite&#39;)
+
+config = {
+    &#39;development&#39;: DevelopmentConfig,
+    &#39;testing&#39;: TestingConfig,
+    &#39;production&#39;: ProductionConfig,
+    &#39;default&#39;: DevelopmentConfig
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We will also set &lt;code&gt;SQLALCHEMY_TRACK_MODIFICATIONS = False&lt;/code&gt; to conserve system resources as suggested in Flask-SQLAlchemy&amp;rsquo;s documentation. Note that once we start testing the database, Pytest will complain if this parameter has not been specified.&lt;/p&gt;
+&lt;h2 id=&#34;defining-database-models&#34;&gt;Defining database models&lt;/h2&gt;
+&lt;p&gt;If you&amp;rsquo;re used to working with relational databases the old fashioned way, using a framework like SQLAlchemy will feel very different. For example, instead of using DDL queries like &lt;code&gt;CREATE&lt;/code&gt; and &lt;code&gt;ALTER&lt;/code&gt; to build a table, we need to write a special kind of Python class that inherits from SQLAlchemy&amp;rsquo;s &lt;code&gt;Model&lt;/code&gt; base class and whose attributes define the table columns.&lt;/p&gt;
+&lt;p&gt;We are going to kick things off with a single table. The &lt;code&gt;User&lt;/code&gt; 
+&lt;a href=&#34;https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;model&lt;/a&gt; below defines a table with four columns:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;id&lt;/code&gt; (integer), a unique identifying number for each user,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;email&lt;/code&gt; (string, max length 64), the user&amp;rsquo;s email&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;username&lt;/code&gt; (string, max length 32), as it sounds, and&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;password_hash&lt;/code&gt; (string), an encoded version of the user&amp;rsquo;s password (described later).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;srcmodelspy&#34;&gt;src/models.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from . import db
+
+class User(db.Model):
+    __tablename__ = &#39;users&#39;
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(64), unique=True, index=True, nullable=False)
+    username = db.Column(db.String(32), unique=True, index=True, nullable=False)
+    password_hash = db.Column(db.String(128))
+
+    def __repr__(self):
+        return f&#39;&amp;lt;User {self.username}&amp;gt;&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Setting &lt;code&gt;index=True&lt;/code&gt; tells SQLAlchemy to build an index for the column, which makes queries more efficient. We also don&amp;rsquo;t want to allow null values for the id, email and username columns (this is automatic for primary keys).&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    For now, I&amp;rsquo;ll let the the password hash column take null values &amp;mdash; maybe null could be used to indicate that a user has been banned from the application.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;creating-the-database&#34;&gt;Creating the database&lt;/h2&gt;
+&lt;p&gt;With the model defined, our next task is to create the database. Running &lt;code&gt;flask shell&lt;/code&gt; will start 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/cli/#open-a-shell&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;an interactive Python shell&lt;/a&gt; in the context of the application. The first order of business is to import the SQLAlchemy instance and run &lt;code&gt;db.create_all()&lt;/code&gt;, which creates the database and any tables that are defined by the model files.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;ROOTDIR&amp;gt; flask shell
+&amp;gt;&amp;gt;&amp;gt; from src import db
+&amp;gt;&amp;gt;&amp;gt; db.create_all()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With the default development configuration in effect, this will create a &lt;code&gt;data-dev.sqlite&lt;/code&gt; file in the base directory.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s create a couple of users and inspect their properties.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; from src.models import User
+&amp;gt;&amp;gt;&amp;gt; u1 = User(email=&#39;bert@gmail.com&#39;, username=&#39;bert&#39;)
+&amp;gt;&amp;gt;&amp;gt; u2 = User(email=&#39;ernie@yahoo.com&#39;, username=&#39;ernie&#39;)
+&amp;gt;&amp;gt;&amp;gt; print(u1)
+&amp;lt;User bert&amp;gt;
+&amp;gt;&amp;gt;&amp;gt; print(u1.id)
+None
+&amp;gt;&amp;gt;&amp;gt; print(u1.email)
+bert@gmail.com
+&amp;gt;&amp;gt;&amp;gt; print(u2)
+&amp;lt;User ernie&amp;gt;
+&amp;gt;&amp;gt;&amp;gt; print(u2.id)
+None
+&amp;gt;&amp;gt;&amp;gt; print(u2.email)
+ernie@yahoo.com
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From the output above, it looks as though the ID properties haven&amp;rsquo;t been set properly. This is because although we have made some Python objects, any primary key properties won&amp;rsquo;t take values until the objects have been written to the database. This is done by adding them to a &lt;em&gt;session&lt;/em&gt;, and then committing the session:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; db.session.add(u1)
+&amp;gt;&amp;gt;&amp;gt; db.session.add(u2)
+&amp;gt;&amp;gt;&amp;gt; db.session.commit()
+&amp;gt;&amp;gt;&amp;gt; print(u1.id)
+1
+&amp;gt;&amp;gt;&amp;gt; print(u2.id)
+2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A list of all users in the table can now be obtained by querying the user model:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; User.query.all()
+[&amp;lt;User bert&amp;gt;, &amp;lt;User ernie&amp;gt;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;implementing-password-hashes&#34;&gt;Implementing password hashes&lt;/h2&gt;
+&lt;p&gt;Storing cleartext passwords within a database is almost certainly a bad idea. If a hacker gains access to the database, the credentials of all users can be easily accessed and any sensitive information stored on the application server becomes fair game. It is important to store passwords securely to prevent or at least mitigate these kinds of risks.&lt;/p&gt;
+&lt;p&gt;Instead of storing a raw password, the database can instead keep track of its corresponding &lt;em&gt;hash&lt;/em&gt;. This involves using a hash function to transform the password into a string of random-looking characters. For example, we can use a 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Bcrypt&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;bcrypt&lt;/a&gt; hash function to convert the &lt;code&gt;meepmeep&lt;/code&gt; password into&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$2a$04$cT3a9teblhIemCmmXjXQleoxjovVhoRddfm9DR6tZWeuDRETIn5hK
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;which looks nothing like the original password. Hash functions also make use of a random component to &lt;em&gt;salt&lt;/em&gt; the hash, such that using the function twice on the same input results in completely different outputs. More importantly, hash functions are &amp;ldquo;one-way&amp;rdquo;, meaning that while computation of the hash is relatively fast, the inverse operation (i.e., recovering the password from the hash) is practically impossible.&lt;/p&gt;
+&lt;p&gt;We can use the 
+&lt;a href=&#34;https://werkzeug.palletsprojects.com/en/1.0.x/utils/#module-werkzeug.security&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Werkzeug&lt;/a&gt; package to do the heavy lifting for us, using the &lt;code&gt;generate_password_hash()&lt;/code&gt; and &lt;code&gt;check_password_hash()&lt;/code&gt; functions to handle hash generation and verification. The idea here is to update the User model class such that a model instance (e.g., &lt;code&gt;u1&lt;/code&gt; in the example above) can be used to set a write-only &lt;code&gt;password&lt;/code&gt; attribute, which generates the &lt;code&gt;password_hash&lt;/code&gt; attribute when the password is written. The model also makes the &lt;code&gt;verify_password()&lt;/code&gt; method available to the application so that Werkzeug can compare the user&amp;rsquo;s password hash with that of the second input argument.&lt;/p&gt;
+&lt;h4 id=&#34;srcmodelspy-1&#34;&gt;src/models.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from . import db
+from werkzeug.security import generate_password_hash, check_password_hash
+
+class User(db.Model):
+    ...
+    @property
+    def password(self):
+        raise AttributeError(&#39;password is not readable&#39;)
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can now create a new user entry to demonstrate how this works. Grover has the honor of being the first user to be assigned a password, so we&amp;rsquo;ll commit his credentials to the database and eventually use them to log into the system.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; u = User(email=&#39;grover@hotmail.com&#39;, username=&#39;grover&#39;)
+&amp;gt;&amp;gt;&amp;gt; print(u)
+&amp;lt;User grover&amp;gt;
+&amp;gt;&amp;gt;&amp;gt; u.password = &#39;imbluedabadeedabadaa&#39;
+&amp;gt;&amp;gt;&amp;gt; print(u.password_hash)
+pbkdf2:sha256:150000$KpvVu5xH$0fb90391c70c36c82d5e6760aa8925bbfaafb8f9f482b482ad8b34bd9f452c3
+&amp;gt;&amp;gt;&amp;gt; print(u.password)
+# raises AttributeError: password is not readable
+&amp;gt;&amp;gt;&amp;gt; db.session.add(u)   
+&amp;gt;&amp;gt;&amp;gt; db.session.commit()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;testing-the-database&#34;&gt;Testing the database&lt;/h2&gt;
+&lt;p&gt;It&amp;rsquo;s a good idea to write some basic unit tests to make sure any future changes to our code don&amp;rsquo;t break this functionality. Below is a set of three tests that validate our expectations for how passwords should be accessed and validated.&lt;/p&gt;
+&lt;h4 id=&#34;teststest_user_modelpy&#34;&gt;tests/test_user_model.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from src.models import User
+import pytest
+
+def test_password_setter():
+    u = User(password=&#39;meep&#39;)
+    assert u.password_hash is not None
+
+def test_unreadable_password():
+    u = User(password=&#39;meep&#39;)
+    with pytest.raises(AttributeError):
+        u.password
+
+def test_password_verification():
+    u = User(password=&#39;meep&#39;)
+    assert u.verify_password(&#39;meep&#39;) == True
+    assert u.verify_password(&#39;beep&#39;) == False
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Running pytest confirms that all is well.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;==================================== test session starts ====================================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+rootdir: C:\Users\alexh\Workspace\python\issues
+plugins: flask-1.0.0
+collected 6 items
+
+tests\test_suite.py ...                                                                [ 50%]
+tests\test_user_model.py ...                                                           [100%]
+
+===================================== 6 passed in 0.64s =====================================
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;implementing-user-authentication&#34;&gt;Implementing user authentication&lt;/h1&gt;
+&lt;p&gt;Now that the database has some idea of who should be able to use the app (i.e., Grover), the next step is to implement user authentication. The general goal is to display different information to the user, depending on whether they have been authenticated. At minimum, we need a login page that accepts a username/password pair and communicates with the database to determine whether the credentials are valid.&lt;/p&gt;
+&lt;p&gt;Just as we have a &lt;code&gt;main&lt;/code&gt; blueprint for organizing project-related view functions (project, issues, messages, etc.), we will also have an &lt;code&gt;auth&lt;/code&gt; blueprint. There will be two view functions in this blueprint: one to handle user login and the other user logout. We will also need a form to accept and submit user credentials. All of these will be placed in an &lt;code&gt;auth&lt;/code&gt; folder, which in turn sits inside the project source code directory.&lt;/p&gt;
+&lt;h2 id=&#34;login-form&#34;&gt;Login form&lt;/h2&gt;
+&lt;p&gt;To implement the login form, we will use the Flask-WTF extension. As was done for the user database model, the form is implemented as a Python class that inherits from &lt;code&gt;FlaskForm&lt;/code&gt;, a special base class. It&amp;rsquo;s a pretty simple form, with two text fields for the user credentials, a checkbox to indicate a preference for staying logged in, and a submit button. Flask-WTF also makes it easy to implement 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/patterns/wtforms/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;data validation&lt;/a&gt;, which is very convenient.&lt;/p&gt;
+&lt;h4 id=&#34;srcauthformspy&#34;&gt;src/auth/forms.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.validators import DataRequired, Length, Email
+
+class LoginForm(FlaskForm):
+    email = StringField(&#39;Email&#39;, validators=[DataRequired(), Length(1, 64), Email()])
+    password = PasswordField(&#39;Password&#39;, validators=[DataRequired()])
+    remember_me = BooleanField(&#39;Stay logged in&#39;)
+    submit = SubmitField(&#39;Sign in&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Flask-WTF will complain if you haven&amp;rsquo;t configured a secret key. This is used to cryptographically sign the user session such that an attacker cannot impersonate an authorized user to attack the web application (see also: &lt;a href=&#34;https://owasp.org/www-community/attacks/csrf&#34;&gt;cross-site request forgery&lt;/a&gt;).
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-the-login-form-nothing-more-nothing-less&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-04-auth/login.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; The login form. Nothing more, nothing less.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-04-auth/login.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; The login form. Nothing more, nothing less.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;user-session-management&#34;&gt;User session management&lt;/h2&gt;
+&lt;p&gt;After the user has correctly entered their credentials, we need to update the application state to reflect that the user has been authenticated. This is handled through another Flask extension, Flask-Login, that integrates nicely with the user model to keep track of authentication state.&lt;/p&gt;
+&lt;p&gt;Flask-Login requires our User class to implement 
+&lt;a href=&#34;https://flask-login.readthedocs.io/en/latest/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;several properties and methods&lt;/a&gt;. This can be achieved by inheriting from Flask-Login&amp;rsquo;s &lt;code&gt;UserMixin&lt;/code&gt; class. We will be checking the &lt;code&gt;is_authenticated&lt;/code&gt; property in the HTML templates to test whether &amp;lsquo;authorized&amp;rsquo; content (i.e., a personalized greeting) should be displayed to the user.&lt;/p&gt;
+&lt;p&gt;The final requirement of the User class is that it implements the &lt;code&gt;load_user()&lt;/code&gt; function. Flask-Login supplies this function with a user ID and expects to receive the corresponding user object. The &lt;code&gt;login_manager.user_loader&lt;/code&gt; decorator is used to register the callback with Flask-Login.&lt;/p&gt;
+&lt;h4 id=&#34;srcauthviewspy&#34;&gt;src/auth/views.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;...
+from . import db, login_manager
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;view-functions&#34;&gt;View functions&lt;/h2&gt;
+&lt;p&gt;All the components that have been discussed so far &amp;mdash; password validation, database access, user authentication &amp;mdash; will come together in the authorization view functions. When the login page is requested, the login form will be sent to the user. If the user submits sensible-looking data, the application will first query the database to find a user whose email matches the one entered by the user. If either (a) no such user exists or (b) the password hashes don&amp;rsquo;t match, the application flashes an appropriate message and simply returns to the login form.&lt;/p&gt;
+&lt;h4 id=&#34;srcauthviewspy-1&#34;&gt;src/auth/views.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import render_template, redirect, request, url_for, flash, session
+from flask_login import login_user, logout_user, login_required
+from . import auth
+from ..models import User
+from .forms import LoginForm
+
+@auth.route(&#39;/login&#39;, methods=[&#39;GET&#39;, &#39;POST&#39;])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        # look for the user in the database and verify their password
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is not None and user.verify_password(form.password.data):
+            login_user(user, form.remember_me.data)
+            next = request.args.get(&#39;next&#39;)
+            if next is None or not next.startswith(&#39;/&#39;):
+                # store some dummy data in the user session
+                session[&#39;user_data&#39;] = {
+                    &#39;username&#39;: user.username,
+                    &#39;role&#39;: &#39;admin&#39;,
+                    &#39;num_issues&#39;: 12,
+                    &#39;num_messages&#39;: 2
+                }
+                next = url_for(&#39;main.index&#39;)
+            return redirect(next)
+        flash(&#39;Invalid username or password&#39;)
+
+    return render_template(&#39;auth/login.html&#39;, form=form)
+
+@auth.route(&#39;/logout&#39;)
+@login_required
+def logout():
+    logout_user()
+    flash(&#39;You have been signed out.&#39;)
+    return redirect(url_for(&#39;main.index&#39;))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The code that runs when a user logs in successfully is a little more complicated. After we tell Flask-Login that all went well (&lt;code&gt;login_user()&lt;/code&gt;), the &lt;code&gt;next&lt;/code&gt; attribute in the request needs to be tested. If the login form showed up because the unauthorized user tried to access a protected page, &lt;code&gt;next&lt;/code&gt; will hold the URL of that page and redirect to it. Otherwise, if &lt;code&gt;next&lt;/code&gt; is empty, the user is directed to the default &lt;code&gt;main.index&lt;/code&gt; endpoint. Before the redirect kicks in, the username (including some extra dummy information) is stored in the user session, to be accessed by the HTML templates.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    We also don&amp;rsquo;t want the &lt;code&gt;next&lt;/code&gt; URL to start with a slash, which indicates an absolute path (instead of a relative path). Allowing absolute redirects creates an opportunity for an attacker to redirect users to a site of their choosing. This is probably not a good thing!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;grover-signs-in&#34;&gt;Grover signs in&lt;/h1&gt;
+&lt;p&gt;All that&amp;rsquo;s left to do is give it a try!&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-after-grover-signs-in-we-see-a-user-specific-greeting-together-with-some-dummy-data&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-04-auth/success.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; After Grover signs in, we see a user-specific greeting together with some dummy data.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-04-auth/success.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; After Grover signs in, we see a user-specific greeting together with some dummy data.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-grover-signs-off-with-a-notification-informing-him-of-what-just-happened&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-04-auth/logout.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Grover signs off, with a notification informing him of what just happened.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-04-auth/logout.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Grover signs off, with a notification informing him of what just happened.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;ve cloned the &lt;a href=&#34;https://github.com/ahadjinicolaou/issues.app&#34;&gt;project repository&lt;/a&gt;, you can run &lt;code&gt;git checkout f902914&lt;/code&gt; to get the current version of the source code.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;Authorization deserves careful consideration in any application that holds sensitive information. The next steps for this project might involve creating user roles (e.g., administrator, manager, developer) that permit specific application functionality, including the ability to perform CRUD operations on projects, issues and messages. But building out the user interface might be more fun&amp;hellip;&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>issues.app (3): Modularity with Blueprints</title>

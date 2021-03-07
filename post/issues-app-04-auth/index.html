@@ -1,0 +1,1496 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Doing it right with user sessions, password hashing and database storage.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/issues-app-04-auth/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/issues-app-04-auth/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/issues-app-04-auth/">
+  <meta property="og:title" content="issues.app (4): Authentication | Remotely Curious">
+  <meta property="og:description" content="Doing it right with user sessions, password hashing and database storage."><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2021-03-06T22:07:07-05:00">
+    
+    <meta property="article:modified_time" content="2021-03-06T22:07:07-05:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/issues-app-04-auth/"
+  },
+  "headline": "issues.app (4): Authentication",
+  
+  "datePublished": "2021-03-06T22:07:07-05:00",
+  "dateModified": "2021-03-06T22:07:07-05:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Doing it right with user sessions, password hashing and database storage."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>issues.app (4): Authentication | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>issues.app (4): Authentication</h1>
+
+  
+  <p class="page-subtitle">User sessions, password hashing and database storage.</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Mar 6, 2021
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    12 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/development/">development</a>, <a href="/category/issues.app/">issues.app</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <div class="alert alert-note">
+  <div>
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find <a href="/post/issues-app-03-blueprints/">here</a>. Any code documented here may change significantly in the future. <strong>Be warned!</strong>
+  </div>
+</div>
+<p>As of the last codebase revision, we have ourselves the skeleton of (what will hopefully become) a fully-fledged web application. This writeup will document the creation of an <em>authentication</em> system that lets users use the application in certain ways, depending on whether the system can confirm their identity (e.g., with a username/password). The system is comprised of (a) a database (SQLite) that holds user credentials, and (b) user sessions in the browser to keep track of authenticated state.</p>
+<p>Note that my approach mirrors that of Miguel Grinberg&rsquo;s in his 
+<a href="https://www.amazon.com/Flask-Web-Development-Developing-Applications/dp/1491991739" target="_blank" rel="noopener">Flask Web Development</a> book. While there are a few moving parts to this solution, the Python packages involved are easy to use and work well together. Perfect for a webapp novice like myself.</p>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#installing-a-database-framework">Installing a database framework</a>
+      <ul>
+        <li><a href="#configuring-sqlalchemy">Configuring SQLAlchemy</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#defining-database-models">Defining database models</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#creating-the-database">Creating the database</a></li>
+        <li><a href="#implementing-password-hashes">Implementing password hashes</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#testing-the-database">Testing the database</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#implementing-user-authentication">Implementing user authentication</a>
+      <ul>
+        <li><a href="#login-form">Login form</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#user-session-management">User session management</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#view-functions">View functions</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#grover-signs-in">Grover signs in</a></li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="installing-a-database-framework">Installing a database framework</h1>
+<p>To implement the database, we will be using 
+<a href="https://www.sqlalchemy.org/" target="_blank" rel="noopener">SQLAlchemy</a>. There are 
+<a href="https://www.sqlalchemy.org/features.html" target="_blank" rel="noopener">many advantages</a> to using this high-level framework but perhaps the biggest one is that it allows for the definition of the database schema through Python classes. This is really convenient, as you will see later. SQLAlchemy gives us the choice of most popular database engines. For the sake of simplicity, I will run with SQLite.</p>
+<p>As with many nice things, SQLAlchemy has a matching Flask extension: Flask-SQLAlchemy. This is installed in the usual way:</p>
+<p><code>pip install flask-sqlalchemy</code></p>
+<h2 id="configuring-sqlalchemy">Configuring SQLAlchemy</h2>
+<p>Flask-SQLAlchemy picks up its 
+<a href="https://flask-sqlalchemy.palletsprojects.com/en/2.x/config/" target="_blank" rel="noopener">configuration</a> from the Flask application instance. As was done for the Bootstrap object, we need to create the database object and bind it to the app instance with the <code>init_app()</code> method.</p>
+<h4 id="src__init__py">src/<strong>init</strong>.py</h4>
+<pre><code class="language-python">...
+from flask_sqlalchemy import SQLAlchemy
+
+bootstrap = Bootstrap()
+db = SQLAlchemy()
+
+def create_app(config_name):
+    app = Flask(__name__, template_folder='./templates', static_folder='./static')
+    app.config.from_object(config[config_name])
+
+    bootstrap.init_app(app)
+    db.init_app(app)
+    ...
+    return app
+</code></pre>
+<p>Now we will configure Flask-SQLAlchemy. The most important parameter is <code>SQLALCHEMY_DATABASE_URI</code>, which takes as its value the URL of the database file. It&rsquo;s good practice to work on a separate database for each configuration &ndash; an accidental modification of the production database could be painful.</p>
+<p>On Windows, an SQLite URL take the form <code>sqlite:///&lt;DATABASE-PATH&gt;</code>, like <code>sqlite:///c:/issues.app/data.sqlite</code>. For testing instances, setting the URL to <code>sqlite://</code> tells SQLAlchemy to create the database in memory, essentially as a throwaway database.</p>
+<h4 id="configpy">config.py</h4>
+<pre><code class="language-python">import os
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY') # needed for tamper-proof session cookies
+    SQLALCHEMY_TRACK_MODIFICATIONS = False # disable event system and conserve memory
+
+class DevelopmentConfig(Config):
+    # enables interactive debugger on the development server
+    # also useful for monitoring code changes
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
+
+class TestingConfig(Config):
+    TESTING = True # disables error catching during request handling
+    SQLALCHEMY_DATABASE_URI = 'sqlite://' # test data stored in memory
+
+class ProductionConfig(Config):
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+
+config = {
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
+    'production': ProductionConfig,
+    'default': DevelopmentConfig
+}
+</code></pre>
+<p>We will also set <code>SQLALCHEMY_TRACK_MODIFICATIONS = False</code> to conserve system resources as suggested in Flask-SQLAlchemy&rsquo;s documentation. Note that once we start testing the database, Pytest will complain if this parameter has not been specified.</p>
+<h2 id="defining-database-models">Defining database models</h2>
+<p>If you&rsquo;re used to working with relational databases the old fashioned way, using a framework like SQLAlchemy will feel very different. For example, instead of using DDL queries like <code>CREATE</code> and <code>ALTER</code> to build a table, we need to write a special kind of Python class that inherits from SQLAlchemy&rsquo;s <code>Model</code> base class and whose attributes define the table columns.</p>
+<p>We are going to kick things off with a single table. The <code>User</code> 
+<a href="https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/" target="_blank" rel="noopener">model</a> below defines a table with four columns:</p>
+<ul>
+<li><code>id</code> (integer), a unique identifying number for each user,</li>
+<li><code>email</code> (string, max length 64), the user&rsquo;s email</li>
+<li><code>username</code> (string, max length 32), as it sounds, and</li>
+<li><code>password_hash</code> (string), an encoded version of the user&rsquo;s password (described later).</li>
+</ul>
+<h4 id="srcmodelspy">src/models.py</h4>
+<pre><code class="language-python">from . import db
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(64), unique=True, index=True, nullable=False)
+    username = db.Column(db.String(32), unique=True, index=True, nullable=False)
+    password_hash = db.Column(db.String(128))
+
+    def __repr__(self):
+        return f'&lt;User {self.username}&gt;'
+</code></pre>
+<p>Setting <code>index=True</code> tells SQLAlchemy to build an index for the column, which makes queries more efficient. We also don&rsquo;t want to allow null values for the id, email and username columns (this is automatic for primary keys).</p>
+<div class="alert alert-note">
+  <div>
+    For now, I&rsquo;ll let the the password hash column take null values &mdash; maybe null could be used to indicate that a user has been banned from the application.
+  </div>
+</div>
+<h2 id="creating-the-database">Creating the database</h2>
+<p>With the model defined, our next task is to create the database. Running <code>flask shell</code> will start 
+<a href="https://flask.palletsprojects.com/en/1.1.x/cli/#open-a-shell" target="_blank" rel="noopener">an interactive Python shell</a> in the context of the application. The first order of business is to import the SQLAlchemy instance and run <code>db.create_all()</code>, which creates the database and any tables that are defined by the model files.</p>
+<pre><code class="language-bash">ROOTDIR&gt; flask shell
+&gt;&gt;&gt; from src import db
+&gt;&gt;&gt; db.create_all()
+</code></pre>
+<p>With the default development configuration in effect, this will create a <code>data-dev.sqlite</code> file in the base directory.</p>
+<p>Let&rsquo;s create a couple of users and inspect their properties.</p>
+<pre><code class="language-bash">&gt;&gt;&gt; from src.models import User
+&gt;&gt;&gt; u1 = User(email='bert@gmail.com', username='bert')
+&gt;&gt;&gt; u2 = User(email='ernie@yahoo.com', username='ernie')
+&gt;&gt;&gt; print(u1)
+&lt;User bert&gt;
+&gt;&gt;&gt; print(u1.id)
+None
+&gt;&gt;&gt; print(u1.email)
+bert@gmail.com
+&gt;&gt;&gt; print(u2)
+&lt;User ernie&gt;
+&gt;&gt;&gt; print(u2.id)
+None
+&gt;&gt;&gt; print(u2.email)
+ernie@yahoo.com
+</code></pre>
+<p>From the output above, it looks as though the ID properties haven&rsquo;t been set properly. This is because although we have made some Python objects, any primary key properties won&rsquo;t take values until the objects have been written to the database. This is done by adding them to a <em>session</em>, and then committing the session:</p>
+<pre><code class="language-bash">&gt;&gt;&gt; db.session.add(u1)
+&gt;&gt;&gt; db.session.add(u2)
+&gt;&gt;&gt; db.session.commit()
+&gt;&gt;&gt; print(u1.id)
+1
+&gt;&gt;&gt; print(u2.id)
+2
+</code></pre>
+<p>A list of all users in the table can now be obtained by querying the user model:</p>
+<pre><code class="language-bash">&gt;&gt;&gt; User.query.all()
+[&lt;User bert&gt;, &lt;User ernie&gt;]
+</code></pre>
+<h2 id="implementing-password-hashes">Implementing password hashes</h2>
+<p>Storing cleartext passwords within a database is almost certainly a bad idea. If a hacker gains access to the database, the credentials of all users can be easily accessed and any sensitive information stored on the application server becomes fair game. It is important to store passwords securely to prevent or at least mitigate these kinds of risks.</p>
+<p>Instead of storing a raw password, the database can instead keep track of its corresponding <em>hash</em>. This involves using a hash function to transform the password into a string of random-looking characters. For example, we can use a 
+<a href="https://en.wikipedia.org/wiki/Bcrypt" target="_blank" rel="noopener">bcrypt</a> hash function to convert the <code>meepmeep</code> password into</p>
+<pre><code>$2a$04$cT3a9teblhIemCmmXjXQleoxjovVhoRddfm9DR6tZWeuDRETIn5hK
+</code></pre>
+<p>which looks nothing like the original password. Hash functions also make use of a random component to <em>salt</em> the hash, such that using the function twice on the same input results in completely different outputs. More importantly, hash functions are &ldquo;one-way&rdquo;, meaning that while computation of the hash is relatively fast, the inverse operation (i.e., recovering the password from the hash) is practically impossible.</p>
+<p>We can use the 
+<a href="https://werkzeug.palletsprojects.com/en/1.0.x/utils/#module-werkzeug.security" target="_blank" rel="noopener">Werkzeug</a> package to do the heavy lifting for us, using the <code>generate_password_hash()</code> and <code>check_password_hash()</code> functions to handle hash generation and verification. The idea here is to update the User model class such that a model instance (e.g., <code>u1</code> in the example above) can be used to set a write-only <code>password</code> attribute, which generates the <code>password_hash</code> attribute when the password is written. The model also makes the <code>verify_password()</code> method available to the application so that Werkzeug can compare the user&rsquo;s password hash with that of the second input argument.</p>
+<h4 id="srcmodelspy-1">src/models.py</h4>
+<pre><code class="language-python">from . import db
+from werkzeug.security import generate_password_hash, check_password_hash
+
+class User(db.Model):
+    ...
+    @property
+    def password(self):
+        raise AttributeError('password is not readable')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+</code></pre>
+<p>We can now create a new user entry to demonstrate how this works. Grover has the honor of being the first user to be assigned a password, so we&rsquo;ll commit his credentials to the database and eventually use them to log into the system.</p>
+<pre><code class="language-bash">&gt;&gt;&gt; u = User(email='grover@hotmail.com', username='grover')
+&gt;&gt;&gt; print(u)
+&lt;User grover&gt;
+&gt;&gt;&gt; u.password = 'imbluedabadeedabadaa'
+&gt;&gt;&gt; print(u.password_hash)
+pbkdf2:sha256:150000$KpvVu5xH$0fb90391c70c36c82d5e6760aa8925bbfaafb8f9f482b482ad8b34bd9f452c3
+&gt;&gt;&gt; print(u.password)
+# raises AttributeError: password is not readable
+&gt;&gt;&gt; db.session.add(u)   
+&gt;&gt;&gt; db.session.commit()
+</code></pre>
+<h2 id="testing-the-database">Testing the database</h2>
+<p>It&rsquo;s a good idea to write some basic unit tests to make sure any future changes to our code don&rsquo;t break this functionality. Below is a set of three tests that validate our expectations for how passwords should be accessed and validated.</p>
+<h4 id="teststest_user_modelpy">tests/test_user_model.py</h4>
+<pre><code class="language-python">from src.models import User
+import pytest
+
+def test_password_setter():
+    u = User(password='meep')
+    assert u.password_hash is not None
+
+def test_unreadable_password():
+    u = User(password='meep')
+    with pytest.raises(AttributeError):
+        u.password
+
+def test_password_verification():
+    u = User(password='meep')
+    assert u.verify_password('meep') == True
+    assert u.verify_password('beep') == False
+</code></pre>
+<p>Running pytest confirms that all is well.</p>
+<pre><code class="language-bash">==================================== test session starts ====================================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+rootdir: C:\Users\alexh\Workspace\python\issues
+plugins: flask-1.0.0
+collected 6 items
+
+tests\test_suite.py ...                                                                [ 50%]
+tests\test_user_model.py ...                                                           [100%]
+
+===================================== 6 passed in 0.64s =====================================
+</code></pre>
+<h1 id="implementing-user-authentication">Implementing user authentication</h1>
+<p>Now that the database has some idea of who should be able to use the app (i.e., Grover), the next step is to implement user authentication. The general goal is to display different information to the user, depending on whether they have been authenticated. At minimum, we need a login page that accepts a username/password pair and communicates with the database to determine whether the credentials are valid.</p>
+<p>Just as we have a <code>main</code> blueprint for organizing project-related view functions (project, issues, messages, etc.), we will also have an <code>auth</code> blueprint. There will be two view functions in this blueprint: one to handle user login and the other user logout. We will also need a form to accept and submit user credentials. All of these will be placed in an <code>auth</code> folder, which in turn sits inside the project source code directory.</p>
+<h2 id="login-form">Login form</h2>
+<p>To implement the login form, we will use the Flask-WTF extension. As was done for the user database model, the form is implemented as a Python class that inherits from <code>FlaskForm</code>, a special base class. It&rsquo;s a pretty simple form, with two text fields for the user credentials, a checkbox to indicate a preference for staying logged in, and a submit button. Flask-WTF also makes it easy to implement 
+<a href="https://flask.palletsprojects.com/en/1.1.x/patterns/wtforms/" target="_blank" rel="noopener">data validation</a>, which is very convenient.</p>
+<h4 id="srcauthformspy">src/auth/forms.py</h4>
+<pre><code class="language-python">from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.validators import DataRequired, Length, Email
+
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Stay logged in')
+    submit = SubmitField('Sign in')
+</code></pre>
+<div class="alert alert-note">
+  <div>
+    Flask-WTF will complain if you haven&rsquo;t configured a secret key. This is used to cryptographically sign the user session such that an attacker cannot impersonate an authorized user to attack the web application (see also: <a href="https://owasp.org/www-community/attacks/csrf">cross-site request forgery</a>).
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-the-login-form-nothing-more-nothing-less">
+
+
+  <a data-fancybox="" href="/issues-app-04-auth/login.png" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; The login form. Nothing more, nothing less.">
+
+
+  <img src="/issues-app-04-auth/login.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> The login form. Nothing more, nothing less.
+  </figcaption>
+
+
+</figure>
+
+<h2 id="user-session-management">User session management</h2>
+<p>After the user has correctly entered their credentials, we need to update the application state to reflect that the user has been authenticated. This is handled through another Flask extension, Flask-Login, that integrates nicely with the user model to keep track of authentication state.</p>
+<p>Flask-Login requires our User class to implement 
+<a href="https://flask-login.readthedocs.io/en/latest/" target="_blank" rel="noopener">several properties and methods</a>. This can be achieved by inheriting from Flask-Login&rsquo;s <code>UserMixin</code> class. We will be checking the <code>is_authenticated</code> property in the HTML templates to test whether &lsquo;authorized&rsquo; content (i.e., a personalized greeting) should be displayed to the user.</p>
+<p>The final requirement of the User class is that it implements the <code>load_user()</code> function. Flask-Login supplies this function with a user ID and expects to receive the corresponding user object. The <code>login_manager.user_loader</code> decorator is used to register the callback with Flask-Login.</p>
+<h4 id="srcauthviewspy">src/auth/views.py</h4>
+<pre><code class="language-python">...
+from . import db, login_manager
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+...
+</code></pre>
+<h2 id="view-functions">View functions</h2>
+<p>All the components that have been discussed so far &mdash; password validation, database access, user authentication &mdash; will come together in the authorization view functions. When the login page is requested, the login form will be sent to the user. If the user submits sensible-looking data, the application will first query the database to find a user whose email matches the one entered by the user. If either (a) no such user exists or (b) the password hashes don&rsquo;t match, the application flashes an appropriate message and simply returns to the login form.</p>
+<h4 id="srcauthviewspy-1">src/auth/views.py</h4>
+<pre><code class="language-python">from flask import render_template, redirect, request, url_for, flash, session
+from flask_login import login_user, logout_user, login_required
+from . import auth
+from ..models import User
+from .forms import LoginForm
+
+@auth.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        # look for the user in the database and verify their password
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is not None and user.verify_password(form.password.data):
+            login_user(user, form.remember_me.data)
+            next = request.args.get('next')
+            if next is None or not next.startswith('/'):
+                # store some dummy data in the user session
+                session['user_data'] = {
+                    'username': user.username,
+                    'role': 'admin',
+                    'num_issues': 12,
+                    'num_messages': 2
+                }
+                next = url_for('main.index')
+            return redirect(next)
+        flash('Invalid username or password')
+
+    return render_template('auth/login.html', form=form)
+
+@auth.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been signed out.')
+    return redirect(url_for('main.index'))
+</code></pre>
+<p>The code that runs when a user logs in successfully is a little more complicated. After we tell Flask-Login that all went well (<code>login_user()</code>), the <code>next</code> attribute in the request needs to be tested. If the login form showed up because the unauthorized user tried to access a protected page, <code>next</code> will hold the URL of that page and redirect to it. Otherwise, if <code>next</code> is empty, the user is directed to the default <code>main.index</code> endpoint. Before the redirect kicks in, the username (including some extra dummy information) is stored in the user session, to be accessed by the HTML templates.</p>
+<div class="alert alert-note">
+  <div>
+    We also don&rsquo;t want the <code>next</code> URL to start with a slash, which indicates an absolute path (instead of a relative path). Allowing absolute redirects creates an opportunity for an attacker to redirect users to a site of their choosing. This is probably not a good thing!
+  </div>
+</div>
+<h1 id="grover-signs-in">Grover signs in</h1>
+<p>All that&rsquo;s left to do is give it a try!</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-after-grover-signs-in-we-see-a-user-specific-greeting-together-with-some-dummy-data">
+
+
+  <a data-fancybox="" href="/issues-app-04-auth/success.png" data-caption="&lt;b&gt;Fig. 2.&lt;/b&gt; After Grover signs in, we see a user-specific greeting together with some dummy data.">
+
+
+  <img src="/issues-app-04-auth/success.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2.</b> After Grover signs in, we see a user-specific greeting together with some dummy data.
+  </figcaption>
+
+
+</figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-grover-signs-off-with-a-notification-informing-him-of-what-just-happened">
+
+
+  <a data-fancybox="" href="/issues-app-04-auth/logout.png" data-caption="&lt;b&gt;Fig. 3.&lt;/b&gt; Grover signs off, with a notification informing him of what just happened.">
+
+
+  <img src="/issues-app-04-auth/logout.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3.</b> Grover signs off, with a notification informing him of what just happened.
+  </figcaption>
+
+
+</figure>
+
+<div class="alert alert-note">
+  <div>
+    If you&rsquo;ve cloned the <a href="https://github.com/ahadjinicolaou/issues.app">project repository</a>, you can run <code>git checkout f902914</code> to get the current version of the source code.
+  </div>
+</div>
+<h1 id="summary">Summary</h1>
+<p>Authorization deserves careful consideration in any application that holds sensitive information. The next steps for this project might involve creating user roles (e.g., administrator, manager, developer) that permit specific application functionality, including the ability to perform CRUD operations on projects, issues and messages. But building out the user interface might be more fun&hellip;</p>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/auth/">auth</a>
+  
+  <a class="badge badge-light" href="/tag/database/">database</a>
+  
+  <a class="badge badge-light" href="/tag/flask/">flask</a>
+  
+  <a class="badge badge-light" href="/tag/pytest/">pytest</a>
+  
+  <a class="badge badge-light" href="/tag/python/">python</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/issues-app-04-auth/&amp;text=issues.app%20%284%29:%20Authentication" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/issues-app-04-auth/&amp;t=issues.app%20%284%29:%20Authentication" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=issues.app%20%284%29:%20Authentication&amp;body=https://www.remotelycurious.net/post/issues-app-04-auth/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/issues-app-04-auth/&amp;title=issues.app%20%284%29:%20Authentication" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=issues.app%20%284%29:%20Authentication%20https://www.remotelycurious.net/post/issues-app-04-auth/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/issues-app-04-auth/&amp;title=issues.app%20%284%29:%20Authentication" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/issues-app-01-intro/">issues.app (1): Getting started with Flask and Pytest</a></li>
+      
+      <li><a href="/post/issues-app-03-blueprints/">issues.app (3): Modularity with Blueprints</a></li>
+      
+      <li><a href="/post/issues-app-02-templates/">issues.app (2): Making templates with Bootstrap</a></li>
+      
+      <li><a href="/post/systemd-shenanigans/">Shenanigans with systemd</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

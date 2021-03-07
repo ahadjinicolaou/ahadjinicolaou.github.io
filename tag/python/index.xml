@@ -5,12 +5,464 @@
     <link>https://www.remotelycurious.net/tag/python/</link>
       <atom:link href="https://www.remotelycurious.net/tag/python/index.xml" rel="self" type="application/rss+xml" />
     <description>python</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sat, 26 Dec 2020 10:11:54 -0500</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sat, 06 Mar 2021 22:07:07 -0500</lastBuildDate>
     <image>
       <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
       <title>python</title>
       <link>https://www.remotelycurious.net/tag/python/</link>
     </image>
+    
+    <item>
+      <title>issues.app (4): Authentication</title>
+      <link>https://www.remotelycurious.net/post/issues-app-04-auth/</link>
+      <pubDate>Sat, 06 Mar 2021 22:07:07 -0500</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-04-auth/</guid>
+      <description>&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find &lt;a href=&#34;https://www.remotelycurious.net/post/issues-app-03-blueprints/&#34;&gt;here&lt;/a&gt;. Any code documented here may change significantly in the future. &lt;strong&gt;Be warned!&lt;/strong&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;As of the last codebase revision, we have ourselves the skeleton of (what will hopefully become) a fully-fledged web application. This writeup will document the creation of an &lt;em&gt;authentication&lt;/em&gt; system that lets users use the application in certain ways, depending on whether the system can confirm their identity (e.g., with a username/password). The system is comprised of (a) a database (SQLite) that holds user credentials, and (b) user sessions in the browser to keep track of authenticated state.&lt;/p&gt;
+&lt;p&gt;Note that my approach mirrors that of Miguel Grinberg&amp;rsquo;s in his 
+&lt;a href=&#34;https://www.amazon.com/Flask-Web-Development-Developing-Applications/dp/1491991739&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Flask Web Development&lt;/a&gt; book. While there are a few moving parts to this solution, the Python packages involved are easy to use and work well together. Perfect for a webapp novice like myself.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#installing-a-database-framework&#34;&gt;Installing a database framework&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#configuring-sqlalchemy&#34;&gt;Configuring SQLAlchemy&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#defining-database-models&#34;&gt;Defining database models&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#creating-the-database&#34;&gt;Creating the database&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#implementing-password-hashes&#34;&gt;Implementing password hashes&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#testing-the-database&#34;&gt;Testing the database&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#implementing-user-authentication&#34;&gt;Implementing user authentication&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#login-form&#34;&gt;Login form&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#user-session-management&#34;&gt;User session management&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#view-functions&#34;&gt;View functions&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#grover-signs-in&#34;&gt;Grover signs in&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;installing-a-database-framework&#34;&gt;Installing a database framework&lt;/h1&gt;
+&lt;p&gt;To implement the database, we will be using 
+&lt;a href=&#34;https://www.sqlalchemy.org/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;SQLAlchemy&lt;/a&gt;. There are 
+&lt;a href=&#34;https://www.sqlalchemy.org/features.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;many advantages&lt;/a&gt; to using this high-level framework but perhaps the biggest one is that it allows for the definition of the database schema through Python classes. This is really convenient, as you will see later. SQLAlchemy gives us the choice of most popular database engines. For the sake of simplicity, I will run with SQLite.&lt;/p&gt;
+&lt;p&gt;As with many nice things, SQLAlchemy has a matching Flask extension: Flask-SQLAlchemy. This is installed in the usual way:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;pip install flask-sqlalchemy&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&#34;configuring-sqlalchemy&#34;&gt;Configuring SQLAlchemy&lt;/h2&gt;
+&lt;p&gt;Flask-SQLAlchemy picks up its 
+&lt;a href=&#34;https://flask-sqlalchemy.palletsprojects.com/en/2.x/config/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;configuration&lt;/a&gt; from the Flask application instance. As was done for the Bootstrap object, we need to create the database object and bind it to the app instance with the &lt;code&gt;init_app()&lt;/code&gt; method.&lt;/p&gt;
+&lt;h4 id=&#34;src__init__py&#34;&gt;src/&lt;strong&gt;init&lt;/strong&gt;.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;...
+from flask_sqlalchemy import SQLAlchemy
+
+bootstrap = Bootstrap()
+db = SQLAlchemy()
+
+def create_app(config_name):
+    app = Flask(__name__, template_folder=&#39;./templates&#39;, static_folder=&#39;./static&#39;)
+    app.config.from_object(config[config_name])
+
+    bootstrap.init_app(app)
+    db.init_app(app)
+    ...
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we will configure Flask-SQLAlchemy. The most important parameter is &lt;code&gt;SQLALCHEMY_DATABASE_URI&lt;/code&gt;, which takes as its value the URL of the database file. It&amp;rsquo;s good practice to work on a separate database for each configuration &amp;ndash; an accidental modification of the production database could be painful.&lt;/p&gt;
+&lt;p&gt;On Windows, an SQLite URL take the form &lt;code&gt;sqlite:///&amp;lt;DATABASE-PATH&amp;gt;&lt;/code&gt;, like &lt;code&gt;sqlite:///c:/issues.app/data.sqlite&lt;/code&gt;. For testing instances, setting the URL to &lt;code&gt;sqlite://&lt;/code&gt; tells SQLAlchemy to create the database in memory, essentially as a throwaway database.&lt;/p&gt;
+&lt;h4 id=&#34;configpy&#34;&gt;config.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import os
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+class Config:
+    SECRET_KEY = os.environ.get(&#39;SECRET_KEY&#39;) # needed for tamper-proof session cookies
+    SQLALCHEMY_TRACK_MODIFICATIONS = False # disable event system and conserve memory
+
+class DevelopmentConfig(Config):
+    # enables interactive debugger on the development server
+    # also useful for monitoring code changes
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = &#39;sqlite:///&#39; + os.path.join(basedir, &#39;data-dev.sqlite&#39;)
+
+class TestingConfig(Config):
+    TESTING = True # disables error catching during request handling
+    SQLALCHEMY_DATABASE_URI = &#39;sqlite://&#39; # test data stored in memory
+
+class ProductionConfig(Config):
+    SQLALCHEMY_DATABASE_URI = &#39;sqlite:///&#39; + os.path.join(basedir, &#39;data.sqlite&#39;)
+
+config = {
+    &#39;development&#39;: DevelopmentConfig,
+    &#39;testing&#39;: TestingConfig,
+    &#39;production&#39;: ProductionConfig,
+    &#39;default&#39;: DevelopmentConfig
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We will also set &lt;code&gt;SQLALCHEMY_TRACK_MODIFICATIONS = False&lt;/code&gt; to conserve system resources as suggested in Flask-SQLAlchemy&amp;rsquo;s documentation. Note that once we start testing the database, Pytest will complain if this parameter has not been specified.&lt;/p&gt;
+&lt;h2 id=&#34;defining-database-models&#34;&gt;Defining database models&lt;/h2&gt;
+&lt;p&gt;If you&amp;rsquo;re used to working with relational databases the old fashioned way, using a framework like SQLAlchemy will feel very different. For example, instead of using DDL queries like &lt;code&gt;CREATE&lt;/code&gt; and &lt;code&gt;ALTER&lt;/code&gt; to build a table, we need to write a special kind of Python class that inherits from SQLAlchemy&amp;rsquo;s &lt;code&gt;Model&lt;/code&gt; base class and whose attributes define the table columns.&lt;/p&gt;
+&lt;p&gt;We are going to kick things off with a single table. The &lt;code&gt;User&lt;/code&gt; 
+&lt;a href=&#34;https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;model&lt;/a&gt; below defines a table with four columns:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;id&lt;/code&gt; (integer), a unique identifying number for each user,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;email&lt;/code&gt; (string, max length 64), the user&amp;rsquo;s email&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;username&lt;/code&gt; (string, max length 32), as it sounds, and&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;password_hash&lt;/code&gt; (string), an encoded version of the user&amp;rsquo;s password (described later).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;srcmodelspy&#34;&gt;src/models.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from . import db
+
+class User(db.Model):
+    __tablename__ = &#39;users&#39;
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(64), unique=True, index=True, nullable=False)
+    username = db.Column(db.String(32), unique=True, index=True, nullable=False)
+    password_hash = db.Column(db.String(128))
+
+    def __repr__(self):
+        return f&#39;&amp;lt;User {self.username}&amp;gt;&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Setting &lt;code&gt;index=True&lt;/code&gt; tells SQLAlchemy to build an index for the column, which makes queries more efficient. We also don&amp;rsquo;t want to allow null values for the id, email and username columns (this is automatic for primary keys).&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    For now, I&amp;rsquo;ll let the the password hash column take null values &amp;mdash; maybe null could be used to indicate that a user has been banned from the application.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;creating-the-database&#34;&gt;Creating the database&lt;/h2&gt;
+&lt;p&gt;With the model defined, our next task is to create the database. Running &lt;code&gt;flask shell&lt;/code&gt; will start 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/cli/#open-a-shell&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;an interactive Python shell&lt;/a&gt; in the context of the application. The first order of business is to import the SQLAlchemy instance and run &lt;code&gt;db.create_all()&lt;/code&gt;, which creates the database and any tables that are defined by the model files.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;ROOTDIR&amp;gt; flask shell
+&amp;gt;&amp;gt;&amp;gt; from src import db
+&amp;gt;&amp;gt;&amp;gt; db.create_all()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With the default development configuration in effect, this will create a &lt;code&gt;data-dev.sqlite&lt;/code&gt; file in the base directory.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s create a couple of users and inspect their properties.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; from src.models import User
+&amp;gt;&amp;gt;&amp;gt; u1 = User(email=&#39;bert@gmail.com&#39;, username=&#39;bert&#39;)
+&amp;gt;&amp;gt;&amp;gt; u2 = User(email=&#39;ernie@yahoo.com&#39;, username=&#39;ernie&#39;)
+&amp;gt;&amp;gt;&amp;gt; print(u1)
+&amp;lt;User bert&amp;gt;
+&amp;gt;&amp;gt;&amp;gt; print(u1.id)
+None
+&amp;gt;&amp;gt;&amp;gt; print(u1.email)
+bert@gmail.com
+&amp;gt;&amp;gt;&amp;gt; print(u2)
+&amp;lt;User ernie&amp;gt;
+&amp;gt;&amp;gt;&amp;gt; print(u2.id)
+None
+&amp;gt;&amp;gt;&amp;gt; print(u2.email)
+ernie@yahoo.com
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From the output above, it looks as though the ID properties haven&amp;rsquo;t been set properly. This is because although we have made some Python objects, any primary key properties won&amp;rsquo;t take values until the objects have been written to the database. This is done by adding them to a &lt;em&gt;session&lt;/em&gt;, and then committing the session:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; db.session.add(u1)
+&amp;gt;&amp;gt;&amp;gt; db.session.add(u2)
+&amp;gt;&amp;gt;&amp;gt; db.session.commit()
+&amp;gt;&amp;gt;&amp;gt; print(u1.id)
+1
+&amp;gt;&amp;gt;&amp;gt; print(u2.id)
+2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A list of all users in the table can now be obtained by querying the user model:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; User.query.all()
+[&amp;lt;User bert&amp;gt;, &amp;lt;User ernie&amp;gt;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;implementing-password-hashes&#34;&gt;Implementing password hashes&lt;/h2&gt;
+&lt;p&gt;Storing cleartext passwords within a database is almost certainly a bad idea. If a hacker gains access to the database, the credentials of all users can be easily accessed and any sensitive information stored on the application server becomes fair game. It is important to store passwords securely to prevent or at least mitigate these kinds of risks.&lt;/p&gt;
+&lt;p&gt;Instead of storing a raw password, the database can instead keep track of its corresponding &lt;em&gt;hash&lt;/em&gt;. This involves using a hash function to transform the password into a string of random-looking characters. For example, we can use a 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Bcrypt&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;bcrypt&lt;/a&gt; hash function to convert the &lt;code&gt;meepmeep&lt;/code&gt; password into&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$2a$04$cT3a9teblhIemCmmXjXQleoxjovVhoRddfm9DR6tZWeuDRETIn5hK
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;which looks nothing like the original password. Hash functions also make use of a random component to &lt;em&gt;salt&lt;/em&gt; the hash, such that using the function twice on the same input results in completely different outputs. More importantly, hash functions are &amp;ldquo;one-way&amp;rdquo;, meaning that while computation of the hash is relatively fast, the inverse operation (i.e., recovering the password from the hash) is practically impossible.&lt;/p&gt;
+&lt;p&gt;We can use the 
+&lt;a href=&#34;https://werkzeug.palletsprojects.com/en/1.0.x/utils/#module-werkzeug.security&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Werkzeug&lt;/a&gt; package to do the heavy lifting for us, using the &lt;code&gt;generate_password_hash()&lt;/code&gt; and &lt;code&gt;check_password_hash()&lt;/code&gt; functions to handle hash generation and verification. The idea here is to update the User model class such that a model instance (e.g., &lt;code&gt;u1&lt;/code&gt; in the example above) can be used to set a write-only &lt;code&gt;password&lt;/code&gt; attribute, which generates the &lt;code&gt;password_hash&lt;/code&gt; attribute when the password is written. The model also makes the &lt;code&gt;verify_password()&lt;/code&gt; method available to the application so that Werkzeug can compare the user&amp;rsquo;s password hash with that of the second input argument.&lt;/p&gt;
+&lt;h4 id=&#34;srcmodelspy-1&#34;&gt;src/models.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from . import db
+from werkzeug.security import generate_password_hash, check_password_hash
+
+class User(db.Model):
+    ...
+    @property
+    def password(self):
+        raise AttributeError(&#39;password is not readable&#39;)
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can now create a new user entry to demonstrate how this works. Grover has the honor of being the first user to be assigned a password, so we&amp;rsquo;ll commit his credentials to the database and eventually use them to log into the system.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; u = User(email=&#39;grover@hotmail.com&#39;, username=&#39;grover&#39;)
+&amp;gt;&amp;gt;&amp;gt; print(u)
+&amp;lt;User grover&amp;gt;
+&amp;gt;&amp;gt;&amp;gt; u.password = &#39;imbluedabadeedabadaa&#39;
+&amp;gt;&amp;gt;&amp;gt; print(u.password_hash)
+pbkdf2:sha256:150000$KpvVu5xH$0fb90391c70c36c82d5e6760aa8925bbfaafb8f9f482b482ad8b34bd9f452c3
+&amp;gt;&amp;gt;&amp;gt; print(u.password)
+# raises AttributeError: password is not readable
+&amp;gt;&amp;gt;&amp;gt; db.session.add(u)   
+&amp;gt;&amp;gt;&amp;gt; db.session.commit()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;testing-the-database&#34;&gt;Testing the database&lt;/h2&gt;
+&lt;p&gt;It&amp;rsquo;s a good idea to write some basic unit tests to make sure any future changes to our code don&amp;rsquo;t break this functionality. Below is a set of three tests that validate our expectations for how passwords should be accessed and validated.&lt;/p&gt;
+&lt;h4 id=&#34;teststest_user_modelpy&#34;&gt;tests/test_user_model.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from src.models import User
+import pytest
+
+def test_password_setter():
+    u = User(password=&#39;meep&#39;)
+    assert u.password_hash is not None
+
+def test_unreadable_password():
+    u = User(password=&#39;meep&#39;)
+    with pytest.raises(AttributeError):
+        u.password
+
+def test_password_verification():
+    u = User(password=&#39;meep&#39;)
+    assert u.verify_password(&#39;meep&#39;) == True
+    assert u.verify_password(&#39;beep&#39;) == False
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Running pytest confirms that all is well.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;==================================== test session starts ====================================
+platform win32 -- Python 3.7.7, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+rootdir: C:\Users\alexh\Workspace\python\issues
+plugins: flask-1.0.0
+collected 6 items
+
+tests\test_suite.py ...                                                                [ 50%]
+tests\test_user_model.py ...                                                           [100%]
+
+===================================== 6 passed in 0.64s =====================================
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;implementing-user-authentication&#34;&gt;Implementing user authentication&lt;/h1&gt;
+&lt;p&gt;Now that the database has some idea of who should be able to use the app (i.e., Grover), the next step is to implement user authentication. The general goal is to display different information to the user, depending on whether they have been authenticated. At minimum, we need a login page that accepts a username/password pair and communicates with the database to determine whether the credentials are valid.&lt;/p&gt;
+&lt;p&gt;Just as we have a &lt;code&gt;main&lt;/code&gt; blueprint for organizing project-related view functions (project, issues, messages, etc.), we will also have an &lt;code&gt;auth&lt;/code&gt; blueprint. There will be two view functions in this blueprint: one to handle user login and the other user logout. We will also need a form to accept and submit user credentials. All of these will be placed in an &lt;code&gt;auth&lt;/code&gt; folder, which in turn sits inside the project source code directory.&lt;/p&gt;
+&lt;h2 id=&#34;login-form&#34;&gt;Login form&lt;/h2&gt;
+&lt;p&gt;To implement the login form, we will use the Flask-WTF extension. As was done for the user database model, the form is implemented as a Python class that inherits from &lt;code&gt;FlaskForm&lt;/code&gt;, a special base class. It&amp;rsquo;s a pretty simple form, with two text fields for the user credentials, a checkbox to indicate a preference for staying logged in, and a submit button. Flask-WTF also makes it easy to implement 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/patterns/wtforms/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;data validation&lt;/a&gt;, which is very convenient.&lt;/p&gt;
+&lt;h4 id=&#34;srcauthformspy&#34;&gt;src/auth/forms.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.validators import DataRequired, Length, Email
+
+class LoginForm(FlaskForm):
+    email = StringField(&#39;Email&#39;, validators=[DataRequired(), Length(1, 64), Email()])
+    password = PasswordField(&#39;Password&#39;, validators=[DataRequired()])
+    remember_me = BooleanField(&#39;Stay logged in&#39;)
+    submit = SubmitField(&#39;Sign in&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Flask-WTF will complain if you haven&amp;rsquo;t configured a secret key. This is used to cryptographically sign the user session such that an attacker cannot impersonate an authorized user to attack the web application (see also: &lt;a href=&#34;https://owasp.org/www-community/attacks/csrf&#34;&gt;cross-site request forgery&lt;/a&gt;).
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-the-login-form-nothing-more-nothing-less&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-04-auth/login.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; The login form. Nothing more, nothing less.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-04-auth/login.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; The login form. Nothing more, nothing less.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;user-session-management&#34;&gt;User session management&lt;/h2&gt;
+&lt;p&gt;After the user has correctly entered their credentials, we need to update the application state to reflect that the user has been authenticated. This is handled through another Flask extension, Flask-Login, that integrates nicely with the user model to keep track of authentication state.&lt;/p&gt;
+&lt;p&gt;Flask-Login requires our User class to implement 
+&lt;a href=&#34;https://flask-login.readthedocs.io/en/latest/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;several properties and methods&lt;/a&gt;. This can be achieved by inheriting from Flask-Login&amp;rsquo;s &lt;code&gt;UserMixin&lt;/code&gt; class. We will be checking the &lt;code&gt;is_authenticated&lt;/code&gt; property in the HTML templates to test whether &amp;lsquo;authorized&amp;rsquo; content (i.e., a personalized greeting) should be displayed to the user.&lt;/p&gt;
+&lt;p&gt;The final requirement of the User class is that it implements the &lt;code&gt;load_user()&lt;/code&gt; function. Flask-Login supplies this function with a user ID and expects to receive the corresponding user object. The &lt;code&gt;login_manager.user_loader&lt;/code&gt; decorator is used to register the callback with Flask-Login.&lt;/p&gt;
+&lt;h4 id=&#34;srcauthviewspy&#34;&gt;src/auth/views.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;...
+from . import db, login_manager
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;view-functions&#34;&gt;View functions&lt;/h2&gt;
+&lt;p&gt;All the components that have been discussed so far &amp;mdash; password validation, database access, user authentication &amp;mdash; will come together in the authorization view functions. When the login page is requested, the login form will be sent to the user. If the user submits sensible-looking data, the application will first query the database to find a user whose email matches the one entered by the user. If either (a) no such user exists or (b) the password hashes don&amp;rsquo;t match, the application flashes an appropriate message and simply returns to the login form.&lt;/p&gt;
+&lt;h4 id=&#34;srcauthviewspy-1&#34;&gt;src/auth/views.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import render_template, redirect, request, url_for, flash, session
+from flask_login import login_user, logout_user, login_required
+from . import auth
+from ..models import User
+from .forms import LoginForm
+
+@auth.route(&#39;/login&#39;, methods=[&#39;GET&#39;, &#39;POST&#39;])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        # look for the user in the database and verify their password
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is not None and user.verify_password(form.password.data):
+            login_user(user, form.remember_me.data)
+            next = request.args.get(&#39;next&#39;)
+            if next is None or not next.startswith(&#39;/&#39;):
+                # store some dummy data in the user session
+                session[&#39;user_data&#39;] = {
+                    &#39;username&#39;: user.username,
+                    &#39;role&#39;: &#39;admin&#39;,
+                    &#39;num_issues&#39;: 12,
+                    &#39;num_messages&#39;: 2
+                }
+                next = url_for(&#39;main.index&#39;)
+            return redirect(next)
+        flash(&#39;Invalid username or password&#39;)
+
+    return render_template(&#39;auth/login.html&#39;, form=form)
+
+@auth.route(&#39;/logout&#39;)
+@login_required
+def logout():
+    logout_user()
+    flash(&#39;You have been signed out.&#39;)
+    return redirect(url_for(&#39;main.index&#39;))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The code that runs when a user logs in successfully is a little more complicated. After we tell Flask-Login that all went well (&lt;code&gt;login_user()&lt;/code&gt;), the &lt;code&gt;next&lt;/code&gt; attribute in the request needs to be tested. If the login form showed up because the unauthorized user tried to access a protected page, &lt;code&gt;next&lt;/code&gt; will hold the URL of that page and redirect to it. Otherwise, if &lt;code&gt;next&lt;/code&gt; is empty, the user is directed to the default &lt;code&gt;main.index&lt;/code&gt; endpoint. Before the redirect kicks in, the username (including some extra dummy information) is stored in the user session, to be accessed by the HTML templates.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    We also don&amp;rsquo;t want the &lt;code&gt;next&lt;/code&gt; URL to start with a slash, which indicates an absolute path (instead of a relative path). Allowing absolute redirects creates an opportunity for an attacker to redirect users to a site of their choosing. This is probably not a good thing!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;grover-signs-in&#34;&gt;Grover signs in&lt;/h1&gt;
+&lt;p&gt;All that&amp;rsquo;s left to do is give it a try!&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-after-grover-signs-in-we-see-a-user-specific-greeting-together-with-some-dummy-data&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-04-auth/success.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; After Grover signs in, we see a user-specific greeting together with some dummy data.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-04-auth/success.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; After Grover signs in, we see a user-specific greeting together with some dummy data.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-grover-signs-off-with-a-notification-informing-him-of-what-just-happened&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-04-auth/logout.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Grover signs off, with a notification informing him of what just happened.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-04-auth/logout.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Grover signs off, with a notification informing him of what just happened.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;ve cloned the &lt;a href=&#34;https://github.com/ahadjinicolaou/issues.app&#34;&gt;project repository&lt;/a&gt;, you can run &lt;code&gt;git checkout f902914&lt;/code&gt; to get the current version of the source code.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;Authorization deserves careful consideration in any application that holds sensitive information. The next steps for this project might involve creating user roles (e.g., administrator, manager, developer) that permit specific application functionality, including the ability to perform CRUD operations on projects, issues and messages. But building out the user interface might be more fun&amp;hellip;&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Shenanigans with systemd</title>
@@ -503,6 +955,395 @@ ExecStart=/usr/bin/sudo /usr/bin/python3 /data/judgy.py btables
 &lt;p&gt;Start the service via &lt;code&gt;# systemctl start judgy.service&lt;/code&gt; and you&amp;rsquo;re in business. You can stop the service either through &lt;code&gt;systemctl&lt;/code&gt; or by entering the safe word.&lt;/p&gt;
 &lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
 &lt;p&gt;If you made it through the writeup, congratulations! By now, you likely have a decent grasp of the basics of service management, as well as an appreciation for systemd&amp;rsquo;s various capabilities. Although I am no sysadmin, the process of making this writeup has improved my understanding of how systemd operates under the hood, while at the same time making me realize how much more there is to this software monolith&amp;hellip;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>issues.app (3): Modularity with Blueprints</title>
+      <link>https://www.remotelycurious.net/post/issues-app-03-blueprints/</link>
+      <pubDate>Fri, 25 Sep 2020 18:34:18 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-03-blueprints/</guid>
+      <description>&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find &lt;a href=&#34;https://www.remotelycurious.net/post/issues-app-02-templates/&#34;&gt;here&lt;/a&gt;. Any code documented here may change significantly in the future. &lt;strong&gt;Be warned!&lt;/strong&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Today I&amp;rsquo;ll be documenting several structure-related changes that collectively represent a significant change to the codebase. In order of appearance, these changes are as follows:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;switching from Flask-Bootstrap to Bootstrap-Flask (i.e. Bootstrap v3 to v4)&lt;/li&gt;
+&lt;li&gt;relocating several source files for more meaningful project structure&lt;/li&gt;
+&lt;li&gt;implementation of &lt;em&gt;blueprints&lt;/em&gt; for better code modularity.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;These are not sexy changes, so to sweeten the deal, I&amp;rsquo;ve also gone ahead and cooked up the beginnings of a user interface for the project. You&amp;rsquo;ll get a glimpse of it as I detail the migration of the codebase to Bootstrap-Flask.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s get started!&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#using-better-templates&#34;&gt;Using better templates&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#switching-to-bootstrap-flask&#34;&gt;Switching to Bootstrap-Flask&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-proto-interface&#34;&gt;The proto-interface&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#the-base-template&#34;&gt;The base template&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#project-restructure&#34;&gt;Project restructure&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#blueprints&#34;&gt;Blueprints&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-main-blueprint&#34;&gt;The main blueprint&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;using-better-templates&#34;&gt;Using better templates&lt;/h1&gt;
+&lt;p&gt;The first order of business is to make a base template for the issue tracker. By defining page components and using template blocks (e.g., &lt;code&gt;{% block content %}&lt;/code&gt;), a base template can make page components available to a child template, such that the derived page can use or modify the base template&amp;rsquo;s content. I will use the base template to hold a &lt;em&gt;navbar&lt;/em&gt;, a horizontal component on the top of each app page that contains links to other pages, as well as other non-view-specific information (e.g., number of issues assigned to the logged-in user).&lt;/p&gt;
+&lt;h2 id=&#34;switching-to-bootstrap-flask&#34;&gt;Switching to Bootstrap-Flask&lt;/h2&gt;
+&lt;p&gt;One of the issues I discovered with Flask-Bootstrap is that the package uses Bootstrap 3. At first I didn&amp;rsquo;t see this as an issue, but the more I wanted to play around with the layout, the more time I was sinking into custom CSS changes and fighting the defaults. It&amp;rsquo;s worth noting that even though I am definitely &lt;strong&gt;not&lt;/strong&gt; an interface designer, nor a master of CSS, I am fussy when it comes to design. By the time I was satisfied with my navbar, more than &lt;em&gt;three hours&lt;/em&gt; had passed through a rapid cycle of Google searches, browser element inspection and minute CSS changes. And that&amp;rsquo;s just a single navbar!&lt;/p&gt;
+&lt;p&gt;After reading so many Stack Overflow posts containing some variant of &amp;ldquo;this is resolved in v4&amp;rdquo;, I pulled the plug on Flask-Bootstrap and replaced it with 
+&lt;a href=&#34;https://bootstrap-flask.readthedocs.io/en/stable/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Bootstrap-Flask&lt;/a&gt;, which uses Bootstrap 4. If you are in any doubt about which version to use, take it from me: use v4.&lt;/p&gt;
+&lt;h2 id=&#34;the-proto-interface&#34;&gt;The proto-interface&lt;/h2&gt;
+&lt;p&gt;The first version of our issue tracker interface can be seen below. At this stage it&amp;rsquo;s really just the navbar with a very plain content page. Most of the what you&amp;rsquo;re looking at is described by a base template, with the content underneath the navbar filled out by each child template. We have four child templates, one for each major component in the app:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the dashboard,&lt;/li&gt;
+&lt;li&gt;the projects page,&lt;/li&gt;
+&lt;li&gt;the issues page,&lt;/li&gt;
+&lt;li&gt;the message page.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-the-proto-interface-for-the-app&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/interface.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; The proto-interface for the app.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/interface.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; The proto-interface for the app.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Aside from some links to different application views, the navbar contains some other information. We have a couple of &lt;em&gt;badges&lt;/em&gt;: little numerical indicators that hold the number of active issues and unread messages for the user. There&amp;rsquo;s also a user dropdown menu that lists the username and their role. We will save a proper description of the major data entities underlying this project (users, projects, issues, messages, etc.) for when we get to implementing the project&amp;rsquo;s database. That will definitely warrant a separate writeup.&lt;/p&gt;
+&lt;p&gt;Currently, each child template looks almost identical and pretty boring. This is what the dashboard template looks like:&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesdashboardhtml&#34;&gt;src/templates/dashboard.html&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{% extends &amp;quot;base.html&amp;quot; %}
+
+{% block content %}
+&amp;lt;div class=&amp;quot;container&amp;quot;&amp;gt;
+    &amp;lt;div class=&amp;quot;row&amp;quot;&amp;gt;
+        &amp;lt;div class=&amp;quot;col&amp;quot;&amp;gt;
+            &amp;lt;h1&amp;gt;Dashboard&amp;lt;/h1&amp;gt;
+            &amp;lt;p&amp;gt;This test content comes from the dashboard template.&amp;lt;/p&amp;gt;
+        &amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Unlike Flask-Bootstrap, Bootstrap-Flask does not come with its own base template, so 
+&lt;a href=&#34;https://bootstrap-flask.readthedocs.io/en/stable/basic.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;you have to make one&lt;/a&gt;. The next section provides an overview of this project&amp;rsquo;s base template, as well as some important aspects of its design.&lt;/p&gt;
+&lt;h3 id=&#34;the-base-template&#34;&gt;The base template&lt;/h3&gt;
+&lt;p&gt;After leading with the &lt;code&gt;DOCTYPE&lt;/code&gt; tag, the base template includes some meta tags in the &lt;code&gt;head&lt;/code&gt; element that allow for the view to be 
+&lt;a href=&#34;https://learn.shayhowe.com/advanced-html-css/responsive-web-design/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;responsive&lt;/a&gt;, the effects of which will be shown soon. We also have some code that sets the favicon and loads CSS files, including Bootstrap and a custom CSS file for small design tweaks.&lt;/p&gt;
+&lt;h4 id=&#34;srctemplatesbasehtml--head&#34;&gt;src/templates/base.html &amp;raquo; &lt;code&gt;&amp;lt;head&amp;gt;&lt;/code&gt;&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{% block head %}
+&amp;lt;!-- required meta tags --&amp;gt;
+&amp;lt;meta charset=&amp;quot;utf-8&amp;quot;&amp;gt;
+&amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=device-width, initial-scale=1, shrink-to-fit=no&amp;quot;&amp;gt;
+
+&amp;lt;!-- favicon resources --&amp;gt;
+&amp;lt;link rel=&amp;quot;shortcut icon&amp;quot; href=&amp;quot;{{ url_for(&#39;static&#39;, filename=&#39;favicon-16.png&#39;) }}&amp;quot; type=&amp;quot;image/png&amp;quot;&amp;gt;
+&amp;lt;link rel=&amp;quot;icon&amp;quot; href=&amp;quot;{{ url_for(&#39;static&#39;, filename=&#39;favicon-16.png&#39;) }}&amp;quot; type=&amp;quot;image/png&amp;quot;&amp;gt;
+
+{% block styles %}
+&amp;lt;!-- bootstrap CSS --&amp;gt;
+{{ bootstrap.load_css() }}
+&amp;lt;link rel=&amp;quot;stylesheet&amp;quot; href=&amp;quot;{{ url_for(&#39;static&#39;, filename=&#39;custom.css&#39;) }}&amp;quot;&amp;gt;
+{% endblock %}
+
+&amp;lt;title&amp;gt;issues.app&amp;lt;/title&amp;gt;
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Most of the remaining code is within the &lt;code&gt;body&lt;/code&gt; element and is used to define the navbar. Bootstrap is a mobile-first framework, so it&amp;rsquo;s worth putting a bit of thought into the navbar&amp;rsquo;s layout for different window sizes. After deciding which components to include in the navbar, we can then choose which components to hide or &lt;em&gt;collapse&lt;/em&gt; when the display size is small enough.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    A &lt;em&gt;mobile-first&lt;/em&gt; design philosophy is geared at making content look good on small displays (e.g., those of phones and tablets), before considering larger displays like laptop screens. This compels you to consider content before everything else, saving your screen real estate for what actually matters.
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-a-collapsed-navbar-shows-a-hamburger-menu&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/collapsed.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; A collapsed navbar shows a hamburger menu.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/collapsed.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; A collapsed navbar shows a hamburger menu.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Components can be collapsed by nesting the components within a &lt;code&gt;div.collapse.navbar-collapse&lt;/code&gt; element. The &lt;code&gt;.navbar-toggler&lt;/code&gt; class is used to bundle collapsed components into a hamburger menu that references the components using the &lt;code&gt;#navbarNavDropdown&lt;/code&gt; ID. The &lt;code&gt;navbar-brand&lt;/code&gt; element, used to access the dashboard, will always be shown.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-opening-up-the-menu&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/collapsed-menu.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Opening up the menu.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-03-blueprints/collapsed-menu.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Opening up the menu.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h4 id=&#34;srctemplatesbasehtml--body&#34;&gt;src/templates/base.html &amp;raquo; &lt;code&gt;&amp;lt;body&amp;gt;&lt;/code&gt;&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;div class=&amp;quot;navbar navbar-fixed-top navbar-expand-md navbar-light bg-light&amp;quot;&amp;gt;
+    &amp;lt;!-- app brand --&amp;gt;
+    &amp;lt;a class=&amp;quot;navbar-brand&amp;quot; href=&amp;quot;{{ url_for(&#39;index&#39;) }}&amp;quot;&amp;gt;
+        &amp;lt;img class=&amp;quot;d-inline-block align-top&amp;quot; src=&amp;quot;{{ url_for(&#39;static&#39;, filename=&#39;favicon-32.png&#39;) }}&amp;quot; &amp;gt;
+        issues.app
+    &amp;lt;/a&amp;gt;
+
+    &amp;lt;!-- hamburger menu --&amp;gt;
+    &amp;lt;button class=&amp;quot;navbar-toggler&amp;quot; type=&amp;quot;button&amp;quot; data-toggle=&amp;quot;collapse&amp;quot; data-target=&amp;quot;#navbarNavDropdown&amp;quot; aria-controls=&amp;quot;navbarNavDropdown&amp;quot; aria-expanded=&amp;quot;false&amp;quot; aria-label=&amp;quot;Toggle navigation&amp;quot;&amp;gt;
+        &amp;lt;span class=&amp;quot;navbar-toggler-icon&amp;quot;&amp;gt;&amp;lt;/span&amp;gt;
+    &amp;lt;/button&amp;gt;
+    
+    &amp;lt;!-- items below collapse into the menu above--&amp;gt;
+    &amp;lt;div class=&amp;quot;collapse navbar-collapse&amp;quot; id=&amp;quot;navbarNavDropdown&amp;quot;&amp;gt;
+        &amp;lt;!-- logged-in user dropdown --&amp;gt;
+        &amp;lt;ul class=&amp;quot;navbar-nav ml-auto order-1&amp;quot;&amp;gt;
+            &amp;lt;li class=&amp;quot;nav-item dropdown&amp;quot;&amp;gt;
+                &amp;lt;a class=&amp;quot;nav-link dropdown-toggle&amp;quot; href=&amp;quot;#&amp;quot; id=&amp;quot;navbarUserDropdown&amp;quot; role=&amp;quot;button&amp;quot; data-toggle=&amp;quot;dropdown&amp;quot; aria-haspopup=&amp;quot;true&amp;quot; aria-expanded=&amp;quot;false&amp;quot;&amp;gt;
+                    &amp;amp;nbsp;{{ user_data[&#39;user&#39;] }}&amp;lt;span class=&amp;quot;badge badge-secondary&amp;quot;&amp;gt;{{ user_data[&#39;role&#39;] }}&amp;lt;/span&amp;gt;&amp;lt;span class=&amp;quot;caret&amp;quot;&amp;gt;&amp;lt;/span&amp;gt;
+                &amp;lt;/a&amp;gt;
+
+                &amp;lt;div class=&amp;quot;dropdown-menu&amp;quot; aria-labelledby=&amp;quot;navbarUserDropdown&amp;quot;&amp;gt;
+                    &amp;lt;a class=&amp;quot;dropdown-item&amp;quot; href=&amp;quot;#&amp;quot;&amp;gt;Profile&amp;lt;/a&amp;gt;
+                    &amp;lt;a class=&amp;quot;dropdown-item&amp;quot; href=&amp;quot;#&amp;quot;&amp;gt;Settings&amp;lt;/a&amp;gt;
+                    &amp;lt;div class=&amp;quot;dropdown-divider&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+                    &amp;lt;a class=&amp;quot;dropdown-item&amp;quot; href=&amp;quot;#&amp;quot;&amp;gt;Sign out&amp;lt;/a&amp;gt;
+                &amp;lt;/div&amp;gt;
+            &amp;lt;/li&amp;gt;
+        &amp;lt;/ul&amp;gt;
+
+        &amp;lt;!-- major app sections --&amp;gt;
+        &amp;lt;ul class=&amp;quot;navbar-nav mr-auto order-0&amp;quot;&amp;gt;
+            &amp;lt;li class=&amp;quot;nav-item {{ &#39;active&#39; if is_active[&#39;projects&#39;] }}&amp;quot;&amp;gt;
+                &amp;lt;a class=&amp;quot;nav-link d-flex align-items-center&amp;quot; href=&amp;quot;{{ url_for(&#39;projects&#39;) }}&amp;quot;&amp;gt;
+                    &amp;amp;nbsp;Projects&amp;amp;nbsp;
+                &amp;lt;/a&amp;gt;
+            &amp;lt;/li&amp;gt;
+            &amp;lt;li class=&amp;quot;nav-item {{ &#39;active&#39; if is_active[&#39;issues&#39;] }}&amp;quot;&amp;gt;
+                &amp;lt;a class=&amp;quot;nav-link d-flex align-items-center&amp;quot; href=&amp;quot;{{ url_for(&#39;issues&#39;) }}&amp;quot;&amp;gt;
+                    &amp;amp;nbsp;Issues&amp;amp;nbsp;{% if user_data[&#39;num_issues&#39;] %}&amp;lt;span class=&amp;quot;badge badge-pill badge-primary&amp;quot;&amp;gt;{{ user_data[&#39;num_issues&#39;] }}&amp;lt;/span&amp;gt;{% endif %}
+                &amp;lt;/a&amp;gt;
+            &amp;lt;/li&amp;gt;
+            &amp;lt;li class=&amp;quot;nav-item {{ &#39;active&#39; if is_active[&#39;messages&#39;] }}&amp;quot;&amp;gt;
+                &amp;lt;a class=&amp;quot;nav-link d-flex align-items-center&amp;quot; href=&amp;quot;{{ url_for(&#39;messages&#39;) }}&amp;quot;&amp;gt;
+                    &amp;amp;nbsp;Messages&amp;amp;nbsp;{% if user_data[&#39;num_messages&#39;] %}&amp;lt;span class=&amp;quot;badge badge-pill badge-primary&amp;quot;&amp;gt;{{ user_data[&#39;num_messages&#39;] }}&amp;lt;/span&amp;gt;{% endif %}
+                &amp;lt;/a&amp;gt;
+            &amp;lt;/li&amp;gt;
+        &amp;lt;/ul&amp;gt;
+    &amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Looking at the code above, you will notice some Jinja statements sprinkled around the place. The statements that populate the navbar user data access a dictionary called &lt;code&gt;user_data&lt;/code&gt;, which is supplied to Jinja through each view function. For example, the projects template is rendered within the &lt;code&gt;projects()&lt;/code&gt; view function as shown below.&lt;/p&gt;
+&lt;h4 id=&#34;srcmaininitpy--create_app&#34;&gt;src/main/init.py &amp;raquo; &lt;code&gt;create_app()&lt;/code&gt;&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;@app.route(&#39;/projects&#39;)
+def projects():
+    return render_template(&#39;projects.html&#39;,
+        is_active={&#39;projects&#39;: True},
+        user_data=get_user_data())
+
+def get_user_data():
+    return {
+      &#39;user&#39;: &#39;ahadjinicolaou&#39;,
+      &#39;role&#39;: &#39;admin&#39;,
+      &#39;num_issues&#39;: 12,
+      &#39;num_messages&#39;: 2}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Although the function &lt;code&gt;get_user_data()&lt;/code&gt; is just returning some dummy data here, you can imagine this function being rewritten to say, query a &lt;code&gt;Users&lt;/code&gt; table in a database and parse the results to create a proper user data dictionary.&lt;/p&gt;
+&lt;p&gt;Another point worth noting is the use of Flask&amp;rsquo;s &lt;code&gt;url_for()&lt;/code&gt; function. Recall that we declare view functions in our code using the &lt;code&gt;app.route&lt;/code&gt; decorator. Flask keeps track of the association between each URL rule (e.g. &lt;code&gt;/projects&lt;/code&gt;) and its view function using the app instance&amp;rsquo;s URL map. You can inspect the URL map for the application by accessing &lt;code&gt;app.url_map&lt;/code&gt; within the main package constructor.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s what it looks like:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;Map([&amp;lt;Rule &#39;/projects&#39; (HEAD, OPTIONS, GET) -&amp;gt; projects&amp;gt;,
+    &amp;lt;Rule &#39;/messages&#39; (HEAD, OPTIONS, GET) -&amp;gt; messages&amp;gt;,
+    &amp;lt;Rule &#39;/issues&#39; (HEAD, OPTIONS, GET) -&amp;gt; issues&amp;gt;,
+    &amp;lt;Rule &#39;/&#39; (HEAD, OPTIONS, GET) -&amp;gt; index&amp;gt;,
+    &amp;lt;Rule &#39;/bootstrap/static/&amp;lt;filename&amp;gt;&#39; (HEAD, OPTIONS, GET) -&amp;gt; bootstrap.static&amp;gt;,
+    &amp;lt;Rule &#39;/static/&amp;lt;filename&amp;gt;&#39; (HEAD, OPTIONS, GET) -&amp;gt; static&amp;gt;])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There&amp;rsquo;s some extra stuff in here that we have yet to discuss, but the main takeaway is that for every URL rule, there is an &lt;em&gt;endpoint&lt;/em&gt; that identifies the function Flask should use to handle the associated request. By default, Flask uses the name of the function as the endpoint. We can see that, for instance, a request for &lt;code&gt;/projects&lt;/code&gt; will be handled using the &lt;code&gt;projects()&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;We will take another look at this URL map after restructuring our code to use &lt;em&gt;blueprints&lt;/em&gt;, but before we get to that, we need to make a quick fix.&lt;/p&gt;
+&lt;h1 id=&#34;project-restructure&#34;&gt;Project restructure&lt;/h1&gt;
+&lt;p&gt;As I was looking at my project structure, it dawned on me that the location of some files doesn&amp;rsquo;t make a lot of sense. I&amp;rsquo;m looking at &lt;code&gt;issues.py&lt;/code&gt;, &lt;code&gt;config.py&lt;/code&gt;, and &lt;code&gt;__init__.py&lt;/code&gt;, all of which are located in &lt;code&gt;src/main&lt;/code&gt;. The first two don&amp;rsquo;t need to be so deep within the project structure &amp;ndash; in fact, they should be in the project root, since they don&amp;rsquo;t rely on any project-specific packages. There are two consequences of moving these two files:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the &lt;code&gt;FLASK_APP&lt;/code&gt; environment variable should now be set to &lt;code&gt;issues.py&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;the &lt;code&gt;config&lt;/code&gt; dictionary within &lt;code&gt;__init__.py&lt;/code&gt; should now be imported &lt;code&gt;from config&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Speaking of &lt;code&gt;__init__.py&lt;/code&gt;, since it contains the &lt;code&gt;create_app()&lt;/code&gt; factory function, this file should be a package constructor for the &lt;em&gt;src&lt;/em&gt; package, rather than the &lt;em&gt;main&lt;/em&gt; subpackage. Moving this file to the &lt;code&gt;src&lt;/code&gt; directory allows us to keep our project subpackages (containing different functionality for the app) all in one place. The &lt;code&gt;src/main&lt;/code&gt; folder (empty at this point) can instead be used to keep our view functions and error response functions, which we will get to as we further modularize the codebase.&lt;/p&gt;
+&lt;p&gt;Moving &lt;code&gt;__init__.py&lt;/code&gt; requires us to make changes to the arguments in the &lt;code&gt;Flask&lt;/code&gt; object initializer:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;template_folder=&#39;./templates&#39;&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;static_folder=&#39;./static&#39;&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We also need to update the factory function import statement in the &lt;code&gt;tests/conftest.py&lt;/code&gt; file: &lt;code&gt;from src import create_app&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Alright, we&amp;rsquo;re finally ready to talk blueprints!&lt;/p&gt;
+&lt;h1 id=&#34;blueprints&#34;&gt;Blueprints&lt;/h1&gt;
+&lt;p&gt;One obvious way to better segment our codebase is to somehow isolate our HTML response functions (stuffed within the &lt;code&gt;create_app()&lt;/code&gt; factory function) within their own file. There&amp;rsquo;s a wrinkle in that idea, however: outside of the package constructor, the response functions no longer have access to the &lt;code&gt;app&lt;/code&gt; variable, and by extension, the &lt;code&gt;app.route&lt;/code&gt; decorator.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s where the 
+&lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/blueprints/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Blueprint&lt;/a&gt; class can help. A blueprint can be used to store all of these response-serving functions, without being attached to the application instance. All that functionality sits in a dormant state, waiting to be registered with the application. Once registered, the functions get grafted onto the app and the instance finds itself with additional powers, just as nature had intended.&lt;/p&gt;
+&lt;h2 id=&#34;the-main-blueprint&#34;&gt;The main blueprint&lt;/h2&gt;
+&lt;p&gt;After moving the factory function code into &lt;code&gt;src&lt;/code&gt;, we were left with an empty &lt;code&gt;src/main&lt;/code&gt; folder. We will promptly repurpose this folder to house the &lt;em&gt;main blueprint&lt;/em&gt; &amp;ndash; the blueprint that tells Flask how to render all of our major app components. All of our response and error functions will now be kept in a &lt;code&gt;main&lt;/code&gt; package constructor file. Note that we have to use the &lt;code&gt;main.route&lt;/code&gt; view decorator associated with the main blueprint.&lt;/p&gt;
+&lt;p&gt;We also have to use the &lt;code&gt;main.app_errorhandler&lt;/code&gt; decorator to handle our 404 response throughout the whole app. Using the &lt;code&gt;main.errorhandler&lt;/code&gt; decorator would tell Flask to run this error function only for routes defined by the main blueprint.&lt;/p&gt;
+&lt;h4 id=&#34;srcmain__init__py&#34;&gt;src/main/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from flask import Blueprint
+from flask import render_template
+
+main = Blueprint(&#39;main&#39;, __name__)
+
+@main.route(&#39;/&#39;)
+def index():
+    return render_template(&#39;dashboard.html&#39;,
+            is_active={},
+            user_data=get_user_data())
+
+@main.route(&#39;/projects&#39;)
+def projects():
+    return render_template(&#39;projects.html&#39;,
+            is_active={&#39;projects&#39;: True},
+            user_data=get_user_data())
+
+@main.route(&#39;/issues&#39;)
+def issues():
+    return render_template(&#39;issues.html&#39;,
+            is_active={&#39;issues&#39;: True},
+            user_data=get_user_data())
+
+@main.route(&#39;/messages&#39;)
+def messages():
+    return render_template(&#39;messages.html&#39;,
+            is_active={&#39;messages&#39;: True},
+            user_data=get_user_data())
+
+@main.app_errorhandler(404)
+def page_not_found(e):
+    return render_template(&amp;quot;404.html&amp;quot;,
+            is_active={},
+            user_data={}), 404
+
+def get_user_data():
+    return {
+        &#39;user&#39;: &#39;ahadjinicolaou&#39;,
+        &#39;role&#39;: &#39;admin&#39;,
+        &#39;num_issues&#39;: 12,
+        &#39;num_messages&#39;: 2}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After defining the blueprint, we need to register it within the factory function.&lt;/p&gt;
+&lt;h4 id=&#34;src__init__py&#34;&gt;src/__init__.py&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;...
+from flask import Blueprint
+
+# factory function
+def create_app(config_name):
+    app = Flask(__name__, template_folder=&#39;./templates&#39;, static_folder=&#39;./static&#39;)
+    app.config.from_object(config[config_name])
+
+    bootstrap.init_app(app)
+
+    from src.main import main as main_blueprint
+    app.register_blueprint(main_blueprint)
+
+    return app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Remember that chatter about Flask&amp;rsquo;s URL map? If we print it out now, you&amp;rsquo;ll see that the endpoints for &lt;code&gt;main_blueprint&lt;/code&gt;&#39;s URL rules have been updated to include the &lt;code&gt;main.&lt;/code&gt; prefix.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;Map([&amp;lt;Rule &#39;/projects&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.projects&amp;gt;,
+    &amp;lt;Rule &#39;/messages&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.messages&amp;gt;,
+    &amp;lt;Rule &#39;/issues&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.issues&amp;gt;,
+    &amp;lt;Rule &#39;/&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.index&amp;gt;,
+    &amp;lt;Rule &#39;/bootstrap/static/&amp;lt;filename&amp;gt;&#39; (GET, OPTIONS, HEAD) -&amp;gt; bootstrap.static&amp;gt;,
+    &amp;lt;Rule &#39;/static/&amp;lt;filename&amp;gt;&#39; (GET, OPTIONS, HEAD) -&amp;gt; static&amp;gt;])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Of course, this means that we have to change the corresponding endpoints referenced in the templates. A call to &lt;code&gt;url_for(&#39;index&#39;)&lt;/code&gt; for example will be replaced by &lt;code&gt;url_for(&#39;main.index&#39;)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;After relaunching the server and making sure we haven&amp;rsquo;t broken anything, we should see&amp;hellip; no difference. Brilliant.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    If you&amp;rsquo;ve cloned the &lt;a href=&#34;https://github.com/ahadjinicolaou/issues.app&#34;&gt;project repository&lt;/a&gt;, you can run &lt;code&gt;git checkout cff1a49&lt;/code&gt; to get the current version of the source code.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;After a little bit of futzing with the codebase, we have ourselves a highly modular codebase that allows us to cleanly segment presentation code from application logic. It&amp;rsquo;s also nice to have the beginnings of what will hopefully become a clean, functional user interface fit for an issue tracker.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m also happier after having moved those three project files to more suitable locations &amp;ndash; frankly, their previous locations were an afterthought that I should have noticed earlier. Better late than never!&lt;/p&gt;
 </description>
     </item>
     
