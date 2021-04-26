@@ -5,12 +5,318 @@
     <link>https://www.remotelycurious.net/category/development/</link>
       <atom:link href="https://www.remotelycurious.net/category/development/index.xml" rel="self" type="application/rss+xml" />
     <description>development</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sat, 06 Mar 2021 22:07:07 -0500</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 25 Apr 2021 20:01:13 -0400</lastBuildDate>
     <image>
       <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
       <title>development</title>
       <link>https://www.remotelycurious.net/category/development/</link>
     </image>
+    
+    <item>
+      <title>issues.app (5): Database design</title>
+      <link>https://www.remotelycurious.net/post/issues-app-05-db/</link>
+      <pubDate>Sun, 25 Apr 2021 20:01:13 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/issues-app-05-db/</guid>
+      <description>&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This writeup is a result of my efforts to learn web app development with Flask. It builds on the codebase from the previous writeup, which you can find &lt;a href=&#34;https://www.remotelycurious.net/post/issues-app-04-auth/&#34;&gt;here&lt;/a&gt;. Any code documented here may change significantly in the future. &lt;strong&gt;Be warned!&lt;/strong&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Most useful applications need to manage data. Generally, the more complex the application, the harder it becomes to efficiently organize this data. As it turns out, there is a lot to think about when it comes to managing the kind of data you might find in an issue tracker. This writeup describes the initial database schemata that will support &lt;code&gt;issues.app&lt;/code&gt;, including the thought processes that led to several important design decisions.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#the-database-schema&#34;&gt;The database schema&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#messages-and-comments&#34;&gt;Messages and comments&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#status-codes&#34;&gt;Status codes&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#roles-and-permissions&#34;&gt;Roles and permissions&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#addendum&#34;&gt;Addendum&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;the-database-schema&#34;&gt;The database schema&lt;/h1&gt;
+&lt;p&gt;The easiest way to start the design process (at least for me) is to define the conceptual things that the application will need to manage. If we&amp;rsquo;re talking about an issue tracker, I say we will need:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;issues&lt;/em&gt;, no surprises there,&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;projects&lt;/em&gt;, to organize issues into different areas of work,&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;users&lt;/em&gt;, to work on the issues,&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;user roles&lt;/em&gt;, to specify which operations (e.g., updating an issue, archiving a project) can be performed by each user,&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;comments&lt;/em&gt; and &lt;em&gt;messages&lt;/em&gt;, to allow public and private communication within the app.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Each of these things gets a table in the database. All tables have an ID column, which serves as the primary key for each table. As described in the previous writeup, each table will be implemented as a Python class that inherits from SQLAlchemy&amp;rsquo;s Model class. The relationship between different tables is shown in the diagram below.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-initial-database-schematic-for-issuesapp-pk-primary-key-fk-foreign-key&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-05-db/issues-schema.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Initial database schematic for issues.app. PK: primary key, FK: foreign key.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-05-db/issues-schema.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Initial database schematic for issues.app. PK: primary key, FK: foreign key.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This schema will almost certainly change. It&amp;rsquo;s probably a good idea, for example, to track issue/project changes, such as when an issue gets assigned to a user, or when the user accepts the assignment. This might be implemented with an &lt;em&gt;Activity&lt;/em&gt; table that keeps track of the affected entity (issue, project, etc.) and the details of the change (e.g., issue status: ASSIGNED → ACCEPTED).
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Let&amp;rsquo;s talk more about some of the features of this design.&lt;/p&gt;
+&lt;h2 id=&#34;messages-and-comments&#34;&gt;Messages and comments&lt;/h2&gt;
+&lt;p&gt;There are two kinds of communication available in the app: (1) private messaging, in which a comment is sent by one person to another, and (2) public comments, which are posted on an issue or project. Since comments can be associated with more than one conceptual object (or what I&amp;rsquo;m calling an &lt;em&gt;entity&lt;/em&gt;), the Comment table is a bit more complex than the Message table.&lt;/p&gt;
+&lt;p&gt;For that reason, the Comment table keeps track of two things:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the &lt;em&gt;entity ID&lt;/em&gt;, holding the unique identification number of the entity,&lt;/li&gt;
+&lt;li&gt;the &lt;em&gt;entity code&lt;/em&gt;, which identifies what kind of entity is being commented on.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The entity codes are stored in the Python dictionary subclass shown below. The &lt;code&gt;name()&lt;/code&gt; method allows an instance of the class to perform code-to-name lookups.&lt;/p&gt;
+&lt;h4 id=&#34;srcmodelspy--entity&#34;&gt;src/models.py &amp;raquo; Entity&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class Entity(dict):
+    def __init__(self):
+        self[&#39;ISSUE&#39;] = 1
+        self[&#39;PROJECT&#39;] = 2
+        self[&#39;FORUM&#39;] = 3
+
+    def __getattr__(self, attr):
+        return self.get(attr)
+
+    def name(self, code):
+        for key, val in self.items():
+            if val == code:
+                return key
+        # complain if code is absent
+        raise KeyError(&#39;input is not a valid entity code&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;status-codes&#34;&gt;Status codes&lt;/h2&gt;
+&lt;p&gt;The status of an issue will be stored as an integer (&lt;code&gt;Issue.status_code&lt;/code&gt;), which can take one of several values. In the end I settled on the states shown in the flowchart below (Fig. 2), with arrows indicating the possible transitions between states.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-issue-status-flowchart&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/issues-app-05-db/status-flowchart.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Issue status flowchart.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/issues-app-05-db/status-flowchart.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Issue status flowchart.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;The usual setting I have in mind for this app involves &lt;em&gt;employees&lt;/em&gt; who work on issues, &lt;em&gt;reviewers&lt;/em&gt;, who check the employees&amp;rsquo; work, and &lt;em&gt;managers&lt;/em&gt;, who have the final say. In a hypothetical situation, their interactions with the application might look like this:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;A new issue is created on behalf of a client.&lt;/li&gt;
+&lt;li&gt;The manager assigns the issue to the employee (NEW → ASSIGNED).&lt;/li&gt;
+&lt;li&gt;The employee accepts the assignment (ASSIGNED → ACCEPTED).&lt;/li&gt;
+&lt;li&gt;After completing work to resolve the issue, the employee indicates that the issue is ready for some QA (ACCEPTED → REVIEW).&lt;/li&gt;
+&lt;li&gt;The reviewer realizes that an issue is up for review, goes over the work of the employee, and decides that the issue has been resolved (REVIEW → RESOLVED).&lt;/li&gt;
+&lt;li&gt;Noticing that an issue has been resolved, the manager verifies that the work has indeed solved the problem and archives the issue (RESOLVED → ARCHIVED).&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;A Python dictionary subclass will be used to hold the status data and perform code-to-name lookups. Four of these status values (NEW, ACTIVE, INACTIVE, ARCHIVED) will likely be used for projects, using &lt;code&gt;Project.status_code&lt;/code&gt;.&lt;/p&gt;
+&lt;h4 id=&#34;srcmodelspy--status&#34;&gt;src/models.py &amp;raquo; Status&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class Status(dict):
+    def __init__(self):
+        self[&#39;NEW&#39;] = 1
+        self[&#39;ASSIGNED&#39;] = 2
+        self[&#39;ACCEPTED&#39;] = 3
+        self[&#39;REVIEW&#39;] = 4
+        self[&#39;RESOLVED&#39;] = 5
+        self[&#39;DISMISSED&#39;] = 6
+        self[&#39;ACTIVE&#39;] = 7
+        self[&#39;INACTIVE&#39;] = 8
+        self[&#39;ARCHIVED&#39;] = 9
+
+    def __getattr__(self, attr):
+        return self.get(attr)
+
+    def name(self, code):
+        for key, val in self.items():
+            if val == code:
+                return key
+        # complain if code is absent
+        raise KeyError(&#39;input is not a valid status code&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;roles-and-permissions&#34;&gt;Roles and permissions&lt;/h2&gt;
+&lt;p&gt;A user will be able to perform different operations in the application, depending on what role they have in the company. Managers, for example, will generally have more permissions than regular employees, who in turn will have more permissions than associates (non-employees or temporary workers). The table below shows what this privilege hierarchy looks like.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;clients&lt;/th&gt;
+&lt;th&gt;associates&lt;/th&gt;
+&lt;th&gt;employees&lt;/th&gt;
+&lt;th&gt;reviewers&lt;/th&gt;
+&lt;th&gt;managers&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;💬 message users&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;✍️ create comments&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🎫 create issues&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;📋 review issues&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;📁 create projects&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;🗃️ resolve and archive&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;✅&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Depending on what role each user plays in the company, they will be able to perform different operations. The different permissions are stored in the dictionary subclass shown below.&lt;/p&gt;
+&lt;h4 id=&#34;srcmodelspy--permission&#34;&gt;src/models.py &amp;raquo; Permission&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class Permission(dict):
+    def __init__(self):
+        self[&#39;NOTHING&#39;] = 0
+        self[&#39;MESSAGE_USERS&#39;] = 1
+        self[&#39;CREATE_COMMENTS&#39;] = 2
+        self[&#39;CREATE_ISSUES&#39;] = 4
+        self[&#39;CREATE_PROJECTS&#39;] = 8
+        self[&#39;RESOLVE_ISSUES&#39;] = 16
+        self[&#39;ARCHIVE_PROJECTS&#39;] = 32
+        self[&#39;EVERYTHING&#39;] = 64
+
+    def __getattr__(self, attr):
+        return self.get(attr)
+
+    def name(self, code):
+        for key, val in self.items():
+            if val == code:
+                return key
+        # complain if code is absent
+        raise KeyError(&#39;input is not a valid permission code&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that the numeric values of these permissions are powers of two, which allows for permissions to be combined and easily decoded by the webapp. That means we can, for instance, define the role of an employee by the sum of three privileges:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;r = Role(name=&#39;employee&#39;, permissions=p.MESSAGE_USERS + p.CREATE_COMMENTS + p.CREATE_ISSUES)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Note to self: consider adding a &lt;em&gt;revoked permissions&lt;/em&gt; column to the User table, such that the user&amp;rsquo;s effective permissions are (a) their role&amp;rsquo;s permissions, minus (b) their revoked permissions. If an associate is spamming users with messages, an admin could set their revoked permissions field to &lt;code&gt;MESSAGE_USERS&lt;/code&gt;, making their effective privileges equal to &lt;code&gt;CREATE_COMMENTS&lt;/code&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;addendum&#34;&gt;Addendum&lt;/h1&gt;
+&lt;p&gt;As it turns out, there&amp;rsquo;s a much better data structure that can be used instead of these custom dictionary subclasses I cooked up. Ladies and gentlemen, let me present: the humble 
+&lt;a href=&#34;https://docs.python.org/3/library/enum.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;enum&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;By subclassing an enum, we not only gain access to some handy features, but we also get away with using far less code. For example, let&amp;rsquo;s rewrite the Permission class like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;class Permission(IntEnum):
+    NOTHING = 0
+    MESSAGE_USERS = 1
+    CREATE_COMMENTS = 2
+    CREATE_ISSUES = 4
+    CREATE_PROJECTS = 8
+    RESOLVE_ISSUES = 16
+    ARCHIVE_PROJECTS = 32
+    EVERYTHING = 64
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here&amp;rsquo;s a quick demonstration of what this class can do for us:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Permission.CREATE_ISSUES&lt;/code&gt; → &lt;code&gt;&amp;lt;Permission.CREATE_ISSUES: 4&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Permission.CREATE_ISSUES.name&lt;/code&gt; → &lt;code&gt;CREATE_ISSUES&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Permission.CREATE_ISSUES.value&lt;/code&gt; → &lt;code&gt;4&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Permission(4)&lt;/code&gt; → &lt;code&gt;&amp;lt;Permission.CREATE_ISSUES: 4&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Permission(5)&lt;/code&gt; → &lt;code&gt;ValueError: 5 is not a valid Permission&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Permission.CREATE_ERROR&lt;/code&gt; → &lt;code&gt;AttributeError: CREATE_ERROR&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Safety and convenience, all in one package. Beautiful, isn&amp;rsquo;t it?&lt;/p&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;This is a first attempt to define the logical organization of data in the issue tracker. Definitely a work in progress, but it should be enough to get the app off the ground and moving towards a working prototype.&lt;/p&gt;
+&lt;p&gt;Looks like I can&amp;rsquo;t put off working on the user interface for much longer!&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>issues.app (4): Authentication</title>

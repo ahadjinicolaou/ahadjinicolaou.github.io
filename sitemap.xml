@@ -3,32 +3,62 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://www.remotelycurious.net/tag/auth/</loc>
-    <lastmod>2021-03-06T22:07:07-05:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://www.remotelycurious.net/categories/</loc>
-    <lastmod>2021-03-06T22:07:07-05:00</lastmod>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
   </url>
   
   <url>
     <loc>https://www.remotelycurious.net/tag/database/</loc>
-    <lastmod>2021-03-06T22:07:07-05:00</lastmod>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/design/</loc>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
   </url>
   
   <url>
     <loc>https://www.remotelycurious.net/category/development/</loc>
-    <lastmod>2021-03-06T22:07:07-05:00</lastmod>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
   </url>
   
   <url>
     <loc>https://www.remotelycurious.net/tag/flask/</loc>
-    <lastmod>2021-03-06T22:07:07-05:00</lastmod>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
   </url>
   
   <url>
     <loc>https://www.remotelycurious.net/category/issues.app/</loc>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/issues-app-05-db/</loc>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/post/</loc>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/python/</loc>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/</loc>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tags/</loc>
+    <lastmod>2021-04-26T18:36:56-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.remotelycurious.net/tag/auth/</loc>
     <lastmod>2021-03-06T22:07:07-05:00</lastmod>
   </url>
   
@@ -38,27 +68,7 @@
   </url>
   
   <url>
-    <loc>https://www.remotelycurious.net/post/</loc>
-    <lastmod>2021-03-06T22:07:07-05:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://www.remotelycurious.net/tag/pytest/</loc>
-    <lastmod>2021-03-06T22:07:07-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/tag/python/</loc>
-    <lastmod>2021-03-06T22:07:07-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/</loc>
-    <lastmod>2021-03-06T22:07:07-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.remotelycurious.net/tags/</loc>
     <lastmod>2021-03-06T22:07:07-05:00</lastmod>
   </url>
   
