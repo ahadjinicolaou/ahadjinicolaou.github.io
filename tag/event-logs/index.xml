@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>event-logs | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/tag/event-logs/</link>
+      <atom:link href="https://www.remotelycurious.net/tag/event-logs/index.xml" rel="self" type="application/rss+xml" />
+    <description>event-logs</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 11 Jul 2021 11:47:58 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>event-logs</title>
+      <link>https://www.remotelycurious.net/tag/event-logs/</link>
+    </image>
+    
+    <item>
+      <title>Building an Active Directory lab with Proxmox</title>
+      <link>https://www.remotelycurious.net/post/activelab/</link>
+      <pubDate>Sun, 11 Jul 2021 11:47:58 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/activelab/</guid>
+      <description>&lt;p&gt;Over the last couple of weeks, I decided that it would be good for my cybersecurity career ambitions to learn a little something about Windows administration. The phrase &amp;ldquo;active directory&amp;rdquo; is something that I&amp;rsquo;ve often heard popping up in discussions about Windows security in the context of both offensive and defensive activity. Since 
+&lt;a href=&#34;https://ww2.frost.com/frost-perspectives/active-directory-holds-the-keys-to-your-kingdom-but-is-it-secure/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;the vast majority of Fortune 500 companies&lt;/a&gt; make use of Active Directory in their corporate networks, perhaps it&amp;rsquo;s no small wonder.&lt;/p&gt;
+&lt;p&gt;To see what all the fuss is about (and maybe learn a thing or two), I built a virtualized Active Directory lab. As with 
+&lt;a href=&#34;https://www.remotelycurious.net/post/homelab&#34;&gt;my previous homelab writeup&lt;/a&gt;, I thought it would be good to write this up to consolidate all the loose bits of information that I picked up along the way. For the initial domain controller installation, I took some hints from The Cyber Mentor&amp;rsquo;s guide for 
+&lt;a href=&#34;https://www.youtube.com/watch?v=xftEuVQ7kY0&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;building an AD hacking lab&lt;/a&gt;, as well as the documentation for 
+&lt;a href=&#34;https://pve.proxmox.com/wiki/Main_Page&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Proxmox&lt;/a&gt; for advice on setting up Windows VMs.&lt;/p&gt;
+&lt;!-- The documentation for [Proxmox](https://pve.proxmox.com/wiki/Main_Page)
+The Cyber Mentor&#39;s guide for [building an AD hacking lab](https://www.youtube.com/watch?v=xftEuVQ7kY0)
+Although TCM&#39;s motivations for the lab are very different (i.e., a proving ground for attacking system vulnerabilities) --&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#objectives&#34;&gt;Objectives&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#requirements&#34;&gt;Requirements&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#installation&#34;&gt;Installation&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#domain-controller&#34;&gt;Domain controller&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#installing-windows-server&#34;&gt;Installing Windows Server&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#configuring-the-network&#34;&gt;Configuring the network&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#promotion-to-domain-controller&#34;&gt;Promotion to domain controller&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#workstations&#34;&gt;Workstations&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#installing-windows-enterprise&#34;&gt;Installing Windows Enterprise&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#configuring-the-network-1&#34;&gt;Configuring the network&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#join-workstation-to-domain&#34;&gt;Join workstation to domain&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#configuration&#34;&gt;Configuration&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#add-an-active-directory-user&#34;&gt;Add an active directory user&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#configure-remote-management&#34;&gt;Configure remote management&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;objectives&#34;&gt;Objectives&lt;/h1&gt;
+&lt;p&gt;My general motive is to learn more about the importance of Active Directory in securing a Windows network. Aside from this, I have some specific plans for how I will put this AD lab to use, which I talk about briefly at the end of the writeup. Most of my plans involve learning something that I have never used or seen in action (PowerShell, group policies, Windows events), so this should be fun!&lt;/p&gt;
+&lt;h1 id=&#34;requirements&#34;&gt;Requirements&lt;/h1&gt;
+&lt;p&gt;Since most of my goals have something to do with Windows administration, I will be building a Windows &amp;ldquo;corporate network&amp;rdquo;, consisting of one Active Directory (AD) domain controller and a fleet of two Windows workstations. These will eventually be configured to push event logs to a fourth machine, which will be responsible for event querying and log analysis. All of these machines will be implemented as Proxmox VMs that are connected to the same (virtual) network segment.&lt;/p&gt;
+&lt;p&gt;To realize this tiny network, I could configure the workstation VMs individually, but setting up an AD domain will allow me to manage the workstations from the domain controller using group policies and PowerShell remote sessions. Individual VM configuration can therefore be limited to the initial OS/driver installation and static IP assignment. I like to think that this approach is scalable and bears some resemblance to how actual sysadmins carry out (a very small subset of) their duties.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Full disclosure: I have never managed an enterprise network. Hopefully that last claim isn&amp;rsquo;t too offensive!
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;For this project, I&amp;rsquo;ll be recruiting my trusty 
+&lt;a href=&#34;https://protectli.com/product/fw6b/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Protectli FW6B&lt;/a&gt;, which has been set up as a Proxmox hypervisor (you can find the corresponding writeup 
+&lt;a href=&#34;https://www.remotelycurious.net/post/homelab&#34;&gt;here&lt;/a&gt;). This time around, I loaded it with 32 GiB of RAM to better handle the burden of running all these VMs.&lt;/p&gt;
+&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
+&lt;p&gt;Our Windows network consists of one domain controller (Windows Server 2019) and two workstations (Windows 10 Pro). Proxmox&amp;rsquo;s documentation recommends a specific set of 
+&lt;a href=&#34;https://pve.proxmox.com/wiki/Windows_VirtIO_Drivers&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;drivers for Windows VMs&lt;/a&gt; that do not come with the OS but promise to enhance device performance. These VirtIO drivers will be loaded during Windows&#39; installation using an extra virtualized CD/DVD reader.&lt;/p&gt;
+&lt;p&gt;The following disk images will be used:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso&lt;/code&gt; (Windows 2019 Server)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;19043.928.210409-1212.21h1_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso&lt;/code&gt; (Windows 10 Enterprise)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;virtio-win-0.1.190.iso&lt;/code&gt; (VirtIO drivers)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;domain-controller&#34;&gt;Domain controller&lt;/h2&gt;
+&lt;p&gt;Our setup will feature a &lt;em&gt;domain&lt;/em&gt;, a network of computers that is managed by a &lt;em&gt;domain controller&lt;/em&gt; (DC). Of its many responsibilities, the DC is tasked with making sure that all configured application and security policies are respected by all devices on the network. Among other things, we will use the DC to create domain user accounts that allow users to access the domain.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s what DOMCON, the domain controller VM looks like under Proxmox:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1 CPU core, 4 GiB RAM&lt;/li&gt;
+&lt;li&gt;32 GiB VirtIO SCSI HDD (write-back, discard)&lt;/li&gt;
+&lt;li&gt;VirtIO NIC&lt;/li&gt;
+&lt;li&gt;2x DVD drives (Windows Server 2019; VirtIO driver package)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Remember that the Windows setup process won&amp;rsquo;t recognize the VirtIO devices, so make sure that the second DVD drive (e.g., &lt;code&gt;ide3&lt;/code&gt;) is loaded with the VirtIO ISO before powering it on. You should also ensure that this DVD drive has a higher device number than that of the installation media (e.g., 2 in &lt;code&gt;ide2&lt;/code&gt;), such that the VM attempts to boot off the Windows ISO first.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Let&amp;rsquo;s boot up the VM.&lt;/p&gt;
+&lt;h3 id=&#34;installing-windows-server&#34;&gt;Installing Windows Server&lt;/h3&gt;
+&lt;p&gt;After clicking Install at the first installer prompt, you will be asked to select the OS to install. We are going to opt for Windows Server 2019 &lt;strong&gt;Standard Evaluation (Desktop Experience)&lt;/strong&gt; to get a graphical interface. There will be another prompt after you agree to the standard terms of use, asking about the type of installation. Select &lt;strong&gt;Custom: Install Windows only&lt;/strong&gt; to proceed.&lt;/p&gt;
+&lt;p&gt;Now if you&amp;rsquo;ve gone with the configuration listed above, you won&amp;rsquo;t find any available drives to choose in this next screen. This is because Windows doesn&amp;rsquo;t recognize the SCSI disk drive, as expected. To install the drivers, click &lt;strong&gt;Load driver&lt;/strong&gt; and browse to &lt;code&gt;E:\vioscsi\2k19\amd64&lt;/code&gt;, which will yield the Red Hat VirtIO SCSI pass-through controller driver.&lt;/p&gt;
+&lt;p&gt;After loading the driver, we&amp;rsquo;re ready for some partitioning. Select the newly-visible drive, click &lt;strong&gt;New&lt;/strong&gt;, and allocate the entire drive for the partition to get the screen below.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-disk-partitions-shown-after-installing-the-virtio-scsi-drivers&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/partitions.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1&amp;lt;/b&amp;gt;. Disk partitions, shown after installing the VirtIO SCSI drivers.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/partitions.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1&lt;/b&gt;. Disk partitions, shown after installing the VirtIO SCSI drivers.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;With the second partition selected, click &lt;strong&gt;Next&lt;/strong&gt; and the installation will proceed. Eventually, the system will reboot and you will be asked to supply a password for the local Administrator account. After this, you can unlock the login screen with Ctrl-Alt-Delete and log in with those same credentials.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-you-can-send-ctrl-alt-del-using-the-three-keys-button-in-the-proxmox-web-interface-sidebar&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/ctrl-alt-del.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2&amp;lt;/b&amp;gt;. You can send Ctrl-Alt-Del using the &amp;amp;ldquo;three keys&amp;amp;rdquo; button in the Proxmox web interface sidebar.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/ctrl-alt-del.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2&lt;/b&gt;. You can send Ctrl-Alt-Del using the &amp;ldquo;three keys&amp;rdquo; button in the Proxmox web interface sidebar.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h3 id=&#34;configuring-the-network&#34;&gt;Configuring the network&lt;/h3&gt;
+&lt;p&gt;Our first order of business is to establish network connectivity. This means we need to use the VirtIO disk image once more, since our NIC is also a VirtIO device. Enter Device Manager, find the &lt;em&gt;Ethernet Controller&lt;/em&gt; and click &lt;strong&gt;Update driver&lt;/strong&gt; (Fig. 3). Searching the &lt;code&gt;E:\NetKVM\2k19\amd64&lt;/code&gt; folder will yield the Red Hat VirtIO Ethernet Adapter driver.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-updating-the-nic-driver-in-device-manager&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/device-manager.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3&amp;lt;/b&amp;gt;. Updating the NIC driver in Device Manager.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/device-manager.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3&lt;/b&gt;. Updating the NIC driver in Device Manager.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;You will now get a prompt asking whether to allow network discovery. It&amp;rsquo;s a home network, so this is fine.&lt;/p&gt;
+&lt;p&gt;We will now assign this machine with a static IP address. Under Network Connections, access the Properties of the Ethernet adapter and bring up the TCP/IPv4 properties (Fig. 4). Here, the default gateway is pointing to my home router.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-setting-the-ip-address-and-default-gateway-for-the-dc&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/tcp-ip.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4&amp;lt;/b&amp;gt;. Setting the IP address and default gateway for the DC.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/tcp-ip.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4&lt;/b&gt;. Setting the IP address and default gateway for the DC.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;After changing the computer name to DOMCON (e.g., right-click This PC &amp;raquo; Properties &amp;raquo; Change settings &amp;raquo; &lt;strong&gt;Change&lt;/strong&gt;), let the VM reboot and log back in. We are now ready to prepare our server to become a domain controller.&lt;/p&gt;
+&lt;h3 id=&#34;promotion-to-domain-controller&#34;&gt;Promotion to domain controller&lt;/h3&gt;
+&lt;p&gt;We are going to promote DOMCON to become the DC for our prospective Windows domain. This requires the installation of the AD Domain Services role, which can be initiated by using the Server Manager window (Fig. 5). Click Manage &amp;raquo; &lt;strong&gt;Add Roles and Features&lt;/strong&gt; to bring up a wizard and go through it as shown below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Installation Type: &lt;em&gt;Role-based or feature-based installation&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;Server Selection: &lt;em&gt;DOMCON&lt;/em&gt; at 192.168.0.11&lt;/li&gt;
+&lt;li&gt;Server Roles: Check &lt;em&gt;Active Directory Domain Services&lt;/em&gt; (click &lt;strong&gt;Add Features&lt;/strong&gt; to add the required services/features when prompted)&lt;/li&gt;
+&lt;li&gt;Click through to the end and click &lt;strong&gt;Install&lt;/strong&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-5b-using-the-server-manager-to-add-roles-and-additional-functionality&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/server-manager.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 5&amp;lt;/b&amp;gt;. Using the Server Manager to add roles and additional functionality.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/server-manager.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 5&lt;/b&gt;. Using the Server Manager to add roles and additional functionality.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;After installation, we are shown a summary of what was installed, as well as a little line of text offering the option to promote the server to a domain controller (Fig. 6). Lovely.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-6b-choosing-to-promote-the-domain-controller&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/dc-promo.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 6&amp;lt;/b&amp;gt;. Choosing to promote the domain controller.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/dc-promo.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 6&lt;/b&gt;. Choosing to promote the domain controller.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Clicking this brings us to another wizard. At the Deployment Configuration page, select &lt;strong&gt;Add a new forest&lt;/strong&gt; and enter the root domain name. We are running a test lab so our choice of domain name here doesn&amp;rsquo;t really matter. I will call mine &lt;em&gt;labs.remotelycurious.net&lt;/em&gt;. Go through the rest of the wizard and click &lt;strong&gt;Install&lt;/strong&gt; at the Prerequisites Check page. Reboot.&lt;/p&gt;
+&lt;p&gt;After reaching the Windows login, notice that the &lt;code&gt;Administrator&lt;/code&gt; account becomes prefixed with &lt;code&gt;LABS&lt;/code&gt;, indicating the presence of the newly-created domain. You will also find that the DC&amp;rsquo;s preferred DNS server is now configured as itself, i.e., 127.0.0.1.&lt;/p&gt;
+&lt;h2 id=&#34;workstations&#34;&gt;Workstations&lt;/h2&gt;
+&lt;p&gt;Time to cook up some clients. The installation and initial configuration of these VMs will be very familiar, having just set up Windows Server for the domain controller. Each client VM will have these specs:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1 CPU core, 2 GiB RAM&lt;/li&gt;
+&lt;li&gt;32 GiB VirtIO SCSI HDD (write-back, discard)&lt;/li&gt;
+&lt;li&gt;VirtIO NIC&lt;/li&gt;
+&lt;li&gt;2x DVD drives (Windows 10 Enterprise; VirtIO driver package)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The steps for setting up WINCLIENT-1 (192.168.0.21/24) are outlined below.&lt;/p&gt;
+&lt;h3 id=&#34;installing-windows-enterprise&#34;&gt;Installing Windows Enterprise&lt;/h3&gt;
+&lt;p&gt;After starting the Windows installation, we click through and arrive at the install location page, as we did in Figure 1. Click &lt;strong&gt;Load driver&lt;/strong&gt; and browse to &lt;code&gt;E:\vioscsi\w10\amd64&lt;/code&gt; to install the Red Hat VirtIO SCSI pass-through controller driver for Windows 10. Allocate the partitions as desired and continue with the installation. Reboot.&lt;/p&gt;
+&lt;p&gt;Once Windows boots, you will be asked to enter the credentials and security questions of a local user (so long as you aren&amp;rsquo;t connected to the internet). Go ahead and set these, click through some more prompts, and wait for Windows to finish setting up your local account.&lt;/p&gt;
+&lt;h3 id=&#34;configuring-the-network-1&#34;&gt;Configuring the network&lt;/h3&gt;
+&lt;p&gt;The VirtIO network adapter needs a driver. Use Device Manager to update the driver using the RedHat one located at &lt;code&gt;E:\NetKVM\w10\amd64&lt;/code&gt;. After the driver update, accept the offer to enable network discovery and change the computer name to WINCLIENT-1. Reboot.&lt;/p&gt;
+&lt;p&gt;To join the domain, the workstations need to be placed on the same subnet as the domain controller. As was done for the server, we will install the NIC driver (Fig. 3) and configure the adapter&amp;rsquo;s TCP/IP settings:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;IP address: 192.168.0.21/24&lt;/li&gt;
+&lt;li&gt;Gateway: 192.168.0.1&lt;/li&gt;
+&lt;li&gt;DNS: 192.168.0.11&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;join-workstation-to-domain&#34;&gt;Join workstation to domain&lt;/h3&gt;
+&lt;p&gt;Click Start, type &amp;lsquo;domain&amp;rsquo; and click &lt;strong&gt;Access work or school&lt;/strong&gt;. After clicking &lt;strong&gt;Connect&lt;/strong&gt;, you will find the option to &lt;em&gt;Join this device to a local Active Directory domain&lt;/em&gt; below. Go ahead and enter &lt;code&gt;labs&lt;/code&gt; to access a login prompt, and enter the labs\Administrator credentials to make the connection.&lt;/p&gt;
+&lt;p&gt;After restarting, the VM will be joined to the domain. Repeat the process for WINCLIENT-2 and a different IP and you will have yourself a &amp;ldquo;fleet&amp;rdquo; of two computers that can be centrally managed by the domain controller.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-7b-check-out-the-fleet&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/resolve-dnsnames.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 7&amp;lt;/b&amp;gt;. Check out the fleet!&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/resolve-dnsnames.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 7&lt;/b&gt;. Check out the fleet!
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h1 id=&#34;configuration&#34;&gt;Configuration&lt;/h1&gt;
+&lt;p&gt;Now that the workstations have been linked up to the domain, we&amp;rsquo;re ready for some configuration. An enterprise needs users, so we will need at least one of those. I&amp;rsquo;ve also decided that it will be useful to have the option of managing the workstations remotely through PowerShell sessions, as mentioned earlier.&lt;/p&gt;
+&lt;h2 id=&#34;add-an-active-directory-user&#34;&gt;Add an active directory user&lt;/h2&gt;
+&lt;p&gt;User accounts can be created using the Active Directory Users and Computers app, but it is relatively easy to do this through PowerShell. Open up a shell as Administrator and run the command below to create a new AD user account for Steven Strange (mind the ticks that let the command span multiple lines).&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;New-ADUser `
+  -Name &amp;quot;Steven Strange&amp;quot; -GivenName &amp;quot;Steven&amp;quot; -Surname &amp;quot;Strange&amp;quot; `
+  -SamAccountName &amp;quot;sstrange&amp;quot; `
+  -ChangePasswordAtLogon $False `
+  -AccountPassword $(ConvertTo-SecureString &amp;quot;Letmein123!&amp;quot; -AsPlainText -Force) `
+  -PassThru | Enable-ADAccount
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There are a few things to note here:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the &lt;code&gt;SamAccountName&lt;/code&gt; parameter is mandatory; all others are optional&lt;/li&gt;
+&lt;li&gt;the account password is set using an encrypted string (&lt;code&gt;System.Security.SecureString&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;the &lt;code&gt;PassThru&lt;/code&gt; option tells the &lt;code&gt;New-ADUser&lt;/code&gt; command to return the new AD user object, which we then pipe to &lt;code&gt;Enable-ADAccount&lt;/code&gt; to save us an extra step (new accounts are disabled by default).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After verifying that we can log in as Steven Strange on one of the client VMs, we can go ahead and set up remote management for the fleet.&lt;/p&gt;
+&lt;h2 id=&#34;configure-remote-management&#34;&gt;Configure remote management&lt;/h2&gt;
+&lt;p&gt;The goal of this stage is to enable Windows Remote Management (WinRM) throughout the domain. We can do this through the application of three different policies within the Group Policy Management app. Navigate to Domains &amp;raquo; labs.remotelycurious.net &amp;raquo; Group Policy Objects &amp;raquo; Default Domain Policy, right-click and click &lt;strong&gt;Edit&lt;/strong&gt; to bring up the Group Policy Management Editor.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Note to self: learn how to do this through PowerShell. Way too much clicking.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;!-- Group Policy Management
+Forest: labs.remotelycurious.net &gt; Domains &gt; labs.remotelycurious.net &gt; Default Domain Policy &gt; EDIT
+Group policy management Editor --&gt;
+&lt;h4 id=&#34;1-enable-remote-management-winrm&#34;&gt;1. Enable Remote Management (WinRM)&lt;/h4&gt;
+&lt;p&gt;Find &lt;em&gt;Windows Remote Management&lt;/em&gt; under Computer Configuration &amp;raquo; Policies &amp;raquo; Windows Settings &amp;raquo; Security Settings &amp;raquo; System Services, right-click and hit &lt;strong&gt;Properties&lt;/strong&gt;. Check &lt;em&gt;Define this policy setting&lt;/em&gt; and select the &lt;em&gt;Automatic&lt;/em&gt; service startup mode before clicking &lt;strong&gt;OK&lt;/strong&gt;.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-8b-winrm-has-just-been-enabled&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/enable-winrm.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 8&amp;lt;/b&amp;gt;. WinRM has just been enabled.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/enable-winrm.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 8&lt;/b&gt;. WinRM has just been enabled.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;!-- Computer Configuration &gt; Policies &gt; Windows Settings &gt; Security Settings &gt; System Services 
+Windows Remote Management Properties -&gt; Define this policy setting, Automatic startup --&gt;
+&lt;h4 id=&#34;2-allow-remote-management-through-winrm&#34;&gt;2. Allow remote management through WinRM&lt;/h4&gt;
+&lt;p&gt;After enabling the service, the next step is to actually allow it to operate. Find the &lt;em&gt;Allow remote server management through WinRM&lt;/em&gt; setting under Computer Configuration &amp;raquo; Policies &amp;raquo; Administrative Templates &amp;raquo; Windows Components &amp;raquo; Windows Remote Management &amp;raquo; WinRM Service, right-click and choose &lt;strong&gt;Edit&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Here we can choose which IPs will be allowed to establish a remote connection. After enabling the setting, fill in the IPv4 field appropriately and click &lt;strong&gt;OK&lt;/strong&gt;. In my case, the Windows network spans from 192.168.0.11 to 192.168.0.22, and I want to be able to remote from any PC to any other one, just for fun.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-9b-allowing-winrm-connections-from-any-pc-in-the-windows-network&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/allow-winrm.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 9&amp;lt;/b&amp;gt;. Allowing WinRM connections from any PC in the Windows network.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/allow-winrm.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 9&lt;/b&gt;. Allowing WinRM connections from any PC in the Windows network.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;!-- Computer Configuration &gt; Policies &gt; Administrative Templates &gt; Windows Components &gt; Windows Remote Management &gt; WinRM Service
+Allow remote server management through WinRM -&gt; Edit
+    -&gt; Enabled
+    -&gt; IPv4 filter: 192.168.0.11-192.168.0.22 --&gt;
+&lt;h4 id=&#34;3-add-winrm-firewall-exception&#34;&gt;3. Add WinRM firewall exception&lt;/h4&gt;
+&lt;p&gt;We&amp;rsquo;ve hit the last stretch, in which we have to allow the remote connection through the firewall. This is done by making an inbound port exception for the WinRM service, which runs on port 5985. Dig up the &lt;em&gt;Define inbound port exceptions&lt;/em&gt; setting under Computer Configuration &amp;raquo; Policies &amp;raquo; Administrative Templates &amp;raquo; Network &amp;raquo; Network Connections &amp;raquo; Windows Defender Firewall &amp;raquo; Domain Profile, right-click and choose &lt;strong&gt;Edit&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;After clicking &lt;strong&gt;Enabled&lt;/strong&gt;, click &lt;strong&gt;Show&lt;/strong&gt; under &lt;em&gt;Define port exceptions&lt;/em&gt;. Each exception is specified in the format &lt;code&gt;&amp;lt;port&amp;gt;:&amp;lt;transport&amp;gt;:&amp;lt;scope&amp;gt;:&amp;lt;status&amp;gt;:&amp;lt;name&amp;gt;&lt;/code&gt;, where&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;transport&lt;/code&gt; is either TCP or UDP,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;scope&lt;/code&gt; indicates the originating networks that are allowed through the firewall,&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;status&lt;/code&gt; is either &amp;lsquo;enabled&amp;rsquo; or &amp;lsquo;disabled&amp;rsquo;, and&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;name&lt;/code&gt; can hold a short description of the rule.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I will enter &lt;code&gt;5985:TCP:localsubnet:enabled:WinRM&lt;/code&gt; to allow local TCP connections through port 5985. That should do it, but the proof is in the pudding. Let&amp;rsquo;s try to connect to WINCLIENT-2 from the domain controller. Does it work?&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-10b-were-in&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/activelab/enter-pssession.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 10&amp;lt;/b&amp;gt;. &amp;amp;ldquo;We&amp;amp;rsquo;re in&amp;amp;rdquo;.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/activelab/enter-pssession.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 10&lt;/b&gt;. &amp;ldquo;We&amp;rsquo;re in&amp;rdquo;.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;We have ourselves a miniature enterprise Windows network, complete with a domain controller and remote management capabilities. There are certainly ways I can make it better (maybe configure WinRM to use TLS?) but it will do the job for now.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m really keen to see if I can use this network as a platform for threat detection. Right now, my thinking is to set up event forwarding such that a selection of Windows events from the AD network is shipped to an Elastic Stack SIEM for log analysis. The idea would be to generate test threats (maybe with Atomic Red Team) and see if I can detect any malicious activity using Elasticsearch queries.&lt;/p&gt;
+&lt;p&gt;But, that&amp;rsquo;s a post for another day.&lt;/p&gt;
+&lt;!-- Computer Configuration &gt; Policies &gt; Administrative Templates &gt; Network &gt; Network Connections &gt; Windows Defender Firewall &gt; Domain Profile
+Define inbound port exceptions -&gt; Edit
+Define port exceptions:
+    -&gt; 5985:TCP:localsubnet:enabled:WinRM --&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

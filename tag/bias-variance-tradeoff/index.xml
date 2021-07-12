@@ -131,7 +131,7 @@
     What follows is a quick derivation of the signed distance from a point to a line. Try to follow the steps if you can, but otherwise feel free to skip to the next section.
   &lt;/div&gt;
 &lt;/div&gt;
-&lt;p&gt;Imagine we have a training example $P$ sitting some distance $d$ away from the decision boundary (Fig. 3). The point $Q$ is any point $x&#39;$ that sits on the decision boundary, such that $\theta \cdot x&amp;rsquo; + \theta_0 = 0$.&lt;/p&gt;
+&lt;p&gt;Imagine we have a training example $P$ sitting some distance $d$ away from the decision boundary (Fig. 3). The point $Q$ is any point $x&#39;$ that sits on the decision boundary, such that $\theta \cdot x&#39; + \theta_0 = 0$.&lt;/p&gt;
 
 
 
@@ -170,8 +170,8 @@
 &lt;p&gt;$$d = \norm{\overrightarrow{RP}} = \norm{\overrightarrow{QP}} \textrm{ cos }\alpha.$$&lt;/p&gt;
 &lt;p&gt;We also know the angle $\alpha$ is related to $\overrightarrow{QP}$ and $\theta$ by the dot product,&lt;/p&gt;
 &lt;p&gt;$$ \theta \cdot \overrightarrow{QP} = \norm{\theta} \norm{\overrightarrow{QP}} \textrm{ cos }\alpha .$$&lt;/p&gt;
-&lt;p&gt;Consolidating these two equations, together with the fact that $\overrightarrow{QP} = x - x&amp;rsquo;,$ yields the final expression for the &lt;em&gt;signed distance&lt;/em&gt;,&lt;/p&gt;
-&lt;p&gt;$$d_s(x) = \frac{ \theta \cdot \overrightarrow{QP} }{\norm{ \theta} } = \frac{ \theta \cdot x - \theta \cdot x&amp;rsquo; }{\norm{ \theta} } = \frac{ \theta \cdot x + \theta_0 }{\norm{ \theta} }. $$&lt;/p&gt;
+&lt;p&gt;Consolidating these two equations, together with the fact that $\overrightarrow{QP} = x - x&#39;,$ yields the final expression for the &lt;em&gt;signed distance&lt;/em&gt;,&lt;/p&gt;
+&lt;p&gt;$$d_s(x) = \frac{ \theta \cdot \overrightarrow{QP} }{\norm{ \theta} } = \frac{ \theta \cdot x - \theta \cdot x&#39; }{\norm{ \theta} } = \frac{ \theta \cdot x + \theta_0 }{\norm{ \theta} }. $$&lt;/p&gt;
 &lt;h2 id=&#34;signed-and-unsigned-distance&#34;&gt;Signed and unsigned distance&lt;/h2&gt;
 &lt;p&gt;What does it mean for $d$ to be signed? As a quick illustration, consider how a hypothetical classifier might deal with some positive training examples (Fig. 4). We can see that the points &amp;ldquo;deepest&amp;rdquo; within the positive region, $x_1$ and $x_2$, are sitting some positive distance from the decision boundary because $\theta \cdot x + \theta_0$ is positive for each point.&lt;/p&gt;
 
@@ -402,7 +402,7 @@
 &lt;figure id=&#34;figure-bfig-8b-sketch-of-an-objective-function-jtheta-and-its-derivative-nabla-jtheta-evaluated-at-point-theta&#34;&gt;
 
 
-  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/derivative.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 8.&amp;lt;/b&amp;gt; Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&amp;amp;rsquo;.$&#34;&gt;
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/derivative.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 8.&amp;lt;/b&amp;gt; Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&amp;#39;.$&#34;&gt;
 
 
   &lt;img src=&#34;https://www.remotelycurious.net/ml-doc-01-2-learning-as-optimization/derivative.png&#34; alt=&#34;&#34;  &gt;
@@ -412,7 +412,7 @@
   
   
   &lt;figcaption&gt;
-    &lt;b&gt;Fig. 8.&lt;/b&gt; Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&amp;rsquo;.$
+    &lt;b&gt;Fig. 8.&lt;/b&gt; Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&#39;.$
   &lt;/figcaption&gt;
 
 
@@ -483,7 +483,7 @@ $\frac{dL}{d\theta} = \frac{dL}{dz}\frac{dz}{d\theta}.$
 &lt;hr&gt;
 &lt;ol&gt;
 &lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
-&lt;p&gt;Although it is not possible to know the exact test error, there are ways to approximate it, such as through cross-validation. &lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Although it is not possible to know the exact test error, there are ways to approximate it, such as through cross-validation.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;/section&gt;

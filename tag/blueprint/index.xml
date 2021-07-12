@@ -380,7 +380,7 @@ def create_app(config_name):
 
     return app
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Remember that chatter about Flask&amp;rsquo;s URL map? If we print it out now, you&amp;rsquo;ll see that the endpoints for &lt;code&gt;main_blueprint&lt;/code&gt;&#39;s URL rules have been updated to include the &lt;code&gt;main.&lt;/code&gt; prefix.&lt;/p&gt;
+&lt;p&gt;Remember that chatter about Flask&amp;rsquo;s URL map? If we print it out now, you&amp;rsquo;ll see that the endpoints for &lt;code&gt;main_blueprint&lt;/code&gt;&amp;rsquo;s URL rules have been updated to include the &lt;code&gt;main.&lt;/code&gt; prefix.&lt;/p&gt;
 &lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;Map([&amp;lt;Rule &#39;/projects&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.projects&amp;gt;,
     &amp;lt;Rule &#39;/messages&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.messages&amp;gt;,
     &amp;lt;Rule &#39;/issues&#39; (GET, OPTIONS, HEAD) -&amp;gt; main.issues&amp;gt;,

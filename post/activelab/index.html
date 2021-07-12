@@ -1,0 +1,1571 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Are you the master of your domain?">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/activelab/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/activelab/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/activelab/">
+  <meta property="og:title" content="Building an Active Directory lab with Proxmox | Remotely Curious">
+  <meta property="og:description" content="Are you the master of your domain?"><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2021-07-11T11:47:58-04:00">
+    
+    <meta property="article:modified_time" content="2021-07-11T11:47:58-04:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/activelab/"
+  },
+  "headline": "Building an Active Directory lab with Proxmox",
+  
+  "datePublished": "2021-07-11T11:47:58-04:00",
+  "dateModified": "2021-07-11T11:47:58-04:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Are you the master of your domain?"
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Building an Active Directory lab with Proxmox | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Building an Active Directory lab with Proxmox</h1>
+
+  
+  <p class="page-subtitle">Are you the master of your domain?</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Jul 11, 2021
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    13 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/sysadmin/">sysadmin</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>Over the last couple of weeks, I decided that it would be good for my cybersecurity career ambitions to learn a little something about Windows administration. The phrase &ldquo;active directory&rdquo; is something that I&rsquo;ve often heard popping up in discussions about Windows security in the context of both offensive and defensive activity. Since 
+<a href="https://ww2.frost.com/frost-perspectives/active-directory-holds-the-keys-to-your-kingdom-but-is-it-secure/" target="_blank" rel="noopener">the vast majority of Fortune 500 companies</a> make use of Active Directory in their corporate networks, perhaps it&rsquo;s no small wonder.</p>
+<p>To see what all the fuss is about (and maybe learn a thing or two), I built a virtualized Active Directory lab. As with 
+<a href="/post/homelab">my previous homelab writeup</a>, I thought it would be good to write this up to consolidate all the loose bits of information that I picked up along the way. For the initial domain controller installation, I took some hints from The Cyber Mentor&rsquo;s guide for 
+<a href="https://www.youtube.com/watch?v=xftEuVQ7kY0" target="_blank" rel="noopener">building an AD hacking lab</a>, as well as the documentation for 
+<a href="https://pve.proxmox.com/wiki/Main_Page" target="_blank" rel="noopener">Proxmox</a> for advice on setting up Windows VMs.</p>
+<!-- The documentation for [Proxmox](https://pve.proxmox.com/wiki/Main_Page)
+The Cyber Mentor's guide for [building an AD hacking lab](https://www.youtube.com/watch?v=xftEuVQ7kY0)
+Although TCM's motivations for the lab are very different (i.e., a proving ground for attacking system vulnerabilities) -->
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#objectives">Objectives</a></li>
+    <li><a href="#requirements">Requirements</a></li>
+    <li><a href="#installation">Installation</a>
+      <ul>
+        <li><a href="#domain-controller">Domain controller</a>
+          <ul>
+            <li><a href="#installing-windows-server">Installing Windows Server</a></li>
+            <li><a href="#configuring-the-network">Configuring the network</a></li>
+            <li><a href="#promotion-to-domain-controller">Promotion to domain controller</a></li>
+          </ul>
+        </li>
+        <li><a href="#workstations">Workstations</a>
+          <ul>
+            <li><a href="#installing-windows-enterprise">Installing Windows Enterprise</a></li>
+            <li><a href="#configuring-the-network-1">Configuring the network</a></li>
+            <li><a href="#join-workstation-to-domain">Join workstation to domain</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#configuration">Configuration</a>
+      <ul>
+        <li><a href="#add-an-active-directory-user">Add an active directory user</a></li>
+        <li><a href="#configure-remote-management">Configure remote management</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="objectives">Objectives</h1>
+<p>My general motive is to learn more about the importance of Active Directory in securing a Windows network. Aside from this, I have some specific plans for how I will put this AD lab to use, which I talk about briefly at the end of the writeup. Most of these plans involve learning something that I have never used or seen in action (PowerShell, group policies, Windows events), so this should be fun!</p>
+<h1 id="requirements">Requirements</h1>
+<p>Since most of my goals have something to do with Windows administration, I will be building a Windows &ldquo;corporate network&rdquo;, consisting of one Active Directory (AD) domain controller and a fleet of two Windows workstations. These will eventually be configured to push event logs to a fourth machine, which will be responsible for event querying and log analysis. All of these machines will be implemented as Proxmox VMs that are connected to the same (virtual) network segment.</p>
+<p>To realize this tiny network, I could configure the workstation VMs individually, but setting up an AD domain will allow me to manage the workstations from the domain controller using group policies and PowerShell remote sessions. Individual VM configuration can therefore be limited to the initial OS/driver installation and static IP assignment. I like to think that this approach is scalable and bears some resemblance to how actual sysadmins carry out (a very small subset of) their duties.</p>
+<div class="alert alert-note">
+  <div>
+    Full disclosure: I have never managed an enterprise network. Hopefully that last claim isn&rsquo;t too offensive!
+  </div>
+</div>
+<p>For this project, I&rsquo;ll be recruiting my trusty 
+<a href="https://protectli.com/product/fw6b/" target="_blank" rel="noopener">Protectli FW6B</a>, which has been set up as a Proxmox hypervisor (you can find the corresponding writeup 
+<a href="/post/homelab">here</a>). This time around, I loaded it with 32 GiB of RAM to better handle the burden of running all these VMs.</p>
+<h1 id="installation">Installation</h1>
+<p>Our Windows network consists of one domain controller (Windows Server 2019) and two workstations (Windows 10 Pro). Proxmox&rsquo;s documentation recommends a specific set of 
+<a href="https://pve.proxmox.com/wiki/Windows_VirtIO_Drivers" target="_blank" rel="noopener">drivers for Windows VMs</a> that do not come with the OS but promise to enhance device performance. These VirtIO drivers will be loaded during Windows' installation using an extra virtualized CD/DVD reader.</p>
+<p>The following disk images will be used:</p>
+<ul>
+<li><code>17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso</code> (Windows 2019 Server)</li>
+<li><code>19043.928.210409-1212.21h1_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso</code> (Windows 10 Enterprise)</li>
+<li><code>virtio-win-0.1.190.iso</code> (VirtIO drivers)</li>
+</ul>
+<h2 id="domain-controller">Domain controller</h2>
+<p>Our setup will feature a <em>domain</em>, a network of computers that is managed by a <em>domain controller</em> (DC). Of its many responsibilities, the DC is tasked with making sure that all configured application and security policies are respected by all devices on the network. Among other things, we will use the DC to create domain user accounts that allow users to access the domain.</p>
+<p>Here&rsquo;s what DOMCON, the domain controller VM looks like under Proxmox:</p>
+<ul>
+<li>1 CPU core, 4 GiB RAM</li>
+<li>32 GiB VirtIO SCSI HDD (write-back, discard)</li>
+<li>VirtIO NIC</li>
+<li>2x DVD drives (Windows Server 2019; VirtIO driver package)</li>
+</ul>
+<div class="alert alert-note">
+  <div>
+    Remember that the Windows setup process won&rsquo;t recognize the VirtIO devices, so make sure that the second DVD drive (e.g., <code>ide3</code>) is loaded with the VirtIO ISO before powering it on. You should also ensure that this DVD drive has a higher device number than that of the installation media (e.g., 2 in <code>ide2</code>), such that the VM attempts to boot off the Windows ISO first.
+  </div>
+</div>
+<p>Let&rsquo;s boot up the VM.</p>
+<h3 id="installing-windows-server">Installing Windows Server</h3>
+<p>After clicking Install at the first installer prompt, you will be asked to select the OS to install. We are going to opt for Windows Server 2019 <strong>Standard Evaluation (Desktop Experience)</strong> to get a graphical interface. There will be another prompt after you agree to the standard terms of use, asking about the type of installation. Select <strong>Custom: Install Windows only</strong> to proceed.</p>
+<p>Now if you&rsquo;ve gone with the configuration listed above, you won&rsquo;t find any available drives to choose in this next screen. This is because Windows doesn&rsquo;t recognize the SCSI disk drive, as expected. To install the drivers, click <strong>Load driver</strong> and browse to <code>E:\vioscsi\2k19\amd64</code>, which will yield the Red Hat VirtIO SCSI pass-through controller driver.</p>
+<p>After loading the driver, we&rsquo;re ready for some partitioning. Select the newly-visible drive, click <strong>New</strong>, and allocate the entire drive for the partition to get the screen below.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-disk-partitions-shown-after-installing-the-virtio-scsi-drivers">
+
+
+  <a data-fancybox="" href="/activelab/partitions.png" data-caption="&lt;b&gt;Fig. 1&lt;/b&gt;. Disk partitions, shown after installing the VirtIO SCSI drivers.">
+
+
+  <img src="/activelab/partitions.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1</b>. Disk partitions, shown after installing the VirtIO SCSI drivers.
+  </figcaption>
+
+
+</figure>
+
+<p>With the second partition selected, click <strong>Next</strong> and the installation will proceed. Eventually, the system will reboot and you will be asked to supply a password for the local Administrator account. After this, you can unlock the login screen with Ctrl-Alt-Delete and log in with those same credentials.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-you-can-send-ctrl-alt-del-using-the-three-keys-button-in-the-proxmox-web-interface-sidebar">
+
+
+  <a data-fancybox="" href="/activelab/ctrl-alt-del.png" data-caption="&lt;b&gt;Fig. 2&lt;/b&gt;. You can send Ctrl-Alt-Del using the &amp;ldquo;three keys&amp;rdquo; button in the Proxmox web interface sidebar.">
+
+
+  <img src="/activelab/ctrl-alt-del.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2</b>. You can send Ctrl-Alt-Del using the &ldquo;three keys&rdquo; button in the Proxmox web interface sidebar.
+  </figcaption>
+
+
+</figure>
+
+<h3 id="configuring-the-network">Configuring the network</h3>
+<p>Our first order of business is to establish network connectivity. This means we need to use the VirtIO disk image once more, since our NIC is also a VirtIO device. Enter Device Manager, find the <em>Ethernet Controller</em> and click <strong>Update driver</strong> (Fig. 3). Searching the <code>E:\NetKVM\2k19\amd64</code> folder will yield the Red Hat VirtIO Ethernet Adapter driver.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-updating-the-nic-driver-in-device-manager">
+
+
+  <a data-fancybox="" href="/activelab/device-manager.png" data-caption="&lt;b&gt;Fig. 3&lt;/b&gt;. Updating the NIC driver in Device Manager.">
+
+
+  <img src="/activelab/device-manager.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3</b>. Updating the NIC driver in Device Manager.
+  </figcaption>
+
+
+</figure>
+
+<p>You will now get a prompt asking whether to allow network discovery. It&rsquo;s a home network, so this is fine.</p>
+<p>We will now assign this machine with a static IP address. Under Network Connections, access the Properties of the Ethernet adapter and bring up the TCP/IPv4 properties (Fig. 4). Here, the default gateway is pointing to my home router.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-4b-setting-the-ip-address-and-default-gateway-for-the-dc">
+
+
+  <a data-fancybox="" href="/activelab/tcp-ip.png" data-caption="&lt;b&gt;Fig. 4&lt;/b&gt;. Setting the IP address and default gateway for the DC.">
+
+
+  <img src="/activelab/tcp-ip.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 4</b>. Setting the IP address and default gateway for the DC.
+  </figcaption>
+
+
+</figure>
+
+<p>After changing the computer name to DOMCON (e.g., right-click This PC &raquo; Properties &raquo; Change settings &raquo; <strong>Change</strong>), let the VM reboot and log back in. We are now ready to prepare our server to become a domain controller.</p>
+<h3 id="promotion-to-domain-controller">Promotion to domain controller</h3>
+<p>We are going to promote DOMCON to become the DC for our prospective Windows domain. This requires the installation of the AD Domain Services role, which can be initiated by using the Server Manager window (Fig. 5). Click Manage &raquo; <strong>Add Roles and Features</strong> to bring up a wizard and go through it as shown below:</p>
+<ul>
+<li>Installation Type: <em>Role-based or feature-based installation</em></li>
+<li>Server Selection: <em>DOMCON</em> at 192.168.0.11</li>
+<li>Server Roles: Check <em>Active Directory Domain Services</em> (click <strong>Add Features</strong> to add the required services/features when prompted)</li>
+<li>Click through to the end and click <strong>Install</strong>.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-5b-using-the-server-manager-to-add-roles-and-additional-functionality">
+
+
+  <a data-fancybox="" href="/activelab/server-manager.png" data-caption="&lt;b&gt;Fig. 5&lt;/b&gt;. Using the Server Manager to add roles and additional functionality.">
+
+
+  <img src="/activelab/server-manager.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 5</b>. Using the Server Manager to add roles and additional functionality.
+  </figcaption>
+
+
+</figure>
+
+<p>After installation, we are shown a summary of what was installed, as well as a little line of text offering the option to promote the server to a domain controller (Fig. 6). Lovely.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-6b-choosing-to-promote-the-domain-controller">
+
+
+  <a data-fancybox="" href="/activelab/dc-promo.png" data-caption="&lt;b&gt;Fig. 6&lt;/b&gt;. Choosing to promote the domain controller.">
+
+
+  <img src="/activelab/dc-promo.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 6</b>. Choosing to promote the domain controller.
+  </figcaption>
+
+
+</figure>
+
+<p>Clicking this brings us to another wizard. At the Deployment Configuration page, select <strong>Add a new forest</strong> and enter the root domain name. We are running a test lab so our choice of domain name here doesn&rsquo;t really matter. I will call mine <em>labs.remotelycurious.net</em>. Go through the rest of the wizard and click <strong>Install</strong> at the Prerequisites Check page. Reboot.</p>
+<p>After reaching the Windows login, notice that the <code>Administrator</code> account becomes prefixed with <code>LABS</code>, indicating the presence of the newly-created domain. You will also find that the DC&rsquo;s preferred DNS server is now configured as itself, i.e., 127.0.0.1.</p>
+<h2 id="workstations">Workstations</h2>
+<p>Time to cook up some clients. The installation and initial configuration of these VMs will be very familiar, having just set up Windows Server for the domain controller. Each client VM will have these specs:</p>
+<ul>
+<li>1 CPU core, 2 GiB RAM</li>
+<li>32 GiB VirtIO SCSI HDD (write-back, discard)</li>
+<li>VirtIO NIC</li>
+<li>2x DVD drives (Windows 10 Enterprise; VirtIO driver package)</li>
+</ul>
+<p>The steps for setting up WINCLIENT-1 (192.168.0.21/24) are outlined below.</p>
+<h3 id="installing-windows-enterprise">Installing Windows Enterprise</h3>
+<p>After starting the Windows installation, we click through and arrive at the install location page, as we did in Figure 1. Click <strong>Load driver</strong> and browse to <code>E:\vioscsi\w10\amd64</code> to install the Red Hat VirtIO SCSI pass-through controller driver for Windows 10. Allocate the partitions as desired and continue with the installation. Reboot.</p>
+<p>Once Windows boots, you will be asked to enter the credentials and security questions of a local user (so long as you aren&rsquo;t connected to the internet). Go ahead and set these, click through some more prompts, and wait for Windows to finish setting up your local account.</p>
+<h3 id="configuring-the-network-1">Configuring the network</h3>
+<p>The VirtIO network adapter needs a driver. Use Device Manager to update the driver using the RedHat one located at <code>E:\NetKVM\w10\amd64</code>. After the driver update, accept the offer to enable network discovery and change the computer name to WINCLIENT-1. Reboot.</p>
+<p>To join the domain, the workstations need to be placed on the same subnet as the domain controller. As was done for the server, we will install the NIC driver (Fig. 3) and configure the adapter&rsquo;s TCP/IP settings:</p>
+<ul>
+<li>IP address: 192.168.0.21/24</li>
+<li>Gateway: 192.168.0.1</li>
+<li>DNS: 192.168.0.11</li>
+</ul>
+<h3 id="join-workstation-to-domain">Join workstation to domain</h3>
+<p>Click Start, type &lsquo;domain&rsquo; and click <strong>Access work or school</strong>. After clicking <strong>Connect</strong>, you will find the option to <em>Join this device to a local Active Directory domain</em> below. Go ahead and enter <code>labs</code> to access a login prompt, and enter the labs\Administrator credentials to make the connection.</p>
+<p>After restarting, the VM will be joined to the domain. Repeat the process for WINCLIENT-2 and a different IP and you will have yourself a &ldquo;fleet&rdquo; of two computers that can be centrally managed by the domain controller.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-7b-check-out-the-fleet">
+
+
+  <a data-fancybox="" href="/activelab/resolve-dnsnames.png" data-caption="&lt;b&gt;Fig. 7&lt;/b&gt;. Check out the fleet!">
+
+
+  <img src="/activelab/resolve-dnsnames.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 7</b>. Check out the fleet!
+  </figcaption>
+
+
+</figure>
+
+<h1 id="configuration">Configuration</h1>
+<p>Now that the workstations have been linked up to the domain, we&rsquo;re ready for some configuration. An enterprise needs users, so we will need at least one of those. I&rsquo;ve also decided that it will be useful to have the option of managing the workstations remotely through PowerShell sessions, as mentioned earlier.</p>
+<h2 id="add-an-active-directory-user">Add an active directory user</h2>
+<p>User accounts can be created using the Active Directory Users and Computers app, but it is relatively easy to do this through PowerShell. Open up a shell as Administrator and run the command below to create a new AD user account for Steven Strange (mind the ticks that let the command span multiple lines).</p>
+<pre><code class="language-bash">New-ADUser `
+  -Name &quot;Steven Strange&quot; -GivenName &quot;Steven&quot; -Surname &quot;Strange&quot; `
+  -SamAccountName &quot;sstrange&quot; `
+  -ChangePasswordAtLogon $False `
+  -AccountPassword $(ConvertTo-SecureString &quot;Letmein123!&quot; -AsPlainText -Force) `
+  -PassThru | Enable-ADAccount
+</code></pre>
+<p>There are a few things to note here:</p>
+<ul>
+<li>the <code>SamAccountName</code> parameter is mandatory; all others are optional,</li>
+<li>the account password is set using an encrypted string object (<code>System.Security.SecureString</code>), evaluated using the <code>$(...)</code> subexpression,</li>
+<li>the <code>PassThru</code> option tells the <code>New-ADUser</code> command to return the new AD user object, which we then pipe to <code>Enable-ADAccount</code> to save us an extra step (new accounts are disabled by default).</li>
+</ul>
+<p>After verifying that we can log in as Steven Strange on one of the client VMs, we can go ahead and set up remote management for the fleet.</p>
+<h2 id="configure-remote-management">Configure remote management</h2>
+<p>The goal of this stage is to enable Windows Remote Management (WinRM) throughout the domain. We can do this through the application of three different policies within the Group Policy Management app. Navigate to Domains &raquo; labs.remotelycurious.net &raquo; Group Policy Objects &raquo; Default Domain Policy, right-click and click <strong>Edit</strong> to bring up the Group Policy Management Editor.</p>
+<div class="alert alert-note">
+  <div>
+    Note to self: learn how to do this through PowerShell. Way too much clicking.
+  </div>
+</div>
+<!-- Group Policy Management
+Forest: labs.remotelycurious.net > Domains > labs.remotelycurious.net > Default Domain Policy > EDIT
+Group policy management Editor -->
+<h4 id="1-enable-remote-management-winrm">1. Enable Remote Management (WinRM)</h4>
+<p>Find <em>Windows Remote Management</em> under Computer Configuration &raquo; Policies &raquo; Windows Settings &raquo; Security Settings &raquo; System Services, right-click and hit <strong>Properties</strong>. Check <em>Define this policy setting</em> and select the <em>Automatic</em> service startup mode before clicking <strong>OK</strong>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-8b-winrm-has-just-been-enabled">
+
+
+  <a data-fancybox="" href="/activelab/enable-winrm.png" data-caption="&lt;b&gt;Fig. 8&lt;/b&gt;. WinRM has just been enabled.">
+
+
+  <img src="/activelab/enable-winrm.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 8</b>. WinRM has just been enabled.
+  </figcaption>
+
+
+</figure>
+
+<!-- Computer Configuration > Policies > Windows Settings > Security Settings > System Services 
+Windows Remote Management Properties -> Define this policy setting, Automatic startup -->
+<h4 id="2-allow-remote-management-through-winrm">2. Allow remote management through WinRM</h4>
+<p>After enabling the service, the next step is to actually allow it to operate. Find the <em>Allow remote server management through WinRM</em> setting under Computer Configuration &raquo; Policies &raquo; Administrative Templates &raquo; Windows Components &raquo; Windows Remote Management &raquo; WinRM Service, right-click and choose <strong>Edit</strong>.</p>
+<p>Here we can choose which IPs will be allowed to establish a remote connection. After enabling the setting, fill in the IPv4 field appropriately and click <strong>OK</strong>. In my case, the Windows network spans from 192.168.0.11 to 192.168.0.22, and I want to be able to remote from any PC to any other one, just for fun.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-9b-allowing-winrm-connections-from-any-pc-in-the-windows-network">
+
+
+  <a data-fancybox="" href="/activelab/allow-winrm.png" data-caption="&lt;b&gt;Fig. 9&lt;/b&gt;. Allowing WinRM connections from any PC in the Windows network.">
+
+
+  <img src="/activelab/allow-winrm.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 9</b>. Allowing WinRM connections from any PC in the Windows network.
+  </figcaption>
+
+
+</figure>
+
+<!-- Computer Configuration > Policies > Administrative Templates > Windows Components > Windows Remote Management > WinRM Service
+Allow remote server management through WinRM -> Edit
+    -> Enabled
+    -> IPv4 filter: 192.168.0.11-192.168.0.22 -->
+<h4 id="3-add-winrm-firewall-exception">3. Add WinRM firewall exception</h4>
+<p>We&rsquo;ve hit the last stretch, in which we have to allow the remote connection through the firewall. This is done by making an inbound port exception for the WinRM service, which runs on port 5985. Dig up the <em>Define inbound port exceptions</em> setting under Computer Configuration &raquo; Policies &raquo; Administrative Templates &raquo; Network &raquo; Network Connections &raquo; Windows Defender Firewall &raquo; Domain Profile, right-click and choose <strong>Edit</strong>.</p>
+<p>After clicking <strong>Enabled</strong>, click <strong>Show</strong> under <em>Define port exceptions</em>. Each exception is specified in the format <code>&lt;port&gt;:&lt;transport&gt;:&lt;scope&gt;:&lt;status&gt;:&lt;name&gt;</code>, where</p>
+<ul>
+<li><code>transport</code> is either TCP or UDP,</li>
+<li><code>scope</code> indicates the originating networks that are allowed through the firewall,</li>
+<li><code>status</code> is either &lsquo;enabled&rsquo; or &lsquo;disabled&rsquo;, and</li>
+<li><code>name</code> can hold a short description of the rule.</li>
+</ul>
+<p>I will enter <code>5985:TCP:localsubnet:enabled:WinRM</code> to allow local TCP connections through port 5985. That should do it, but the proof is in the pudding. Let&rsquo;s try to connect to WINCLIENT-2 from the domain controller. Does it work?</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-10b-were-in">
+
+
+  <a data-fancybox="" href="/activelab/enter-pssession.png" data-caption="&lt;b&gt;Fig. 10&lt;/b&gt;. &amp;ldquo;We&amp;rsquo;re in&amp;rdquo;.">
+
+
+  <img src="/activelab/enter-pssession.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 10</b>. &ldquo;We&rsquo;re in&rdquo;.
+  </figcaption>
+
+
+</figure>
+
+<h1 id="summary">Summary</h1>
+<p>We have ourselves a miniature enterprise Windows network, complete with a domain controller and remote management capabilities. There are certainly ways I can make it better (maybe configure WinRM to use TLS?) but it will do the job for now.</p>
+<p>I&rsquo;m really keen to see if I can use this network as a platform for threat detection. Right now, my thinking is to set up event forwarding such that a selection of Windows events from the AD network is shipped to an Elastic Stack SIEM for log analysis. The idea would be to generate test threats (maybe with Atomic Red Team) and see if I can detect any malicious activity using Elasticsearch queries.</p>
+<p>But, that&rsquo;s a post for another day.</p>
+<!-- Computer Configuration > Policies > Administrative Templates > Network > Network Connections > Windows Defender Firewall > Domain Profile
+Define inbound port exceptions -> Edit
+Define port exceptions:
+    -> 5985:TCP:localsubnet:enabled:WinRM -->
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/powershell/">powershell</a>
+  
+  <a class="badge badge-light" href="/tag/active-directory/">active-directory</a>
+  
+  <a class="badge badge-light" href="/tag/proxmox/">proxmox</a>
+  
+  <a class="badge badge-light" href="/tag/homelab/">homelab</a>
+  
+  <a class="badge badge-light" href="/tag/group-policy/">group-policy</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/activelab/&amp;text=Building%20an%20Active%20Directory%20lab%20with%20Proxmox" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/activelab/&amp;t=Building%20an%20Active%20Directory%20lab%20with%20Proxmox" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Building%20an%20Active%20Directory%20lab%20with%20Proxmox&amp;body=https://www.remotelycurious.net/post/activelab/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/activelab/&amp;title=Building%20an%20Active%20Directory%20lab%20with%20Proxmox" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=Building%20an%20Active%20Directory%20lab%20with%20Proxmox%20https://www.remotelycurious.net/post/activelab/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/activelab/&amp;title=Building%20an%20Active%20Directory%20lab%20with%20Proxmox" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/homelab/">Building a homelab with Proxmox</a></li>
+      
+      <li><a href="/post/systemd-shenanigans/">Shenanigans with systemd</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.b2ed8054531fc8b77a9c500d5dfef876.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

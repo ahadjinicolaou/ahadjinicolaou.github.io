@@ -160,7 +160,7 @@
 
 &lt;/figure&gt;
 
-&lt;p&gt;The usual setting I have in mind for this app involves &lt;em&gt;employees&lt;/em&gt; who work on issues, &lt;em&gt;reviewers&lt;/em&gt;, who check the employees&amp;rsquo; work, and &lt;em&gt;managers&lt;/em&gt;, who have the final say. In a hypothetical situation, their interactions with the application might look like this:&lt;/p&gt;
+&lt;p&gt;The usual setting I have in mind for this app involves &lt;em&gt;employees&lt;/em&gt; who work on issues, &lt;em&gt;reviewers&lt;/em&gt;, who check the employees&#39; work, and &lt;em&gt;managers&lt;/em&gt;, who have the final say. In a hypothetical situation, their interactions with the application might look like this:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;A new issue is created on behalf of a client.&lt;/li&gt;
 &lt;li&gt;The manager assigns the issue to the employee (NEW → ASSIGNED).&lt;/li&gt;
@@ -305,7 +305,7 @@
 &lt;p&gt;Here&amp;rsquo;s a quick demonstration of what this class can do for us:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;Permission.CREATE_ISSUES&lt;/code&gt; → &lt;code&gt;&amp;lt;Permission.CREATE_ISSUES: 4&amp;gt;&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Permission.CREATE_ISSUES.name&lt;/code&gt; → &lt;code&gt;CREATE_ISSUES&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Permission.CREATE_ISSUES.name&lt;/code&gt; → &lt;code&gt;&#39;CREATE_ISSUES&#39;&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Permission.CREATE_ISSUES.value&lt;/code&gt; → &lt;code&gt;4&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Permission(4)&lt;/code&gt; → &lt;code&gt;&amp;lt;Permission.CREATE_ISSUES: 4&amp;gt;&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Permission(5)&lt;/code&gt; → &lt;code&gt;ValueError: 5 is not a valid Permission&lt;/code&gt;&lt;/li&gt;

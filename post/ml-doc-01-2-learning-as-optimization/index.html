@@ -733,7 +733,7 @@
     What follows is a quick derivation of the signed distance from a point to a line. Try to follow the steps if you can, but otherwise feel free to skip to the next section.
   </div>
 </div>
-<p>Imagine we have a training example $P$ sitting some distance $d$ away from the decision boundary (Fig. 3). The point $Q$ is any point $x'$ that sits on the decision boundary, such that $\theta \cdot x&rsquo; + \theta_0 = 0$.</p>
+<p>Imagine we have a training example $P$ sitting some distance $d$ away from the decision boundary (Fig. 3). The point $Q$ is any point $x'$ that sits on the decision boundary, such that $\theta \cdot x' + \theta_0 = 0$.</p>
 
 
 
@@ -772,8 +772,8 @@
 <p>$$d = \norm{\overrightarrow{RP}} = \norm{\overrightarrow{QP}} \textrm{ cos }\alpha.$$</p>
 <p>We also know the angle $\alpha$ is related to $\overrightarrow{QP}$ and $\theta$ by the dot product,</p>
 <p>$$ \theta \cdot \overrightarrow{QP} = \norm{\theta} \norm{\overrightarrow{QP}} \textrm{ cos }\alpha .$$</p>
-<p>Consolidating these two equations, together with the fact that $\overrightarrow{QP} = x - x&rsquo;,$ yields the final expression for the <em>signed distance</em>,</p>
-<p>$$d_s(x) = \frac{ \theta \cdot \overrightarrow{QP} }{\norm{ \theta} } = \frac{ \theta \cdot x - \theta \cdot x&rsquo; }{\norm{ \theta} } = \frac{ \theta \cdot x + \theta_0 }{\norm{ \theta} }. $$</p>
+<p>Consolidating these two equations, together with the fact that $\overrightarrow{QP} = x - x',$ yields the final expression for the <em>signed distance</em>,</p>
+<p>$$d_s(x) = \frac{ \theta \cdot \overrightarrow{QP} }{\norm{ \theta} } = \frac{ \theta \cdot x - \theta \cdot x' }{\norm{ \theta} } = \frac{ \theta \cdot x + \theta_0 }{\norm{ \theta} }. $$</p>
 <h2 id="signed-and-unsigned-distance">Signed and unsigned distance</h2>
 <p>What does it mean for $d$ to be signed? As a quick illustration, consider how a hypothetical classifier might deal with some positive training examples (Fig. 4). We can see that the points &ldquo;deepest&rdquo; within the positive region, $x_1$ and $x_2$, are sitting some positive distance from the decision boundary because $\theta \cdot x + \theta_0$ is positive for each point.</p>
 
@@ -1004,7 +1004,7 @@
 <figure id="figure-bfig-8b-sketch-of-an-objective-function-jtheta-and-its-derivative-nabla-jtheta-evaluated-at-point-theta">
 
 
-  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/derivative.png" data-caption="&lt;b&gt;Fig. 8.&lt;/b&gt; Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&amp;rsquo;.$">
+  <a data-fancybox="" href="/ml-doc-01-2-learning-as-optimization/derivative.png" data-caption="&lt;b&gt;Fig. 8.&lt;/b&gt; Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&#39;.$">
 
 
   <img src="/ml-doc-01-2-learning-as-optimization/derivative.png" alt=""  >
@@ -1014,7 +1014,7 @@
   
   
   <figcaption>
-    <b>Fig. 8.</b> Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta&rsquo;.$
+    <b>Fig. 8.</b> Sketch of an objective function $J(\theta)$ and its derivative $\nabla J(\theta)$, evaluated at point $\theta'.$
   </figcaption>
 
 
@@ -1085,7 +1085,7 @@ $\frac{dL}{d\theta} = \frac{dL}{dz}\frac{dz}{d\theta}.$
 <hr>
 <ol>
 <li id="fn:1" role="doc-endnote">
-<p>Although it is not possible to know the exact test error, there are ways to approximate it, such as through cross-validation. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>Although it is not possible to know the exact test error, there are ways to approximate it, such as through cross-validation.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </section>
@@ -1101,21 +1101,21 @@ $\frac{dL}{d\theta} = \frac{dL}{dz}\frac{dz}{d\theta}.$
 
 <div class="article-tags">
   
-  <a class="badge badge-light" href="/tag/bias-variance-tradeoff/">bias-variance-tradeoff</a>
-  
-  <a class="badge badge-light" href="/tag/classification/">classification</a>
-  
-  <a class="badge badge-light" href="/tag/gradient-descent/">gradient-descent</a>
-  
   <a class="badge badge-light" href="/tag/machine-learning/">machine-learning</a>
-  
-  <a class="badge badge-light" href="/tag/objective-function/">objective-function</a>
   
   <a class="badge badge-light" href="/tag/overfitting/">overfitting</a>
   
+  <a class="badge badge-light" href="/tag/underfitting/">underfitting</a>
+  
+  <a class="badge badge-light" href="/tag/classification/">classification</a>
+  
+  <a class="badge badge-light" href="/tag/objective-function/">objective-function</a>
+  
   <a class="badge badge-light" href="/tag/regularization/">regularization</a>
   
-  <a class="badge badge-light" href="/tag/underfitting/">underfitting</a>
+  <a class="badge badge-light" href="/tag/gradient-descent/">gradient-descent</a>
+  
+  <a class="badge badge-light" href="/tag/bias-variance-tradeoff/">bias-variance-tradeoff</a>
   
 </div>
 
@@ -1447,7 +1447,7 @@ $\frac{dL}{d\theta} = \frac{dL}{dz}\frac{dz}{d\theta}.$
     
     
     
-    <script src="/js/academic.min.37431be2d92d7fb0160054761ab79602.js"></script>
+    <script src="/js/academic.min.b2ed8054531fc8b77a9c500d5dfef876.js"></script>
 
     
 
