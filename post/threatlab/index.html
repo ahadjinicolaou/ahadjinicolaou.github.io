@@ -1,0 +1,1843 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Finding hostile activity by setting MITRE ATT&amp;CK tripwires.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/threatlab/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/threatlab/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/threatlab/">
+  <meta property="og:title" content="Threat detection with Atomic Red Team and Azure Sentinel | Remotely Curious">
+  <meta property="og:description" content="Finding hostile activity by setting MITRE ATT&amp;CK tripwires."><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2021-08-21T20:32:25-04:00">
+    
+    <meta property="article:modified_time" content="2021-08-21T20:32:25-04:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/threatlab/"
+  },
+  "headline": "Threat detection with Atomic Red Team and Azure Sentinel",
+  
+  "datePublished": "2021-08-21T20:32:25-04:00",
+  "dateModified": "2021-08-21T20:32:25-04:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "Finding hostile activity by setting MITRE ATT\u0026CK tripwires."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Threat detection with Atomic Red Team and Azure Sentinel | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Threat detection with Atomic Red Team and Azure Sentinel</h1>
+
+  
+  <p class="page-subtitle">Finding hostile activity by setting MITRE ATT&amp;CK tripwires.</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Aug 21, 2021
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    21 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/cybersecurity/">cybersecurity</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>It&rsquo;s tough to defend an enterprise network against modern cyberattacks. Scale is an issue on its own, considering that the network of a large company can contain thousands of devices, each with their own set of vulnerabilities and permitted network traffic. The situation isn&rsquo;t made any easier by the recent surge in remote work, in which employees bring their own devices (and introduce new security flaws) into the network. All of this makes the lives of cybercriminals much easier, as they find themselves with an ever-increasing array of options to conduct a breach.</p>
+<p>An initial intrusion into the network, while useful, does not usually offer immediate value to a cybercriminal. The real payoff tends to occur after an extensive discovery phase during which the intruder navigates through different servers and takes advantage of misconfigurations, weak passwords, and other vulnerabilities to elevate their account privileges and push further into the network. One approach defenders can take towards protecting their networks is to give up on the idea that they can prevent every breach and instead focus on detecting operators that have already gained access. This approach is effective because while it can take seconds to execute the breach, it might be months before an intruder can find their way through the network and discover the goods. As long as there is sufficient monitoring, there will be more opportunities to identify the activities of an intruder and contain the damage.</p>
+<p>These ideas were discussed recently in a 
+<a href="https://www.youtube.com/watch?v=zIwUBTGjbws" target="_blank" rel="noopener">presentation</a> by Peter Morin, who made a great argument for the value in classifying cyber adversary behaviors using the 
+<a href="https://attack.mitre.org/" target="_blank" rel="noopener">MITRE ATT&amp;CK</a> framework and then looking for signs of these behaviors in Sysmon event logs. To get a feel for what this is like in practice, I developed a virtualized environment using Microsoft Azure, which is the subject of this writeup.</p>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#approach">Approach</a></li>
+    <li><a href="#infrastructure">Infrastructure</a>
+      <ul>
+        <li><a href="#virtual-network">Virtual network</a></li>
+        <li><a href="#virtual-machines">Virtual machines</a>
+          <ul>
+            <li><a href="#applications">Applications</a></li>
+            <li><a href="#removing-vms">Removing VMs</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#event-logging">Event logging</a>
+      <ul>
+        <li><a href="#log-collection">Log collection</a></li>
+        <li><a href="#sysmon-parsing">Sysmon parsing</a></li>
+      </ul>
+    </li>
+    <li><a href="#threat-detection">Threat detection</a>
+      <ul>
+        <li><a href="#baselining">Baselining</a></li>
+        <li><a href="#simulating-threat-activity">Simulating threat activity</a></li>
+        <li><a href="#creating-detection-logic">Creating detection logic</a></li>
+        <li><a href="#detection-in-azure-sentinel">Detection in Azure Sentinel</a></li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="approach">Approach</h1>
+<p>The main goal of this project is to find out how to identify malicious network activity through log analysis. This can be done in many ways, but after some research, I shelled out some specifics in my approach:</p>
+<ul>
+<li>use 
+<a href="https://atomicredteam.io/" target="_blank" rel="noopener">Atomic Red Team</a> to simulate network attacks</li>
+<li>use 
+<a href="https://attack.mitre.org/" target="_blank" rel="noopener">MITRE ATT&amp;CK</a> to describe adversary behaviors</li>
+<li>use 
+<a href="https://www.sumologic.com/blog/windows-event-logging/" target="_blank" rel="noopener">Windows event logs</a> and 
+<a href="https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon" target="_blank" rel="noopener">Sysmon</a> logs to observe network activity</li>
+<li>use 
+<a href="">Azure Sentinel</a> to perform threat detection</li>
+<li>virtualize the required lab infrastructure using 
+<a href="https://azure.microsoft.com" target="_blank" rel="noopener">Azure</a>.</li>
+</ul>
+<!-- https://twitter.com/Cyb3rWard0g/status/1428718505105534980?s=20 sysmon for linux! soonish! -->
+<p>Atomic Red Team was developed specifically to help security teams test their systems against ATT&amp;CK-specified tactics and techniques. The ATT&amp;CK framework itself allows for organizations to not only understand how hostile operators might act to compromise their systems, but also to evaluate their own defenses against these behaviors.</p>
+<p>Let&rsquo;s talk about Windows event logs. They are free, but they are 
+<a href="https://www.exabeam.com/information-security/extracting-actionable-information-from-windows-events/" target="_blank" rel="noopener">notorious</a> for being extremely noisy, poorly defined, and difficult to interpret. Enter  Sysmon (System Monitor). In stark contrast to Windows' native logging solution, Sysmon captures all kinds of useful information by way of a compact, nonredundant event list. It&rsquo;s also free.</p>
+<p>Although I could always implement this environment with my 
+<a href="/post/homelab/">homelab</a>, I&rsquo;ve been looking for an excuse to learn more about the cloud. Since Microsoft is offering a year&rsquo;s worth of free-tier cloud services (plus $200 worth of starter credit) for new Azure customers, I figure now is as good a time as any to have a play.</p>
+<div class="alert alert-note">
+  <div>
+    One (self-imposed) restriction is that PowerShell must be used to configure and provision everything. That way, I can completely regenerate my Azure environment if I screw it up! The other advantage is that scripts are self-documenting, so they might help others looking to achieve similiar things.
+  </div>
+</div>
+<h1 id="infrastructure">Infrastructure</h1>
+<p>The first order of business is to create some Azure virtual machines that will generate our logs. These logs will be shipped to a Log Analytics workspace, which will be configured to detect Atomic Red Team 
+<a href="https://atomicredteam.io/testing" target="_blank" rel="noopener">functional tests</a>.</p>
+<p>As suggested earlier, we will use scripts to provision the VMs. You can create Azure VMs in different 
+<a href="https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general" target="_blank" rel="noopener"><em>sizes</em></a>, which refers to their compute, memory and storage capacities. The B1s VMs cost nothing under the free tier, so they&rsquo;ll be seeing a lot of use in this project.</p>
+<p>A quick note on terminology: virtual machines and other entities managed by Azure are called <em>resources</em>. They must exist inside a <em>resource group</em>, a container that can be used to group related resources. Every resource (and resource group) requires a <em>location</em> (e.g., East US), which tells Azure which cluster of datacenters should hold the resource&rsquo;s data. Since the resource group and location will be identical for all resources, we will store them as global variables within the <code>$AzGlobals</code> hash table, initialized with a 
+<a href="https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/set-azlab-globals.ps1" target="_blank" rel="noopener">script</a>.</p>
+<p>You can find the repository for my work 
+<a href="https://github.com/ahadjinicolaou/azure-cloudlab" target="_blank" rel="noopener">here</a>. I have organized the code for provisioning and configuring Azure resources into two PowerShell modules:</p>
+<ul>
+<li>
+<a href="https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/AzLab.Infrastructure.psm1" target="_blank" rel="noopener"><code>AzLab.Infrastructure</code></a>, for setting up VMs and network connectivity,</li>
+<li>
+<a href="https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/AzLab.LogAnalytics.psm1" target="_blank" rel="noopener"><code>AzLab.LogAnalytics</code></a>, for configuring log collection from the VMs.</li>
+</ul>
+<p>Let&rsquo;s start talking about the functions in the first module.</p>
+<h2 id="virtual-network">Virtual network</h2>
+<p>Since the VMs we create will be managed remotely, they will need internet connectivity. For this, we need to create a 
+<a href="https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview" target="_blank" rel="noopener">virtual network</a> (<code>azlabs-vnet</code>). Within the <code>azlabs-vnet</code> address space of <code>192.168.0.0/24</code>, there will be two virtual subnets, one for Windows VMs and one for Linux VMs.</p>
+<p>To filter network traffic between resources, 
+<a href="https://docs.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview" target="_blank" rel="noopener">network security groups</a> are applied to each subnet. Essentially, these are groups of security rules (or ACLs) that allow or deny packets based on their features, including their protocol, direction, source, and destination. We will configure an NSG to enforce two security rules for remote management:</p>
+<ul>
+<li>AllowSSH (allow inbound TCP, destination port 22)</li>
+<li>AllowSecureWinRM (allow inbound TCP, destination port 5986).</li>
+</ul>
+<p>The virtual network can be created by running <code>Install-AzLabRemoteAccessVNet</code>.</p>
+<h2 id="virtual-machines">Virtual machines</h2>
+<p>When invoked with <code>OperatingSystem=&quot;WindowsServer&quot;</code>, the function <code>New-AzLabVM</code> will create a new Windows virtual machine, assign it a public IP address, and attach it to the Windows subnet, <code>192.168.0.0/28</code>. If the <code>Credential</code> parameter is specified, it will be used to configure a login account for the system, but otherwise, the user will be asked to enter a username/password pair. Currently, these VMs are set to use either a Windows Server 2019 image or a Windows 10 Desktop image (<code>OperatingSystem=&quot;Windows10&quot;</code>) from the 
+<a href="https://azuremarketplace.microsoft.com/en-us/marketplace/apps/microsoftwindowsserver.windowsserver" target="_blank" rel="noopener">Azure Marketplace</a>.</p>
+<p>To manage the Windows VMs remotely, we will use PowerShell to create a connection using the 
+<a href="https://en.wikipedia.org/wiki/Windows_Remote_Management" target="_blank" rel="noopener">WinRM</a> protocol. All transmitted data will be encrypted using TLS (as foreshadowed by the AllowSecureWinRM security rule above), which means we will need to generate a certificate for all VMs on the domain. This is done using <code>New-AzSelfSignedDomainCert</code>, which takes a domain and certificate password as inputs.</p>
+<div class="alert alert-note">
+  <div>
+    <p>Unfortunately, I couldn&rsquo;t find a way to properly specify the certificate common name (CN). My expectation was that it should be <code>*.DOMAIN</code>. Alternatively, if we create one certificate for each VM, the CN should be the <a href="https://en.wikipedia.org/wiki/Fully_qualified_domain_name">FQDN</a> for each VM. In my case, the FQDN for a VM with hostname <code>winsrv</code> looks like this:</p>
+<pre><code class="language-bash">winsrv.xxxxxxxxxxxxxxxxxxxxxxxxxx.xx.internal.cloudapp.net
+</code></pre>
+<p>No dice, either way. We can still get a remote login, but we&rsquo;ll have to skip CN validation. Feels a bit dirty&hellip;</p>
+  </div>
+</div>
+<p>We can create a Windows Server VM (hostname <code>winsrv</code>) with the following commands:</p>
+<pre><code class="language-bash">$cred = Get-Credential -UserName $username
+New-AzLabVM -OperatingSystem &quot;WindowsServer&quot; -VMNames &quot;winsrv&quot; `
+    -Credential $cred -CertPassword $cred.Password 
+</code></pre>
+<p>Assuming the public IP address is in <code>$ip</code>, we can remote into the machine like so:</p>
+<pre><code class="language-bash">Enter-PSSession -ComputerName $ip -Credential $cred -UseSSL `
+    -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck)
+</code></pre>
+<p>We can also create Linux VMs with <code>New-AzLabVM</code> by setting <code>OperatingSystem=&quot;Linux&quot;</code>. This will create an Ubuntu Server VM using an image from Azure Marketplace and connect it to the Linux subnet, <code>192.168.0.16/28</code>. As with the Windows VM, this one takes a <code>Credential</code> parameter that configures an account on the system. We can go a step further and disable password authentication to rely completely on SSH keys for remote access. That means we need to generate a local public/private key pair and then add the public key to the VM&rsquo;s configuration (details to follow).</p>
+<p>I will be using the OpenSSH client to generate a local private/public key pair. The idea here is to copy the public key to a user account on any VM we want to manage remotely. Then, when logging in as that user via SSH, we can use the private key to authenticate.</p>
+<p>After installing OpenSSH, fire up your favorite shell and run <code>ssh-keygen</code>. After following the prompts, if all goes well, you will have two new files located in <code>~/.ssh</code>:</p>
+<ul>
+<li><code>id_rsa</code>, the private key, and</li>
+<li><code>id_rsa.pub</code>, the public key to be sent to the VMs.</li>
+</ul>
+<p>We can provision a Linux VM (hostname <code>linuxsrv</code>) with the following commands:</p>
+<pre><code class="language-bash">$cred = Get-Credential -UserName $username
+New-AzLabVM -OperatingSystem &quot;Linux&quot; -VMNames &quot;linuxsrv&quot; -Credential $cred
+</code></pre>
+<p>With the private key in place, you should be able to remote in via SSH like this:</p>
+<pre><code class="language-bash">ssh USERNAME@IP
+</code></pre>
+<p>As an aside, the 
+<a href="https://portal.azure.com" target="_blank" rel="noopener">Azure Portal</a> has a nice feature that lets you visualize the network topology for your virtual networks. Once you&rsquo;ve got the <em>Virtual network</em> page up for a given vnet, click <strong>Diagram</strong> under Monitoring in the sidebar to bring it up.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-diagram-of-the-azlabs-vnet-virtual-network-consisting-of-one-subnet-for-each-vm-linuxsrv-and-winsrv-the-network-security-group-subnet-nsg-is-acting-on-both-subnets">
+
+
+  <a data-fancybox="" href="/threatlab/vm-diagram.png" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; Diagram of the &lt;code&gt;azlabs-vnet&lt;/code&gt; virtual network, consisting of one subnet for each VM (&lt;code&gt;linuxsrv&lt;/code&gt; and &lt;code&gt;winsrv&lt;/code&gt;). The network security group (&lt;code&gt;subnet-nsg&lt;/code&gt;) is acting on both subnets.">
+
+
+  <img src="/threatlab/vm-diagram.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> Diagram of the <code>azlabs-vnet</code> virtual network, consisting of one subnet for each VM (<code>linuxsrv</code> and <code>winsrv</code>). The network security group (<code>subnet-nsg</code>) is acting on both subnets.
+  </figcaption>
+
+
+</figure>
+
+<h3 id="applications">Applications</h3>
+<p>Sysmon doesn&rsquo;t come with Windows, but we can get it quite easily by putting together an 
+<a href="https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/install-sysmon.ps1" target="_blank" rel="noopener">installation script</a> and running it on the target VM.</p>
+<pre><code class="language-bash">Invoke-AzVMRunCommand -ResourceGroupName $ResourceGroupName -VMName $VMName `
+    -CommandId &quot;RunPowerShellScript&quot; -ScriptPath &quot;.\install-sysmon.ps1&quot;
+</code></pre>
+<p>After making sure that Sysmon isn&rsquo;t already installed, the script proceeds to download and install Sysmon, pulling the configuration from Olaf Hartong&rsquo;s 
+<a href="https://github.com/olafhartong/sysmon-modular" target="_blank" rel="noopener">sysmon-modular</a> repository. This particular configuration tags events with their associated MITRE ATT&amp;CK techniques, which comes in handy for threat detection.</p>
+<div class="alert alert-note">
+  <div>
+    With that said, each event can only be tagged with a single MITRE technique ID. For example, under many configurations, a credential dumping technique (T1003) conducted using PowerShell will be mapped to the <a href="https://redcanary.com/threat-detection-report/techniques/credential-dumping/">T1086 technique</a>.
+  </div>
+</div>
+<p>Atomic Red Team can be 
+<a href="https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/install-atomicredteam.ps1" target="_blank" rel="noopener">installed</a> in much the same way. For convenience, the installation for both apps is bundled into a wrapper function that takes the VM name and a switch parameter for each app.</p>
+<pre><code class="language-bash">Install-AzLabApps -VMNames &quot;winsrv&quot; -InstallSysmon -InstallAtomicRedTeam
+</code></pre>
+<h3 id="removing-vms">Removing VMs</h3>
+<p>It can be a little fiddly to deprovision a VM in Azure, since removing a VM leaves behind its resources (disks, NICs, etc.). The order in which you delete the resources also matters &ndash; Azure will complain if you remove the NIC without deleting the VM to which it&rsquo;s attached, for example. To handle this, I wrote the <code>Remove-AzLabVM</code> function, which looks for all resources associated with the VM and specifies the order in which to delete them.</p>
+<p>Here&rsquo;s the code for removing a single VM.</p>
+<pre><code class="language-bash"># get all resources associated with the VM (they all share the same prefix)
+$res = Get-AzResource -ResourceGroupName $ResourceGroupName -Name &quot;$VMName*&quot;
+
+# determine the order in which they are removed
+$indices = @(
+    [array]::IndexOf($res.Name, $VMName),
+    [array]::IndexOf($res.Name, &quot;$VMName-nic&quot;),
+    [array]::IndexOf($res.Name, &quot;$VMName-pip&quot;),
+    [array]::IndexOf($res.Name, &quot;$VMName-disk&quot;)
+)
+
+# remove each resource (if found)
+foreach ($idx in $indices) {
+    if ($idx -ge 0) {
+        Remove-AzResource -ResourceId $res[$idx].Id -Force | Out-Null
+    }
+}
+</code></pre>
+<p>There are some big assumptions made here, of course. First, the resource names must all share the VM name as a common prefix. The other constraint is that a VM is assumed to come with one drive, one NIC, and one public IP address. For those of you using a variable number of VM resources, you are likely better off testing the ResourceType attribute of each resource in your deletion logic (Fig. 2).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-testing-the-resourcetype-attribute-can-help-to-properly-deprovision-a-virtual-machine">
+
+
+  <a data-fancybox="" href="/threatlab/vm-resources.png" data-caption="&lt;b&gt;Fig. 2.&lt;/b&gt; Testing the ResourceType attribute can help to properly deprovision a virtual machine.">
+
+
+  <img src="/threatlab/vm-resources.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2.</b> Testing the ResourceType attribute can help to properly deprovision a virtual machine.
+  </figcaption>
+
+
+</figure>
+
+<h1 id="event-logging">Event logging</h1>
+<p>We have the infrastructure. Now we need some logs. As mentioned earlier, we will be forwarding logs from the VMs to an Azure Log Analytics workspace for analysis. To do this, we will install the Microsoft Monitoring Agent extension into each VM. On Windows, we will configure event logs and Sysmon logs. On Linux, we can forward Syslog events to the workspace.</p>
+<p>The following discussion refers to functions within the 
+<a href="https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/AzLab.LogAnalytics.psm1" target="_blank" rel="noopener"><code>AzLab.LogAnalytics</code></a> module.</p>
+<h2 id="log-collection">Log collection</h2>
+<p>The <code>Install-AzLabLogAnalyticsWorkspace</code> function creates the workspace and configures a data source that collects logs from connected VMs. By default, the workspace will collect Windows event logs from Microsoft-Windows-Sysmon/Operational.</p>
+<p>For Linux systems, the workspace will collect Syslogs from several 
+<a href="https://en.wikipedia.org/wiki/Syslog#Facility" target="_blank" rel="noopener">facilities</a> by default: auth, authpriv, daemon, kern, syslog, and user.</p>
+<p>Next, we need to install the monitoring extension into each VM, one for each OS type. This is done through <code>Connect-VMsToLogAnalytics</code>. We always have the option of running an installation script on the VM (as was done for Sysmon), but we have available to us a library function fit for purpose: <code>Set-AzVMExtension</code>. The code below will install the VM extension, supplying the log workspace key as a protected setting, and the workspace ID as a regular setting.</p>
+<pre><code class="language-bash">$wskey = Get-AzOperationalInsightsWorkspaceSharedKey `
+    -ResourceGroupName $ResourceGroupName -Name $ws.Name
+Set-AzVMExtension -Name $extname -VMName $VMName `
+    -Settings @{ &quot;workspaceId&quot; = $ws.CustomerId } `
+    -ProtectedSettings @{ &quot;workspaceKey&quot; = $wskey.PrimarySharedKey } `
+    -ResourceGroupName $ResourceGroupName -Location $rg.Location `
+    -ExtensionType $extname `
+    -Publisher &quot;Microsoft.EnterpriseCloud.Monitoring&quot; `
+    -TypeHandlerVersion $thver -ErrorAction &quot;Stop&quot; | Out-Null
+</code></pre>
+<p>Importantly, the VM needs to be able to communicate with a few 
+<a href="https://docs.microsoft.com/en-us/services-hub/health/mma-setup" target="_blank" rel="noopener">Azure endpoints</a> for the installation to succeed. Before starting the installation, <code>Connect-VMsToLogAnalytics</code> will add an outbound security rule to allow HTTPS traffic (AllowSecureHTTP).</p>
+<p>We should make sure that everything is running as it should. Let&rsquo;s try to find some Syslogs from the Linux VM in the Log Analytics workspace.</p>
+<pre><code class="language-bash">$ws = Get-AzOperationalInsightsWorkspace -ResourceGroupName &quot;azlabs-rg&quot; -Name &quot;log-ws&quot;
+$res = Invoke-AzOperationalInsightsQuery -WorkspaceId $ws.CustomerId `
+    -Query &quot;Syslog | where Computer == 'linuxsrv' | top 4 by TimeGenerated&quot;
+$res.Results | Select TimeGenerated,Computer,Facility,SeverityLevel
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-we-have-ourselves-some-syslogs">
+
+
+  <a data-fancybox="" href="/threatlab/syslog-logs.png" data-caption="&lt;b&gt;Fig. 3.&lt;/b&gt; We have ourselves some Syslogs.">
+
+
+  <img src="/threatlab/syslog-logs.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3.</b> We have ourselves some Syslogs.
+  </figcaption>
+
+
+</figure>
+
+<p>Do we have any Sysmon events on the Windows VM?</p>
+<pre><code class="language-bash">$res = Invoke-AzOperationalInsightsQuery -WorkspaceId $ws.CustomerId `
+    -Query &quot;Event | where Computer == 'winsrv' &quot; `
+        + &quot;and Source == 'Microsoft-Windows-Sysmon' | top 4 by TimeGenerated&quot;
+$res.Results | Select TimeGenerated,Computer,Source,EventID
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-4b-sysmon-is-alive-too">
+
+
+  <a data-fancybox="" href="/threatlab/sysmon-logs.png" data-caption="&lt;b&gt;Fig. 4.&lt;/b&gt; Sysmon is alive, too.">
+
+
+  <img src="/threatlab/sysmon-logs.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 4.</b> Sysmon is alive, too.
+  </figcaption>
+
+
+</figure>
+
+<h2 id="sysmon-parsing">Sysmon parsing</h2>
+<p>Before we get into the good stuff, note that the EventData field, with all of its useful information, is a hot mess (Fig. 5). The RenderedDescription field is marginally better, but only because it removes the tags. Neither field on its own will make it easy to generate performant queries &ndash; although I&rsquo;m definitely shooting for clarity over performance!</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-5b-a-raw-sysmon-event-showing-the-contents-of-the-eventdata-field">
+
+
+  <a data-fancybox="" href="/threatlab/sysmon-raw.png" data-caption="&lt;b&gt;Fig. 5.&lt;/b&gt; A raw Sysmon event, showing the contents of the EventData field.">
+
+
+  <img src="/threatlab/sysmon-raw.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 5.</b> A raw Sysmon event, showing the contents of the EventData field.
+  </figcaption>
+
+
+</figure>
+
+<p>One way to deal with this is by using Kusto functions to parse the data. My (inefficient) solution uses regular expressions to 
+<a href="https://docs.microsoft.com/en-us/azure/data-explorer/kusto/query/extractfunction" target="_blank" rel="noopener">extract</a> certain data (MITRE technique ID, parent command, hashes, etc.) and include them as columns in the output.</p>
+<pre><code class="language-bash">Event
+| where Source == &quot;Microsoft-Windows-Sysmon&quot;
+| extend TechniqueID = extract(&quot;(technique_id=)(T[[:digit:]]+(.[[:digit:]]+)*)&quot;, 2, RenderedDescription)
+| extend ProcessGUID = extract(&quot;( ProcessGuid: {)(.*?)(} [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend Signed = tobool(extract(&quot;( Signed: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription))
+| extend CommandLine = extract(&quot;( CommandLine: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend ParentCommandLine = extract(&quot;( ParentCommandLine: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend GrantedAccess = extract(&quot;( GrantedAccess: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend QueryName = extract(&quot;( QueryName: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend Image = extract(&quot;( Image: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend ImageLoaded = extract(&quot;( ImageLoaded: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend ParentImage = extract(&quot;( ParentImage: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend TargetObject = extract(&quot;( TargetObject: )(.*?)( [[:alnum:]]{2,}: | $)&quot;, 2, RenderedDescription)
+| extend TargetFilename = extract(&quot;( TargetFilename: )(.*?)( [[:alnum:]]{2,}: | $)&quot;, 2, RenderedDescription)
+| extend TargetImage = extract(&quot;( TargetImage: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend SourceImage = extract(&quot;( SourceImage: )(.*?)( [[:alnum:]]{2,}: )&quot;, 2, RenderedDescription)
+| extend CallTrace = extract(&quot;( CallTrace: )(.*?)( [[:alnum:]]{2,}: | $)&quot;, 2, RenderedDescription)
+| extend SHA256 = extract(&quot;(SHA256=)(.*)(,)&quot;, 2, RenderedDescription)
+| project-keep TimeGenerated, Computer, EventID, TechniqueID, ProcessGUID, Signed, CommandLine, ParentCommandLine, GrantedAccess, QueryName, Image, ImageLoaded, ParentImage, TargetObject, TargetFilename, TargetImage, SourceImage, CallTrace, SHA256, RenderedDescription
+</code></pre>
+<div class="alert alert-note">
+  <div>
+    <p>It&rsquo;s handy to know how the lazy quantifier works in the above expressions. While the greedy expression <code>(.*)</code> expands to consume everything in its path, the lazy expression <code>(.*?)</code> will match as few characters as possible.</p>
+<figure >
+<p><a data-fancybox="" href="/threatlab/regex-greedy-vs-lazy.png" ></p>
+<p><img src="/threatlab/regex-greedy-vs-lazy.png" alt=""  >
+</a></p>
+</figure>
+<div><figcaption>
+<b>Fig. 6.</b> Greedy (left) versus lazy expressions in action.
+</fidcaption></div>
+  </div>
+</div>
+<p>You can then take that Kusto query and save it as a Log Analytics workspace function (let&rsquo;s name it Sysmon). This lets you use the function as if it were a table, as shown below.</p>
+<pre><code class="language-bash">Sysmon
+| where EventID == 1
+| top 10 by TimeGenerated
+</code></pre>
+<h1 id="threat-detection">Threat detection</h1>
+<p>Before getting into the final phase of this project, it is worth taking a moment to appreciate the challenges involved with scanning logs to identify threats<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>.</p>
+<p>A computer is never truly idle. Processes and network connections are being created and destroyed all the time. This translates to an <strong>enormous amount of logs</strong>. A skilled operator is fully aware that their actions are being logged and will move through their environment carefully, using specialized techniques to obfuscate their digital footprints. As a result, many log entries triggered by an intruder will look like ordinary system events. It is only through careful analysis (and sufficient monitoring) that an intruder&rsquo;s presence can be conclusively established.</p>
+<h2 id="baselining">Baselining</h2>
+<p>My first step is to get a feel for what kinds of events are showing up under normal conditions. In the real world, it&rsquo;s probably a good idea to use this information to reconfigure event logging at the host level, so as to reduce log noise. But here, I just want to know what to expect when I go looking for threat activity.</p>
+<div class="alert alert-note">
+  <div>
+    To keep things simple, my idea of &ldquo;normal&rdquo; in this case is &ldquo;idle&rdquo;. A proper baseline would instead feature activity associated with some kind of user workload (e.g., word processing, email, internet browsing, etc.).
+  </div>
+</div>
+<p>Three hour&rsquo;s worth of idle activity on one Windows VM has generated 2,211 Sysmon events. We can look into the properties of this event distribution with a couple of queries:</p>
+<pre><code class="language-bash"># event spread over time
+Sysmon
+| where TimeGenerated &gt; datetime(&quot;2021-8-20 22:35:00.0&quot;) and TimeGenerated &lt; datetime(&quot;2021-8-21 01:35:00.0&quot;)
+| summarize EventCount = count() by bin(TimeGenerated, 5min)
+
+# event ID count
+Sysmon
+| where TimeGenerated &gt; datetime(&quot;2021-8-20 22:35:00.0&quot;) and TimeGenerated &lt; datetime(&quot;2021-8-21 01:35:00.0&quot;)
+| summarize EventCount = count() by EventID
+| order by EventCount
+| top 8 by EventCount
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-7b-left-sysmon-event-count-over-time-right-event-count-by-id">
+
+
+  <a data-fancybox="" href="/threatlab/event-histogram.png" data-caption="&lt;b&gt;Fig. 7.&lt;/b&gt; Left: Sysmon event count over time. Right: Event count by ID.">
+
+
+  <img src="/threatlab/event-histogram.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 7.</b> Left: Sysmon event count over time. Right: Event count by ID.
+  </figcaption>
+
+
+</figure>
+
+<p>The most common event type (~44% of the total) is <strong>ID 7</strong> 
+<a href="https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-7-image-loaded" target="_blank" rel="noopener">(image loaded)</a>. Let&rsquo;s take a look at what things are frequently being loaded:</p>
+<pre><code class="language-bash">Sysmon
+| where TimeGenerated &gt; datetime(&quot;2021-8-20 22:35:00.0&quot;) and TimeGenerated &lt; datetime(&quot;2021-8-21 01:35:00.0&quot;)
+| where EventID == 7
+| extend ImageLoaded = tolower(extract(@&quot;(.*\\)*(.*$)&quot;, 2, ImageLoaded))
+| summarize EventCount = count() by ImageLoaded
+| order by EventCount
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-8b-top-modules-being-loaded-during-the-baseline-period">
+
+
+  <a data-fancybox="" href="/threatlab/event-loaded-images.png" data-caption="&lt;b&gt;Fig. 8.&lt;/b&gt; Top modules being loaded during the baseline period.">
+
+
+  <img src="/threatlab/event-loaded-images.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 8.</b> Top modules being loaded during the baseline period.
+  </figcaption>
+
+
+</figure>
+
+<p>After a little digging, we find that (a) the <code>vbscript.dll</code> event shows up in one-minute intervals, and (b) the other four top events always follow <code>vbscript.dll</code>. These latter events appear to either support the running of a script or involve anti-malware processes. Since the VM is provisioned with an Azure Marketplace disk image that likely does not have malware, we can reasonably conclude that the vast majority of ID 7 is noise.</p>
+<p>Here&rsquo;s a quick summary of my findings by event ID:</p>
+<ul>
+<li>ID 7, 
+<a href="https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-7-image-loaded" target="_blank" rel="noopener">image loaded</a>: 92% (902/980 events) are caused by <code>mpoav.dll</code> (Windows Defender), <code>amsi.dll</code> (Antimalware Scan Interface) and various script-related processes (<code>vbscript.dll</code>, <code>wshom.ocx</code>, <code>scrrun.dll</code>)</li>
+<li>ID 13, 
+<a href="https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-13-registryevent-value-set" target="_blank" rel="noopener">registry value set</a>: 93% (590/635 events) result from updates to <code>HKLM\System\CurrentControlSet\Services\W32Time\Config\LastKnownGoodTime</code> (Windows Time Service)</li>
+<li>ID 11, 
+<a href="https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-11-filecreate" target="_blank" rel="noopener">file create</a>: 55% (180/330 events) result from writing to <code>$env:WINDIR\ServiceState\EventLog\Data\lastalive[01].dat</code></li>
+<li>ID 10, 
+<a href="https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-10-processaccess" target="_blank" rel="noopener">process access</a>: 89% (119/133 events) originate from the Azure log collector</li>
+<li>ID 23, 
+<a href="https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-23-filedelete-file-delete-archived" target="_blank" rel="noopener">archived file delete</a>: 95% (52/55 events) originate from Windows Defender.</li>
+</ul>
+<p>As hinted at the start of this section, one way this information can be made actionable is by creating Sysmon configuration rules to exclude benign activity. ID 7 events are 
+<a href="https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?source=Sysmon&amp;eventID=7" target="_blank" rel="noopener">particularly noisy</a> and should be carefully filtered if they are to be of any use.</p>
+<h2 id="simulating-threat-activity">Simulating threat activity</h2>
+<p>Attackers have a wide variety of techniques at their disposal. If a defender is tasked with using Atomic Red Team to boost the detection capabilities of their organization&rsquo;s network infrastructure, how do they choose which techniques to target first? This depends on many things, including:</p>
+<ul>
+<li>the organization&rsquo;s attack surface,</li>
+<li>the industry (many APT groups tend to have a preference for certain sectors, e.g., finance in the case of the 
+<a href="https://attack.mitre.org/groups/G0080/" target="_blank" rel="noopener">Cobalt Group</a>),</li>
+<li>which vulnerabilities are currently in fashion (see also: 
+<a href="https://www.bugcrowd.com/blog/printnightmare-what-you-need-to-know/" target="_blank" rel="noopener">PrintNightmare</a> in 2021).</li>
+</ul>
+<p>Since the stakes are not so high in my humble cloudlab, I decided to let Red Canary help me with a 
+<a href="https://redcanary.com/threat-detection-report/techniques/" target="_blank" rel="noopener">top-10 list</a> from their 2021 Threat Detection Report. Right at the top of the list, involved with ~24% of all threats, is T1059: 
+<a href="https://redcanary.com/threat-detection-report/techniques/command-scripting-interpreter/" target="_blank" rel="noopener">Command and Scripting Interpreter</a>. This technique is associated with two sub-techniques: T1059.001 (PowerShell) and T1059.002 (Windows Command Shell), with the first of these being the topic of focus in this section.</p>
+<p>PowerShell is a great tool for administrators and adversaries alike, offering all kinds of functionality to discover information and execute code. There is certainly evidence of this on Atomic Red Team&rsquo;s 
+<a href="https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1059.001/T1059.001.md" target="_blank" rel="noopener">sub-technique page</a>, which shows you what an intruder can do with the tool. I have chosen to play with five tests from this list:</p>
+<ul>
+<li>T1059.001-1: Mimikatz</li>
+<li>T1059.001-4: Obfuscation Tests</li>
+<li>T1059.001-17: PowerShell EncodedCommand parameter variations</li>
+<li>T1059.001-19: PowerShell Command Execution</li>
+<li>T1059.001-20: PowerShell Invoke Known Malicious Cmdlets</li>
+</ul>
+<p>Let&rsquo;s remote in and set the stage. One thing that we need to do is put Windows Defender to bed before running all this malware. The last command actually fires the first test.</p>
+<pre><code class="language-bash"># start remote session
+Enter-PSSession -ComputerName $ip -Credential $cred -UseSSL `
+    -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck)
+
+# turn off real-time monitoring for Windows Defender
+Set-MpPreference -DisableRealtimeMonitoring $true
+
+# import module and verify
+Import-Module &quot;C:\AtomicRedTeam\invoke-atomicredteam\Invoke-AtomicRedTeam.psd1&quot; -Force
+
+# download test prerequisites
+Invoke-AtomicTest T1059.001 -GetPrereqs
+
+# fire in the hole!
+Invoke-AtomicTest T1059.001 -TestNumbers 1
+</code></pre>
+<p>The plan is to run three rounds of each test, with each round spaced by 20 seconds. That way, I can see which events are consistent across tests (and therefore useful for detection logic). You can see the results of running the tests in the histogram below (Fig. 9). The first two test sets (1 and 4) were run between 7:00 and 7:01.40 PM and the last three test sets (17, 19, 20) were run between 7:07 and 7:09.40 PM.</p>
+<pre><code class="language-bash">let StartTime = datetime(&quot;2021-8-21 18:55:00.0&quot;);
+Sysmon
+| where TimeGenerated &gt; StartTime and TimeGenerated &lt; datetime_add(&quot;minute&quot;, 20, StartTime)
+| summarize EventCount = count() by bin(TimeGenerated, 10s)
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-9b-sysmon-events-over-time-note-the-two-comb-like-patterns-that-show-up-during-the-test-interval-7-710-pm">
+
+
+  <a data-fancybox="" href="/threatlab/test-histogram.png" data-caption="&lt;b&gt;Fig. 9.&lt;/b&gt; Sysmon events over time. Note the two comb-like patterns that show up during the test interval (7-7:10 PM).">
+
+
+  <img src="/threatlab/test-histogram.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 9.</b> Sysmon events over time. Note the two comb-like patterns that show up during the test interval (7-7:10 PM).
+  </figcaption>
+
+
+</figure>
+
+<p>By comparing events across trials, it should be easier to distill the tell-tale signs of each technique and ignore irrelevant data. Let&rsquo;s now take a look at how to craft some detection logic, starting with T1059.001-1: Mimikatz.</p>
+<h2 id="creating-detection-logic">Creating detection logic</h2>
+<p>
+<a href="https://github.com/gentilkiwi/mimikatz" target="_blank" rel="noopener">Mimikatz</a> is a security tool that exploits Microsoft&rsquo;s authentication system to extract user credentials from memory. After a user logs on, their credential are stored in the process memory of the Local Security Authority Subsystem Service (LSASS). Mimikatz (and 
+<a href="https://attack.mitre.org/techniques/T1003/001/" target="_blank" rel="noopener">other credential dumpers</a>) work by opening the <code>lsass.exe</code> process, locating the LSA secrets key, and using this to decrypt the memory locations that hold the credentials.</p>
+<p>If we look for events that report <code>lsass.exe</code> being accessed during our three test rounds, we get three. That&rsquo;s nice. Each of these originates from PowerShell and grants the same access value of <code>0x1010</code>, which 
+<a href="https://threathunterplaybook.com/notebooks/windows/06_credential_access/WIN-170105221010.html" target="_blank" rel="noopener">has been observed</a> of Mimikatz in the wild.</p>
+<pre><code class="language-bash">let StartTime = datetime(&quot;2021-8-21 19:00:00.0&quot;);
+Sysmon
+| where TimeGenerated &gt; StartTime and TimeGenerated &lt; datetime_add(&quot;second&quot;, 60, StartTime)
+| extend SourceImage = tolower(extract(@&quot;(.*\\)*(.*$)&quot;, 2, SourceImage))
+| extend TargetImage = tolower(extract(@&quot;(.*\\)*(.*$)&quot;, 2, TargetImage))
+| where TargetImage == &quot;lsass.exe&quot;
+| project TimeGenerated, EventID, SourceImage, TargetImage, GrantedAccess
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-10b-looks-like-mimikatz-smells-like-mimikatz">
+
+
+  <a data-fancybox="" href="/threatlab/mimikatz-access.png" data-caption="&lt;b&gt;Fig. 10.&lt;/b&gt; Looks like Mimikatz. Smells like Mimikatz.">
+
+
+  <img src="/threatlab/mimikatz-access.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 10.</b> Looks like Mimikatz. Smells like Mimikatz.
+  </figcaption>
+
+
+</figure>
+
+<p>We have our detection logic for T1059.001-1: look for ID 10 events that access <code>lsass.exe</code> with <code>0x1010</code> permissions. But if we don&rsquo;t mind creating a few extra false positives, we can create a more general rule that says: &ldquo;if a new PowerShell process is being created from the command line, we don&rsquo;t like it&rdquo;. This is summarized by the query below, which looks for events that span the testing interval.</p>
+<pre><code class="language-bash">let StartTime = datetime(&quot;2021-8-21 19:00:00.0&quot;);
+Sysmon
+| where TimeGenerated &gt; StartTime and TimeGenerated &lt; datetime_add(&quot;minute&quot;, 10, StartTime)
+| where EventID ==1 and ParentImage endswith &quot;cmd.exe&quot; and CommandLine startswith &quot;powershell&quot;
+| project TimeGenerated, EventID, CommandLine
+</code></pre>
+<p>Not only does this query pick out T1059.001-1 (Mimikatz), it also detects traces of T1059.001-19 (PowerShell Command Execution), our fourth test.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-11b-the-results-of-that-query-look-shall-we-say-a-bit-suspicious">
+
+
+  <a data-fancybox="" href="/threatlab/id1-cmd-events.png" data-caption="&lt;b&gt;Fig. 11.&lt;/b&gt; The results of that query look, shall we say, a bit suspicious.">
+
+
+  <img src="/threatlab/id1-cmd-events.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 11.</b> The results of that query look, shall we say, a bit suspicious.
+  </figcaption>
+
+
+</figure>
+
+<p>It&rsquo;s high time we made some rules.</p>
+<h2 id="detection-in-azure-sentinel">Detection in Azure Sentinel</h2>
+<p>To configure Azure Sentinel for threat detection, we first need to enable it for the Log Analytics workspace. This can be done by running the <code>Connect-AzLogAnalyticsToSentinel</code> function.</p>
+<div class="alert alert-note">
+  <div>
+    This function (as well as the one discussed next) can be found in the <a href="https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/AzLab.LogAnalytics.psm1"><code>AzLab.LogAnalytics</code></a> module. Both are wrappers whose sole job is to set convenient defaults for their official <em>Az.SecurityInsights</em> counterparts.
+  </div>
+</div>
+<p>Next, create the rules with the <code>New-AzSentinelScheduledAlertRule</code> function. By default, rules are specified such that Sentinel will query the last 10 minutes of logs every 10 minutes. To confirm that the rules have been added properly, navigate to the Sentinel page within Azure Portal and click <strong>Analytics</strong> in the sidebar. So far, so good (Fig. 12).</p>
+<pre><code class="language-bash">New-AzSentinelScheduledAlertRule -Severity &quot;High&quot; -DisplayName &quot;T1059.001-1 (Mimikatz)&quot; `
+    -Query &quot;Sysmon | where EventID == 10 and TargetImage endswith 'lsass.exe'&quot; 
+
+New-AzSentinelScheduledAlertRule -Severity &quot;High&quot; -DisplayName &quot;T1059.001-19 (PoSh Exec)&quot; `
+    -Query &quot;Sysmon | where EventID == 1 and ParentImage endswith 'cmd.exe'&quot;
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-12b-two-azure-sentinel-rules-as-seen-from-the-portal-page">
+
+
+  <a data-fancybox="" href="/threatlab/sentinel-rules.png" data-caption="&lt;b&gt;Fig. 12.&lt;/b&gt; Two Azure Sentinel rules as seen from the portal page.">
+
+
+  <img src="/threatlab/sentinel-rules.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 12.</b> Two Azure Sentinel rules as seen from the portal page.
+  </figcaption>
+
+
+</figure>
+
+<p>Now all that&rsquo;s left to do is trigger the rules and wait for Sentinel to take notice. An inspection of the <strong>Incidents</strong> page will confirm that it most certainly has (Fig. 13).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-13b-two-fresh-incidents">
+
+
+  <a data-fancybox="" href="/threatlab/sentinel-alerts.png" data-caption="&lt;b&gt;Fig. 13.&lt;/b&gt; Two fresh incidents.">
+
+
+  <img src="/threatlab/sentinel-alerts.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 13.</b> Two fresh incidents.
+  </figcaption>
+
+
+</figure>
+
+<h1 id="summary">Summary</h1>
+<p>Well, that turned into an odyssey.</p>
+<p>At some point I&rsquo;ll come back and replace this section with an actual summary, but now is not the time for reflection. I need a beer.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>Or as others have put it, &ldquo;finding a needle in a haystack of needles&rdquo;.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/azure/">azure</a>
+  
+  <a class="badge badge-light" href="/tag/sentinel/">sentinel</a>
+  
+  <a class="badge badge-light" href="/tag/log-analytics/">log-analytics</a>
+  
+  <a class="badge badge-light" href="/tag/powershell/">powershell</a>
+  
+  <a class="badge badge-light" href="/tag/atomic-red-team/">atomic-red-team</a>
+  
+  <a class="badge badge-light" href="/tag/syslog/">syslog</a>
+  
+  <a class="badge badge-light" href="/tag/sysmon/">sysmon</a>
+  
+  <a class="badge badge-light" href="/tag/mitre-attck/">mitre-att&amp;ck</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/threatlab/&amp;text=Threat%20detection%20with%20Atomic%20Red%20Team%20and%20Azure%20Sentinel" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/threatlab/&amp;t=Threat%20detection%20with%20Atomic%20Red%20Team%20and%20Azure%20Sentinel" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Threat%20detection%20with%20Atomic%20Red%20Team%20and%20Azure%20Sentinel&amp;body=https://www.remotelycurious.net/post/threatlab/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/threatlab/&amp;title=Threat%20detection%20with%20Atomic%20Red%20Team%20and%20Azure%20Sentinel" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=Threat%20detection%20with%20Atomic%20Red%20Team%20and%20Azure%20Sentinel%20https://www.remotelycurious.net/post/threatlab/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/threatlab/&amp;title=Threat%20detection%20with%20Atomic%20Red%20Team%20and%20Azure%20Sentinel" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/activelab/">Building an Active Directory lab with Proxmox</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.b2ed8054531fc8b77a9c500d5dfef876.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

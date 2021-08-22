@@ -23,9 +23,6 @@
 &lt;a href=&#34;https://www.remotelycurious.net/post/homelab&#34;&gt;my previous homelab writeup&lt;/a&gt;, I thought it would be good to write this up to consolidate all the loose bits of information that I picked up along the way. For the initial domain controller installation, I took some hints from The Cyber Mentor&amp;rsquo;s guide for 
 &lt;a href=&#34;https://www.youtube.com/watch?v=xftEuVQ7kY0&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;building an AD hacking lab&lt;/a&gt;, as well as the documentation for 
 &lt;a href=&#34;https://pve.proxmox.com/wiki/Main_Page&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Proxmox&lt;/a&gt; for advice on setting up Windows VMs.&lt;/p&gt;
-&lt;!-- The documentation for [Proxmox](https://pve.proxmox.com/wiki/Main_Page)
-The Cyber Mentor&#39;s guide for [building an AD hacking lab](https://www.youtube.com/watch?v=xftEuVQ7kY0)
-Although TCM&#39;s motivations for the lab are very different (i.e., a proving ground for attacking system vulnerabilities) --&gt;
 &lt;h2&gt;Table of Contents&lt;/h2&gt;
 &lt;nav id=&#34;TableOfContents&#34;&gt;
   &lt;ul&gt;
@@ -65,7 +62,7 @@ Although TCM&#39;s motivations for the lab are very different (i.e., a proving g
 &lt;h1 id=&#34;objectives&#34;&gt;Objectives&lt;/h1&gt;
 &lt;p&gt;My general motive is to learn more about the importance of Active Directory in securing a Windows network. Aside from this, I have some specific plans for how I will put this AD lab to use, which I talk about briefly at the end of the writeup. Most of these plans involve learning something that I have never used or seen in action (PowerShell, group policies, Windows events), so this should be fun!&lt;/p&gt;
 &lt;h1 id=&#34;requirements&#34;&gt;Requirements&lt;/h1&gt;
-&lt;p&gt;Since most of my goals have something to do with Windows administration, I will be building a Windows &amp;ldquo;corporate network&amp;rdquo;, consisting of one Active Directory (AD) domain controller and a fleet of two Windows workstations. These will eventually be configured to push event logs to a fourth machine, which will be responsible for event querying and log analysis. All of these machines will be implemented as Proxmox VMs that are connected to the same (virtual) network segment.&lt;/p&gt;
+&lt;p&gt;Since most of my immediate goals have something to do with Windows administration, I will be building a Windows &amp;ldquo;corporate network&amp;rdquo;, consisting of one Active Directory (AD) domain controller and a fleet of two Windows workstations. In a future project, these will eventually be configured to push event logs to a fourth machine, which will be responsible for event querying and log analysis. All of these machines will be implemented as Proxmox VMs that are connected to the same (virtual) network segment.&lt;/p&gt;
 &lt;p&gt;To realize this tiny network, I could configure the workstation VMs individually, but setting up an AD domain will allow me to manage the workstations from the domain controller using group policies and PowerShell remote sessions. Individual VM configuration can therefore be limited to the initial OS/driver installation and static IP assignment. I like to think that this approach is scalable and bears some resemblance to how actual sysadmins carry out (a very small subset of) their duties.&lt;/p&gt;
 &lt;div class=&#34;alert alert-note&#34;&gt;
   &lt;div&gt;
@@ -406,9 +403,6 @@ Although TCM&#39;s motivations for the lab are very different (i.e., a proving g
     Note to self: learn how to do this through PowerShell. Way too much clicking.
   &lt;/div&gt;
 &lt;/div&gt;
-&lt;!-- Group Policy Management
-Forest: labs.remotelycurious.net &gt; Domains &gt; labs.remotelycurious.net &gt; Default Domain Policy &gt; EDIT
-Group policy management Editor --&gt;
 &lt;h4 id=&#34;1-enable-remote-management-winrm&#34;&gt;1. Enable Remote Management (WinRM)&lt;/h4&gt;
 &lt;p&gt;Find &lt;em&gt;Windows Remote Management&lt;/em&gt; under Computer Configuration &amp;raquo; Policies &amp;raquo; Windows Settings &amp;raquo; Security Settings &amp;raquo; System Services, right-click and hit &lt;strong&gt;Properties&lt;/strong&gt;. Check &lt;em&gt;Define this policy setting&lt;/em&gt; and select the &lt;em&gt;Automatic&lt;/em&gt; service startup mode before clicking &lt;strong&gt;OK&lt;/strong&gt;.&lt;/p&gt;
 
@@ -445,8 +439,6 @@ Group policy management Editor --&gt;
 
 &lt;/figure&gt;
 
-&lt;!-- Computer Configuration &gt; Policies &gt; Windows Settings &gt; Security Settings &gt; System Services 
-Windows Remote Management Properties -&gt; Define this policy setting, Automatic startup --&gt;
 &lt;h4 id=&#34;2-allow-remote-management-through-winrm&#34;&gt;2. Allow remote management through WinRM&lt;/h4&gt;
 &lt;p&gt;After enabling the service, the next step is to actually allow it to operate. Find the &lt;em&gt;Allow remote server management through WinRM&lt;/em&gt; setting under Computer Configuration &amp;raquo; Policies &amp;raquo; Administrative Templates &amp;raquo; Windows Components &amp;raquo; Windows Remote Management &amp;raquo; WinRM Service, right-click and choose &lt;strong&gt;Edit&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;Here we can choose which IPs will be allowed to establish a remote connection. After enabling the setting, fill in the IPv4 field appropriately and click &lt;strong&gt;OK&lt;/strong&gt;. In my case, the Windows network spans from 192.168.0.11 to 192.168.0.22, and I want to be able to remote from any PC to any other one, just for fun.&lt;/p&gt;
@@ -484,10 +476,6 @@ Windows Remote Management Properties -&gt; Define this policy setting, Automatic
 
 &lt;/figure&gt;
 
-&lt;!-- Computer Configuration &gt; Policies &gt; Administrative Templates &gt; Windows Components &gt; Windows Remote Management &gt; WinRM Service
-Allow remote server management through WinRM -&gt; Edit
-    -&gt; Enabled
-    -&gt; IPv4 filter: 192.168.0.11-192.168.0.22 --&gt;
 &lt;h4 id=&#34;3-add-winrm-firewall-exception&#34;&gt;3. Add WinRM firewall exception&lt;/h4&gt;
 &lt;p&gt;We&amp;rsquo;ve hit the last stretch, in which we have to allow the remote connection through the firewall. This is done by making an inbound port exception for the WinRM service, which runs on port 5985. Dig up the &lt;em&gt;Define inbound port exceptions&lt;/em&gt; setting under Computer Configuration &amp;raquo; Policies &amp;raquo; Administrative Templates &amp;raquo; Network &amp;raquo; Network Connections &amp;raquo; Windows Defender Firewall &amp;raquo; Domain Profile, right-click and choose &lt;strong&gt;Edit&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;After clicking &lt;strong&gt;Enabled&lt;/strong&gt;, click &lt;strong&gt;Show&lt;/strong&gt; under &lt;em&gt;Define port exceptions&lt;/em&gt;. Each exception is specified in the format &lt;code&gt;&amp;lt;port&amp;gt;:&amp;lt;transport&amp;gt;:&amp;lt;scope&amp;gt;:&amp;lt;status&amp;gt;:&amp;lt;name&amp;gt;&lt;/code&gt;, where&lt;/p&gt;
@@ -536,10 +524,6 @@ Allow remote server management through WinRM -&gt; Edit
 &lt;p&gt;We have ourselves a miniature enterprise Windows network, complete with a domain controller and remote management capabilities. There are certainly ways I can make it better (maybe configure WinRM to use TLS?) but it will do the job for now.&lt;/p&gt;
 &lt;p&gt;I&amp;rsquo;m really keen to see if I can use this network as a platform for threat detection. Right now, my thinking is to set up event forwarding such that a selection of Windows events from the AD network is shipped to an Elastic Stack SIEM for log analysis. The idea would be to generate test threats (maybe with Atomic Red Team) and see if I can detect any malicious activity using Elasticsearch queries.&lt;/p&gt;
 &lt;p&gt;But, that&amp;rsquo;s a post for another day.&lt;/p&gt;
-&lt;!-- Computer Configuration &gt; Policies &gt; Administrative Templates &gt; Network &gt; Network Connections &gt; Windows Defender Firewall &gt; Domain Profile
-Define inbound port exceptions -&gt; Edit
-Define port exceptions:
-    -&gt; 5985:TCP:localsubnet:enabled:WinRM --&gt;
 </description>
     </item>
     

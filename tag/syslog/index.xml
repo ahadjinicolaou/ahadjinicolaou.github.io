@@ -1,0 +1,815 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>syslog | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/tag/syslog/</link>
+      <atom:link href="https://www.remotelycurious.net/tag/syslog/index.xml" rel="self" type="application/rss+xml" />
+    <description>syslog</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sat, 21 Aug 2021 20:32:25 -0400</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>syslog</title>
+      <link>https://www.remotelycurious.net/tag/syslog/</link>
+    </image>
+    
+    <item>
+      <title>Threat detection with Atomic Red Team and Azure Sentinel</title>
+      <link>https://www.remotelycurious.net/post/threatlab/</link>
+      <pubDate>Sat, 21 Aug 2021 20:32:25 -0400</pubDate>
+      <guid>https://www.remotelycurious.net/post/threatlab/</guid>
+      <description>&lt;p&gt;It&amp;rsquo;s tough to defend an enterprise network against modern cyberattacks. Scale is an issue on its own, considering that the network of a large company can contain thousands of devices, each with their own set of vulnerabilities and permitted network traffic. The situation isn&amp;rsquo;t made any easier by the recent surge in remote work, in which employees bring their own devices (and introduce new security flaws) into the network. All of this makes the lives of cybercriminals much easier, as they find themselves with an ever-increasing array of options to conduct a breach.&lt;/p&gt;
+&lt;p&gt;An initial intrusion into the network, while useful, does not usually offer immediate value to a cybercriminal. The real payoff tends to occur after an extensive discovery phase during which the intruder navigates through different servers and takes advantage of misconfigurations, weak passwords, and other vulnerabilities to elevate their account privileges and push further into the network. One approach defenders can take towards protecting their networks is to give up on the idea that they can prevent every breach and instead focus on detecting operators that have already gained access. This approach is effective because while it can take seconds to execute the breach, it might be months before an intruder can find their way through the network and discover the goods. As long as there is sufficient monitoring, there will be more opportunities to identify the activities of an intruder and contain the damage.&lt;/p&gt;
+&lt;p&gt;These ideas were discussed recently in a 
+&lt;a href=&#34;https://www.youtube.com/watch?v=zIwUBTGjbws&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;presentation&lt;/a&gt; by Peter Morin, who made a great argument for the value in classifying cyber adversary behaviors using the 
+&lt;a href=&#34;https://attack.mitre.org/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;MITRE ATT&amp;amp;CK&lt;/a&gt; framework and then looking for signs of these behaviors in Sysmon event logs. To get a feel for what this is like in practice, I developed a virtualized environment using Microsoft Azure, which is the subject of this writeup.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#approach&#34;&gt;Approach&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#infrastructure&#34;&gt;Infrastructure&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#virtual-network&#34;&gt;Virtual network&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#virtual-machines&#34;&gt;Virtual machines&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;a href=&#34;#applications&#34;&gt;Applications&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&#34;#removing-vms&#34;&gt;Removing VMs&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#event-logging&#34;&gt;Event logging&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#log-collection&#34;&gt;Log collection&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#sysmon-parsing&#34;&gt;Sysmon parsing&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#threat-detection&#34;&gt;Threat detection&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#baselining&#34;&gt;Baselining&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#simulating-threat-activity&#34;&gt;Simulating threat activity&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#creating-detection-logic&#34;&gt;Creating detection logic&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#detection-in-azure-sentinel&#34;&gt;Detection in Azure Sentinel&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;approach&#34;&gt;Approach&lt;/h1&gt;
+&lt;p&gt;The main goal of this project is to find out how to identify malicious network activity through log analysis. This can be done in many ways, but after some research, I shelled out some specifics in my approach:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;use 
+&lt;a href=&#34;https://atomicredteam.io/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Atomic Red Team&lt;/a&gt; to simulate network attacks&lt;/li&gt;
+&lt;li&gt;use 
+&lt;a href=&#34;https://attack.mitre.org/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;MITRE ATT&amp;amp;CK&lt;/a&gt; to describe adversary behaviors&lt;/li&gt;
+&lt;li&gt;use 
+&lt;a href=&#34;https://www.sumologic.com/blog/windows-event-logging/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Windows event logs&lt;/a&gt; and 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Sysmon&lt;/a&gt; logs to observe network activity&lt;/li&gt;
+&lt;li&gt;use 
+&lt;a href=&#34;&#34;&gt;Azure Sentinel&lt;/a&gt; to perform threat detection&lt;/li&gt;
+&lt;li&gt;virtualize the required lab infrastructure using 
+&lt;a href=&#34;https://azure.microsoft.com&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Azure&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- https://twitter.com/Cyb3rWard0g/status/1428718505105534980?s=20 sysmon for linux! soonish! --&gt;
+&lt;p&gt;Atomic Red Team was developed specifically to help security teams test their systems against ATT&amp;amp;CK-specified tactics and techniques. The ATT&amp;amp;CK framework itself allows for organizations to not only understand how hostile operators might act to compromise their systems, but also to evaluate their own defenses against these behaviors.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s talk about Windows event logs. They are free, but they are 
+&lt;a href=&#34;https://www.exabeam.com/information-security/extracting-actionable-information-from-windows-events/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;notorious&lt;/a&gt; for being extremely noisy, poorly defined, and difficult to interpret. Enter  Sysmon (System Monitor). In stark contrast to Windows&#39; native logging solution, Sysmon captures all kinds of useful information by way of a compact, nonredundant event list. It&amp;rsquo;s also free.&lt;/p&gt;
+&lt;p&gt;Although I could always implement this environment with my 
+&lt;a href=&#34;https://www.remotelycurious.net/post/homelab/&#34;&gt;homelab&lt;/a&gt;, I&amp;rsquo;ve been looking for an excuse to learn more about the cloud. Since Microsoft is offering a year&amp;rsquo;s worth of free-tier cloud services (plus $200 worth of starter credit) for new Azure customers, I figure now is as good a time as any to have a play.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    One (self-imposed) restriction is that PowerShell must be used to configure and provision everything. That way, I can completely regenerate my Azure environment if I screw it up! The other advantage is that scripts are self-documenting, so they might help others looking to achieve similiar things.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;infrastructure&#34;&gt;Infrastructure&lt;/h1&gt;
+&lt;p&gt;The first order of business is to create some Azure virtual machines that will generate our logs. These logs will be shipped to a Log Analytics workspace, which will be configured to detect Atomic Red Team 
+&lt;a href=&#34;https://atomicredteam.io/testing&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;functional tests&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;As suggested earlier, we will use scripts to provision the VMs. You can create Azure VMs in different 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-general&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;em&gt;sizes&lt;/em&gt;&lt;/a&gt;, which refers to their compute, memory and storage capacities. The B1s VMs cost nothing under the free tier, so they&amp;rsquo;ll be seeing a lot of use in this project.&lt;/p&gt;
+&lt;p&gt;A quick note on terminology: virtual machines and other entities managed by Azure are called &lt;em&gt;resources&lt;/em&gt;. They must exist inside a &lt;em&gt;resource group&lt;/em&gt;, a container that can be used to group related resources. Every resource (and resource group) requires a &lt;em&gt;location&lt;/em&gt; (e.g., East US), which tells Azure which cluster of datacenters should hold the resource&amp;rsquo;s data. Since the resource group and location will be identical for all resources, we will store them as global variables within the &lt;code&gt;$AzGlobals&lt;/code&gt; hash table, initialized with a 
+&lt;a href=&#34;https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/set-azlab-globals.ps1&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;script&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;You can find the repository for my work 
+&lt;a href=&#34;https://github.com/ahadjinicolaou/azure-cloudlab&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;here&lt;/a&gt;. I have organized the code for provisioning and configuring Azure resources into two PowerShell modules:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/AzLab.Infrastructure.psm1&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;AzLab.Infrastructure&lt;/code&gt;&lt;/a&gt;, for setting up VMs and network connectivity,&lt;/li&gt;
+&lt;li&gt;
+&lt;a href=&#34;https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/AzLab.LogAnalytics.psm1&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;AzLab.LogAnalytics&lt;/code&gt;&lt;/a&gt;, for configuring log collection from the VMs.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let&amp;rsquo;s start talking about the functions in the first module.&lt;/p&gt;
+&lt;h2 id=&#34;virtual-network&#34;&gt;Virtual network&lt;/h2&gt;
+&lt;p&gt;Since the VMs we create will be managed remotely, they will need internet connectivity. For this, we need to create a 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;virtual network&lt;/a&gt; (&lt;code&gt;azlabs-vnet&lt;/code&gt;). Within the &lt;code&gt;azlabs-vnet&lt;/code&gt; address space of &lt;code&gt;192.168.0.0/24&lt;/code&gt;, there will be two virtual subnets, one for Windows VMs and one for Linux VMs.&lt;/p&gt;
+&lt;p&gt;To filter network traffic between resources, 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;network security groups&lt;/a&gt; are applied to each subnet. Essentially, these are groups of security rules (or ACLs) that allow or deny packets based on their features, including their protocol, direction, source, and destination. We will configure an NSG to enforce two security rules for remote management:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;AllowSSH (allow inbound TCP, destination port 22)&lt;/li&gt;
+&lt;li&gt;AllowSecureWinRM (allow inbound TCP, destination port 5986).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The virtual network can be created by running &lt;code&gt;Install-AzLabRemoteAccessVNet&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;virtual-machines&#34;&gt;Virtual machines&lt;/h2&gt;
+&lt;p&gt;When invoked with &lt;code&gt;OperatingSystem=&amp;quot;WindowsServer&amp;quot;&lt;/code&gt;, the function &lt;code&gt;New-AzLabVM&lt;/code&gt; will create a new Windows virtual machine, assign it a public IP address, and attach it to the Windows subnet, &lt;code&gt;192.168.0.0/28&lt;/code&gt;. If the &lt;code&gt;Credential&lt;/code&gt; parameter is specified, it will be used to configure a login account for the system, but otherwise, the user will be asked to enter a username/password pair. Currently, these VMs are set to use either a Windows Server 2019 image or a Windows 10 Desktop image (&lt;code&gt;OperatingSystem=&amp;quot;Windows10&amp;quot;&lt;/code&gt;) from the 
+&lt;a href=&#34;https://azuremarketplace.microsoft.com/en-us/marketplace/apps/microsoftwindowsserver.windowsserver&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Azure Marketplace&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;To manage the Windows VMs remotely, we will use PowerShell to create a connection using the 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Windows_Remote_Management&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;WinRM&lt;/a&gt; protocol. All transmitted data will be encrypted using TLS (as foreshadowed by the AllowSecureWinRM security rule above), which means we will need to generate a certificate for all VMs on the domain. This is done using &lt;code&gt;New-AzSelfSignedDomainCert&lt;/code&gt;, which takes a domain and certificate password as inputs.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;Unfortunately, I couldn&amp;rsquo;t find a way to properly specify the certificate common name (CN). My expectation was that it should be &lt;code&gt;*.DOMAIN&lt;/code&gt;. Alternatively, if we create one certificate for each VM, the CN should be the &lt;a href=&#34;https://en.wikipedia.org/wiki/Fully_qualified_domain_name&#34;&gt;FQDN&lt;/a&gt; for each VM. In my case, the FQDN for a VM with hostname &lt;code&gt;winsrv&lt;/code&gt; looks like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;winsrv.xxxxxxxxxxxxxxxxxxxxxxxxxx.xx.internal.cloudapp.net
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;No dice, either way. We can still get a remote login, but we&amp;rsquo;ll have to skip CN validation. Feels a bit dirty&amp;hellip;&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;We can create a Windows Server VM (hostname &lt;code&gt;winsrv&lt;/code&gt;) with the following commands:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$cred = Get-Credential -UserName $username
+New-AzLabVM -OperatingSystem &amp;quot;WindowsServer&amp;quot; -VMNames &amp;quot;winsrv&amp;quot; `
+    -Credential $cred -CertPassword $cred.Password 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Assuming the public IP address is in &lt;code&gt;$ip&lt;/code&gt;, we can remote into the machine like so:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;Enter-PSSession -ComputerName $ip -Credential $cred -UseSSL `
+    -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can also create Linux VMs with &lt;code&gt;New-AzLabVM&lt;/code&gt; by setting &lt;code&gt;OperatingSystem=&amp;quot;Linux&amp;quot;&lt;/code&gt;. This will create an Ubuntu Server VM using an image from Azure Marketplace and connect it to the Linux subnet, &lt;code&gt;192.168.0.16/28&lt;/code&gt;. As with the Windows VM, this one takes a &lt;code&gt;Credential&lt;/code&gt; parameter that configures an account on the system. We can go a step further and disable password authentication to rely completely on SSH keys for remote access. That means we need to generate a local public/private key pair and then add the public key to the VM&amp;rsquo;s configuration (details to follow).&lt;/p&gt;
+&lt;p&gt;I will be using the OpenSSH client to generate a local private/public key pair. The idea here is to copy the public key to a user account on any VM we want to manage remotely. Then, when logging in as that user via SSH, we can use the private key to authenticate.&lt;/p&gt;
+&lt;p&gt;After installing OpenSSH, fire up your favorite shell and run &lt;code&gt;ssh-keygen&lt;/code&gt;. After following the prompts, if all goes well, you will have two new files located in &lt;code&gt;~/.ssh&lt;/code&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;id_rsa&lt;/code&gt;, the private key, and&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;id_rsa.pub&lt;/code&gt;, the public key to be sent to the VMs.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We can provision a Linux VM (hostname &lt;code&gt;linuxsrv&lt;/code&gt;) with the following commands:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$cred = Get-Credential -UserName $username
+New-AzLabVM -OperatingSystem &amp;quot;Linux&amp;quot; -VMNames &amp;quot;linuxsrv&amp;quot; -Credential $cred
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With the private key in place, you should be able to remote in via SSH like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;ssh USERNAME@IP
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As an aside, the 
+&lt;a href=&#34;https://portal.azure.com&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Azure Portal&lt;/a&gt; has a nice feature that lets you visualize the network topology for your virtual networks. Once you&amp;rsquo;ve got the &lt;em&gt;Virtual network&lt;/em&gt; page up for a given vnet, click &lt;strong&gt;Diagram&lt;/strong&gt; under Monitoring in the sidebar to bring it up.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-diagram-of-the-azlabs-vnet-virtual-network-consisting-of-one-subnet-for-each-vm-linuxsrv-and-winsrv-the-network-security-group-subnet-nsg-is-acting-on-both-subnets&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/vm-diagram.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Diagram of the &amp;lt;code&amp;gt;azlabs-vnet&amp;lt;/code&amp;gt; virtual network, consisting of one subnet for each VM (&amp;lt;code&amp;gt;linuxsrv&amp;lt;/code&amp;gt; and &amp;lt;code&amp;gt;winsrv&amp;lt;/code&amp;gt;). The network security group (&amp;lt;code&amp;gt;subnet-nsg&amp;lt;/code&amp;gt;) is acting on both subnets.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/vm-diagram.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Diagram of the &lt;code&gt;azlabs-vnet&lt;/code&gt; virtual network, consisting of one subnet for each VM (&lt;code&gt;linuxsrv&lt;/code&gt; and &lt;code&gt;winsrv&lt;/code&gt;). The network security group (&lt;code&gt;subnet-nsg&lt;/code&gt;) is acting on both subnets.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h3 id=&#34;applications&#34;&gt;Applications&lt;/h3&gt;
+&lt;p&gt;Sysmon doesn&amp;rsquo;t come with Windows, but we can get it quite easily by putting together an 
+&lt;a href=&#34;https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/install-sysmon.ps1&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;installation script&lt;/a&gt; and running it on the target VM.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;Invoke-AzVMRunCommand -ResourceGroupName $ResourceGroupName -VMName $VMName `
+    -CommandId &amp;quot;RunPowerShellScript&amp;quot; -ScriptPath &amp;quot;.\install-sysmon.ps1&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After making sure that Sysmon isn&amp;rsquo;t already installed, the script proceeds to download and install Sysmon, pulling the configuration from Olaf Hartong&amp;rsquo;s 
+&lt;a href=&#34;https://github.com/olafhartong/sysmon-modular&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;sysmon-modular&lt;/a&gt; repository. This particular configuration tags events with their associated MITRE ATT&amp;amp;CK techniques, which comes in handy for threat detection.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    With that said, each event can only be tagged with a single MITRE technique ID. For example, under many configurations, a credential dumping technique (T1003) conducted using PowerShell will be mapped to the &lt;a href=&#34;https://redcanary.com/threat-detection-report/techniques/credential-dumping/&#34;&gt;T1086 technique&lt;/a&gt;.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Atomic Red Team can be 
+&lt;a href=&#34;https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/install-atomicredteam.ps1&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;installed&lt;/a&gt; in much the same way. For convenience, the installation for both apps is bundled into a wrapper function that takes the VM name and a switch parameter for each app.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;Install-AzLabApps -VMNames &amp;quot;winsrv&amp;quot; -InstallSysmon -InstallAtomicRedTeam
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;removing-vms&#34;&gt;Removing VMs&lt;/h3&gt;
+&lt;p&gt;It can be a little fiddly to deprovision a VM in Azure, since removing a VM leaves behind its resources (disks, NICs, etc.). The order in which you delete the resources also matters &amp;ndash; Azure will complain if you remove the NIC without deleting the VM to which it&amp;rsquo;s attached, for example. To handle this, I wrote the &lt;code&gt;Remove-AzLabVM&lt;/code&gt; function, which looks for all resources associated with the VM and specifies the order in which to delete them.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s the code for removing a single VM.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;# get all resources associated with the VM (they all share the same prefix)
+$res = Get-AzResource -ResourceGroupName $ResourceGroupName -Name &amp;quot;$VMName*&amp;quot;
+
+# determine the order in which they are removed
+$indices = @(
+    [array]::IndexOf($res.Name, $VMName),
+    [array]::IndexOf($res.Name, &amp;quot;$VMName-nic&amp;quot;),
+    [array]::IndexOf($res.Name, &amp;quot;$VMName-pip&amp;quot;),
+    [array]::IndexOf($res.Name, &amp;quot;$VMName-disk&amp;quot;)
+)
+
+# remove each resource (if found)
+foreach ($idx in $indices) {
+    if ($idx -ge 0) {
+        Remove-AzResource -ResourceId $res[$idx].Id -Force | Out-Null
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There are some big assumptions made here, of course. First, the resource names must all share the VM name as a common prefix. The other constraint is that a VM is assumed to come with one drive, one NIC, and one public IP address. For those of you using a variable number of VM resources, you are likely better off testing the ResourceType attribute of each resource in your deletion logic (Fig. 2).&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-testing-the-resourcetype-attribute-can-help-to-properly-deprovision-a-virtual-machine&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/vm-resources.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; Testing the ResourceType attribute can help to properly deprovision a virtual machine.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/vm-resources.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; Testing the ResourceType attribute can help to properly deprovision a virtual machine.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h1 id=&#34;event-logging&#34;&gt;Event logging&lt;/h1&gt;
+&lt;p&gt;We have the infrastructure. Now we need some logs. As mentioned earlier, we will be forwarding logs from the VMs to an Azure Log Analytics workspace for analysis. To do this, we will install the Microsoft Monitoring Agent extension into each VM. On Windows, we will configure event logs and Sysmon logs. On Linux, we can forward Syslog events to the workspace.&lt;/p&gt;
+&lt;p&gt;The following discussion refers to functions within the 
+&lt;a href=&#34;https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/AzLab.LogAnalytics.psm1&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;&lt;code&gt;AzLab.LogAnalytics&lt;/code&gt;&lt;/a&gt; module.&lt;/p&gt;
+&lt;h2 id=&#34;log-collection&#34;&gt;Log collection&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;Install-AzLabLogAnalyticsWorkspace&lt;/code&gt; function creates the workspace and configures a data source that collects logs from connected VMs. By default, the workspace will collect Windows event logs from Microsoft-Windows-Sysmon/Operational.&lt;/p&gt;
+&lt;p&gt;For Linux systems, the workspace will collect Syslogs from several 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Syslog#Facility&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;facilities&lt;/a&gt; by default: auth, authpriv, daemon, kern, syslog, and user.&lt;/p&gt;
+&lt;p&gt;Next, we need to install the monitoring extension into each VM, one for each OS type. This is done through &lt;code&gt;Connect-VMsToLogAnalytics&lt;/code&gt;. We always have the option of running an installation script on the VM (as was done for Sysmon), but we have available to us a library function fit for purpose: &lt;code&gt;Set-AzVMExtension&lt;/code&gt;. The code below will install the VM extension, supplying the log workspace key as a protected setting, and the workspace ID as a regular setting.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$wskey = Get-AzOperationalInsightsWorkspaceSharedKey `
+    -ResourceGroupName $ResourceGroupName -Name $ws.Name
+Set-AzVMExtension -Name $extname -VMName $VMName `
+    -Settings @{ &amp;quot;workspaceId&amp;quot; = $ws.CustomerId } `
+    -ProtectedSettings @{ &amp;quot;workspaceKey&amp;quot; = $wskey.PrimarySharedKey } `
+    -ResourceGroupName $ResourceGroupName -Location $rg.Location `
+    -ExtensionType $extname `
+    -Publisher &amp;quot;Microsoft.EnterpriseCloud.Monitoring&amp;quot; `
+    -TypeHandlerVersion $thver -ErrorAction &amp;quot;Stop&amp;quot; | Out-Null
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Importantly, the VM needs to be able to communicate with a few 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/services-hub/health/mma-setup&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Azure endpoints&lt;/a&gt; for the installation to succeed. Before starting the installation, &lt;code&gt;Connect-VMsToLogAnalytics&lt;/code&gt; will add an outbound security rule to allow HTTPS traffic (AllowSecureHTTP).&lt;/p&gt;
+&lt;p&gt;We should make sure that everything is running as it should. Let&amp;rsquo;s try to find some Syslogs from the Linux VM in the Log Analytics workspace.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ws = Get-AzOperationalInsightsWorkspace -ResourceGroupName &amp;quot;azlabs-rg&amp;quot; -Name &amp;quot;log-ws&amp;quot;
+$res = Invoke-AzOperationalInsightsQuery -WorkspaceId $ws.CustomerId `
+    -Query &amp;quot;Syslog | where Computer == &#39;linuxsrv&#39; | top 4 by TimeGenerated&amp;quot;
+$res.Results | Select TimeGenerated,Computer,Facility,SeverityLevel
+&lt;/code&gt;&lt;/pre&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-we-have-ourselves-some-syslogs&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/syslog-logs.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; We have ourselves some Syslogs.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/syslog-logs.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; We have ourselves some Syslogs.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Do we have any Sysmon events on the Windows VM?&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$res = Invoke-AzOperationalInsightsQuery -WorkspaceId $ws.CustomerId `
+    -Query &amp;quot;Event | where Computer == &#39;winsrv&#39; &amp;quot; `
+        + &amp;quot;and Source == &#39;Microsoft-Windows-Sysmon&#39; | top 4 by TimeGenerated&amp;quot;
+$res.Results | Select TimeGenerated,Computer,Source,EventID
+&lt;/code&gt;&lt;/pre&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-sysmon-is-alive-too&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/sysmon-logs.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4.&amp;lt;/b&amp;gt; Sysmon is alive, too.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/sysmon-logs.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4.&lt;/b&gt; Sysmon is alive, too.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;sysmon-parsing&#34;&gt;Sysmon parsing&lt;/h2&gt;
+&lt;p&gt;Before we get into the good stuff, note that the EventData field, with all of its useful information, is a hot mess (Fig. 5). The RenderedDescription field is marginally better, but only because it removes the tags. Neither field on its own will make it easy to generate performant queries &amp;ndash; although I&amp;rsquo;m definitely shooting for clarity over performance!&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-5b-a-raw-sysmon-event-showing-the-contents-of-the-eventdata-field&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/sysmon-raw.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 5.&amp;lt;/b&amp;gt; A raw Sysmon event, showing the contents of the EventData field.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/sysmon-raw.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 5.&lt;/b&gt; A raw Sysmon event, showing the contents of the EventData field.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;One way to deal with this is by using Kusto functions to parse the data. My (inefficient) solution uses regular expressions to 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/azure/data-explorer/kusto/query/extractfunction&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;extract&lt;/a&gt; certain data (MITRE technique ID, parent command, hashes, etc.) and include them as columns in the output.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;Event
+| where Source == &amp;quot;Microsoft-Windows-Sysmon&amp;quot;
+| extend TechniqueID = extract(&amp;quot;(technique_id=)(T[[:digit:]]+(.[[:digit:]]+)*)&amp;quot;, 2, RenderedDescription)
+| extend ProcessGUID = extract(&amp;quot;( ProcessGuid: {)(.*?)(} [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend Signed = tobool(extract(&amp;quot;( Signed: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription))
+| extend CommandLine = extract(&amp;quot;( CommandLine: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend ParentCommandLine = extract(&amp;quot;( ParentCommandLine: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend GrantedAccess = extract(&amp;quot;( GrantedAccess: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend QueryName = extract(&amp;quot;( QueryName: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend Image = extract(&amp;quot;( Image: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend ImageLoaded = extract(&amp;quot;( ImageLoaded: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend ParentImage = extract(&amp;quot;( ParentImage: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend TargetObject = extract(&amp;quot;( TargetObject: )(.*?)( [[:alnum:]]{2,}: | $)&amp;quot;, 2, RenderedDescription)
+| extend TargetFilename = extract(&amp;quot;( TargetFilename: )(.*?)( [[:alnum:]]{2,}: | $)&amp;quot;, 2, RenderedDescription)
+| extend TargetImage = extract(&amp;quot;( TargetImage: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend SourceImage = extract(&amp;quot;( SourceImage: )(.*?)( [[:alnum:]]{2,}: )&amp;quot;, 2, RenderedDescription)
+| extend CallTrace = extract(&amp;quot;( CallTrace: )(.*?)( [[:alnum:]]{2,}: | $)&amp;quot;, 2, RenderedDescription)
+| extend SHA256 = extract(&amp;quot;(SHA256=)(.*)(,)&amp;quot;, 2, RenderedDescription)
+| project-keep TimeGenerated, Computer, EventID, TechniqueID, ProcessGUID, Signed, CommandLine, ParentCommandLine, GrantedAccess, QueryName, Image, ImageLoaded, ParentImage, TargetObject, TargetFilename, TargetImage, SourceImage, CallTrace, SHA256, RenderedDescription
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    &lt;p&gt;It&amp;rsquo;s handy to know how the lazy quantifier works in the above expressions. While the greedy expression &lt;code&gt;(.*)&lt;/code&gt; expands to consume everything in its path, the lazy expression &lt;code&gt;(.*?)&lt;/code&gt; will match as few characters as possible.&lt;/p&gt;
+&lt;figure &gt;
+&lt;p&gt;&lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/regex-greedy-vs-lazy.png&#34; &gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.remotelycurious.net/threatlab/regex-greedy-vs-lazy.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;&lt;/p&gt;
+&lt;/figure&gt;
+&lt;div&gt;&lt;figcaption&gt;
+&lt;b&gt;Fig. 6.&lt;/b&gt; Greedy (left) versus lazy expressions in action.
+&lt;/fidcaption&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;You can then take that Kusto query and save it as a Log Analytics workspace function (let&amp;rsquo;s name it Sysmon). This lets you use the function as if it were a table, as shown below.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;Sysmon
+| where EventID == 1
+| top 10 by TimeGenerated
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id=&#34;threat-detection&#34;&gt;Threat detection&lt;/h1&gt;
+&lt;p&gt;Before getting into the final phase of this project, it is worth taking a moment to appreciate the challenges involved with scanning logs to identify threats&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;A computer is never truly idle. Processes and network connections are being created and destroyed all the time. This translates to an &lt;strong&gt;enormous amount of logs&lt;/strong&gt;. A skilled operator is fully aware that their actions are being logged and will move through their environment carefully, using specialized techniques to obfuscate their digital footprints. As a result, many log entries triggered by an intruder will look like ordinary system events. It is only through careful analysis (and sufficient monitoring) that an intruder&amp;rsquo;s presence can be conclusively established.&lt;/p&gt;
+&lt;h2 id=&#34;baselining&#34;&gt;Baselining&lt;/h2&gt;
+&lt;p&gt;My first step is to get a feel for what kinds of events are showing up under normal conditions. In the real world, it&amp;rsquo;s probably a good idea to use this information to reconfigure event logging at the host level, so as to reduce log noise. But here, I just want to know what to expect when I go looking for threat activity.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    To keep things simple, my idea of &amp;ldquo;normal&amp;rdquo; in this case is &amp;ldquo;idle&amp;rdquo;. A proper baseline would instead feature activity associated with some kind of user workload (e.g., word processing, email, internet browsing, etc.).
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Three hour&amp;rsquo;s worth of idle activity on one Windows VM has generated 2,211 Sysmon events. We can look into the properties of this event distribution with a couple of queries:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;# event spread over time
+Sysmon
+| where TimeGenerated &amp;gt; datetime(&amp;quot;2021-8-20 22:35:00.0&amp;quot;) and TimeGenerated &amp;lt; datetime(&amp;quot;2021-8-21 01:35:00.0&amp;quot;)
+| summarize EventCount = count() by bin(TimeGenerated, 5min)
+
+# event ID count
+Sysmon
+| where TimeGenerated &amp;gt; datetime(&amp;quot;2021-8-20 22:35:00.0&amp;quot;) and TimeGenerated &amp;lt; datetime(&amp;quot;2021-8-21 01:35:00.0&amp;quot;)
+| summarize EventCount = count() by EventID
+| order by EventCount
+| top 8 by EventCount
+&lt;/code&gt;&lt;/pre&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-7b-left-sysmon-event-count-over-time-right-event-count-by-id&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/event-histogram.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 7.&amp;lt;/b&amp;gt; Left: Sysmon event count over time. Right: Event count by ID.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/event-histogram.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 7.&lt;/b&gt; Left: Sysmon event count over time. Right: Event count by ID.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;The most common event type (~44% of the total) is &lt;strong&gt;ID 7&lt;/strong&gt; 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-7-image-loaded&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;(image loaded)&lt;/a&gt;. Let&amp;rsquo;s take a look at what things are frequently being loaded:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;Sysmon
+| where TimeGenerated &amp;gt; datetime(&amp;quot;2021-8-20 22:35:00.0&amp;quot;) and TimeGenerated &amp;lt; datetime(&amp;quot;2021-8-21 01:35:00.0&amp;quot;)
+| where EventID == 7
+| extend ImageLoaded = tolower(extract(@&amp;quot;(.*\\)*(.*$)&amp;quot;, 2, ImageLoaded))
+| summarize EventCount = count() by ImageLoaded
+| order by EventCount
+&lt;/code&gt;&lt;/pre&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-8b-top-modules-being-loaded-during-the-baseline-period&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/event-loaded-images.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 8.&amp;lt;/b&amp;gt; Top modules being loaded during the baseline period.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/event-loaded-images.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 8.&lt;/b&gt; Top modules being loaded during the baseline period.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;After a little digging, we find that (a) the &lt;code&gt;vbscript.dll&lt;/code&gt; event shows up in one-minute intervals, and (b) the other four top events always follow &lt;code&gt;vbscript.dll&lt;/code&gt;. These latter events appear to either support the running of a script or involve anti-malware processes. Since the VM is provisioned with an Azure Marketplace disk image that likely does not have malware, we can reasonably conclude that the vast majority of ID 7 is noise.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s a quick summary of my findings by event ID:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ID 7, 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-7-image-loaded&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;image loaded&lt;/a&gt;: 92% (902/980 events) are caused by &lt;code&gt;mpoav.dll&lt;/code&gt; (Windows Defender), &lt;code&gt;amsi.dll&lt;/code&gt; (Antimalware Scan Interface) and various script-related processes (&lt;code&gt;vbscript.dll&lt;/code&gt;, &lt;code&gt;wshom.ocx&lt;/code&gt;, &lt;code&gt;scrrun.dll&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;ID 13, 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-13-registryevent-value-set&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;registry value set&lt;/a&gt;: 93% (590/635 events) result from updates to &lt;code&gt;HKLM\System\CurrentControlSet\Services\W32Time\Config\LastKnownGoodTime&lt;/code&gt; (Windows Time Service)&lt;/li&gt;
+&lt;li&gt;ID 11, 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-11-filecreate&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;file create&lt;/a&gt;: 55% (180/330 events) result from writing to &lt;code&gt;$env:WINDIR\ServiceState\EventLog\Data\lastalive[01].dat&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;ID 10, 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-10-processaccess&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;process access&lt;/a&gt;: 89% (119/133 events) originate from the Azure log collector&lt;/li&gt;
+&lt;li&gt;ID 23, 
+&lt;a href=&#34;https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon#event-id-23-filedelete-file-delete-archived&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;archived file delete&lt;/a&gt;: 95% (52/55 events) originate from Windows Defender.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;As hinted at the start of this section, one way this information can be made actionable is by creating Sysmon configuration rules to exclude benign activity. ID 7 events are 
+&lt;a href=&#34;https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?source=Sysmon&amp;amp;eventID=7&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;particularly noisy&lt;/a&gt; and should be carefully filtered if they are to be of any use.&lt;/p&gt;
+&lt;h2 id=&#34;simulating-threat-activity&#34;&gt;Simulating threat activity&lt;/h2&gt;
+&lt;p&gt;Attackers have a wide variety of techniques at their disposal. If a defender is tasked with using Atomic Red Team to boost the detection capabilities of their organization&amp;rsquo;s network infrastructure, how do they choose which techniques to target first? This depends on many things, including:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the organization&amp;rsquo;s attack surface,&lt;/li&gt;
+&lt;li&gt;the industry (many APT groups tend to have a preference for certain sectors, e.g., finance in the case of the 
+&lt;a href=&#34;https://attack.mitre.org/groups/G0080/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Cobalt Group&lt;/a&gt;),&lt;/li&gt;
+&lt;li&gt;which vulnerabilities are currently in fashion (see also: 
+&lt;a href=&#34;https://www.bugcrowd.com/blog/printnightmare-what-you-need-to-know/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;PrintNightmare&lt;/a&gt; in 2021).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Since the stakes are not so high in my humble cloudlab, I decided to let Red Canary help me with a 
+&lt;a href=&#34;https://redcanary.com/threat-detection-report/techniques/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;top-10 list&lt;/a&gt; from their 2021 Threat Detection Report. Right at the top of the list, involved with ~24% of all threats, is T1059: 
+&lt;a href=&#34;https://redcanary.com/threat-detection-report/techniques/command-scripting-interpreter/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Command and Scripting Interpreter&lt;/a&gt;. This technique is associated with two sub-techniques: T1059.001 (PowerShell) and T1059.002 (Windows Command Shell), with the first of these being the topic of focus in this section.&lt;/p&gt;
+&lt;p&gt;PowerShell is a great tool for administrators and adversaries alike, offering all kinds of functionality to discover information and execute code. There is certainly evidence of this on Atomic Red Team&amp;rsquo;s 
+&lt;a href=&#34;https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1059.001/T1059.001.md&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;sub-technique page&lt;/a&gt;, which shows you what an intruder can do with the tool. I have chosen to play with five tests from this list:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;T1059.001-1: Mimikatz&lt;/li&gt;
+&lt;li&gt;T1059.001-4: Obfuscation Tests&lt;/li&gt;
+&lt;li&gt;T1059.001-17: PowerShell EncodedCommand parameter variations&lt;/li&gt;
+&lt;li&gt;T1059.001-19: PowerShell Command Execution&lt;/li&gt;
+&lt;li&gt;T1059.001-20: PowerShell Invoke Known Malicious Cmdlets&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let&amp;rsquo;s remote in and set the stage. One thing that we need to do is put Windows Defender to bed before running all this malware. The last command actually fires the first test.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;# start remote session
+Enter-PSSession -ComputerName $ip -Credential $cred -UseSSL `
+    -SessionOption (New-PSSessionOption -SkipCACheck -SkipCNCheck)
+
+# turn off real-time monitoring for Windows Defender
+Set-MpPreference -DisableRealtimeMonitoring $true
+
+# import module and verify
+Import-Module &amp;quot;C:\AtomicRedTeam\invoke-atomicredteam\Invoke-AtomicRedTeam.psd1&amp;quot; -Force
+
+# download test prerequisites
+Invoke-AtomicTest T1059.001 -GetPrereqs
+
+# fire in the hole!
+Invoke-AtomicTest T1059.001 -TestNumbers 1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The plan is to run three rounds of each test, with each round spaced by 20 seconds. That way, I can see which events are consistent across tests (and therefore useful for detection logic). You can see the results of running the tests in the histogram below (Fig. 9). The first two test sets (1 and 4) were run between 7:00 and 7:01.40 PM and the last three test sets (17, 19, 20) were run between 7:07 and 7:09.40 PM.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;let StartTime = datetime(&amp;quot;2021-8-21 18:55:00.0&amp;quot;);
+Sysmon
+| where TimeGenerated &amp;gt; StartTime and TimeGenerated &amp;lt; datetime_add(&amp;quot;minute&amp;quot;, 20, StartTime)
+| summarize EventCount = count() by bin(TimeGenerated, 10s)
+&lt;/code&gt;&lt;/pre&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-9b-sysmon-events-over-time-note-the-two-comb-like-patterns-that-show-up-during-the-test-interval-7-710-pm&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/test-histogram.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 9.&amp;lt;/b&amp;gt; Sysmon events over time. Note the two comb-like patterns that show up during the test interval (7-7:10 PM).&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/test-histogram.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 9.&lt;/b&gt; Sysmon events over time. Note the two comb-like patterns that show up during the test interval (7-7:10 PM).
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;By comparing events across trials, it should be easier to distill the tell-tale signs of each technique and ignore irrelevant data. Let&amp;rsquo;s now take a look at how to craft some detection logic, starting with T1059.001-1: Mimikatz.&lt;/p&gt;
+&lt;h2 id=&#34;creating-detection-logic&#34;&gt;Creating detection logic&lt;/h2&gt;
+&lt;p&gt;
+&lt;a href=&#34;https://github.com/gentilkiwi/mimikatz&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Mimikatz&lt;/a&gt; is a security tool that exploits Microsoft&amp;rsquo;s authentication system to extract user credentials from memory. After a user logs on, their credential are stored in the process memory of the Local Security Authority Subsystem Service (LSASS). Mimikatz (and 
+&lt;a href=&#34;https://attack.mitre.org/techniques/T1003/001/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;other credential dumpers&lt;/a&gt;) work by opening the &lt;code&gt;lsass.exe&lt;/code&gt; process, locating the LSA secrets key, and using this to decrypt the memory locations that hold the credentials.&lt;/p&gt;
+&lt;p&gt;If we look for events that report &lt;code&gt;lsass.exe&lt;/code&gt; being accessed during our three test rounds, we get three. That&amp;rsquo;s nice. Each of these originates from PowerShell and grants the same access value of &lt;code&gt;0x1010&lt;/code&gt;, which 
+&lt;a href=&#34;https://threathunterplaybook.com/notebooks/windows/06_credential_access/WIN-170105221010.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;has been observed&lt;/a&gt; of Mimikatz in the wild.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;let StartTime = datetime(&amp;quot;2021-8-21 19:00:00.0&amp;quot;);
+Sysmon
+| where TimeGenerated &amp;gt; StartTime and TimeGenerated &amp;lt; datetime_add(&amp;quot;second&amp;quot;, 60, StartTime)
+| extend SourceImage = tolower(extract(@&amp;quot;(.*\\)*(.*$)&amp;quot;, 2, SourceImage))
+| extend TargetImage = tolower(extract(@&amp;quot;(.*\\)*(.*$)&amp;quot;, 2, TargetImage))
+| where TargetImage == &amp;quot;lsass.exe&amp;quot;
+| project TimeGenerated, EventID, SourceImage, TargetImage, GrantedAccess
+&lt;/code&gt;&lt;/pre&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-10b-looks-like-mimikatz-smells-like-mimikatz&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/mimikatz-access.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 10.&amp;lt;/b&amp;gt; Looks like Mimikatz. Smells like Mimikatz.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/mimikatz-access.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 10.&lt;/b&gt; Looks like Mimikatz. Smells like Mimikatz.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;We have our detection logic for T1059.001-1: look for ID 10 events that access &lt;code&gt;lsass.exe&lt;/code&gt; with &lt;code&gt;0x1010&lt;/code&gt; permissions. But if we don&amp;rsquo;t mind creating a few extra false positives, we can create a more general rule that says: &amp;ldquo;if a new PowerShell process is being created from the command line, we don&amp;rsquo;t like it&amp;rdquo;. This is summarized by the query below, which looks for events that span the testing interval.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;let StartTime = datetime(&amp;quot;2021-8-21 19:00:00.0&amp;quot;);
+Sysmon
+| where TimeGenerated &amp;gt; StartTime and TimeGenerated &amp;lt; datetime_add(&amp;quot;minute&amp;quot;, 10, StartTime)
+| where EventID ==1 and ParentImage endswith &amp;quot;cmd.exe&amp;quot; and CommandLine startswith &amp;quot;powershell&amp;quot;
+| project TimeGenerated, EventID, CommandLine
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Not only does this query pick out T1059.001-1 (Mimikatz), it also detects traces of T1059.001-19 (PowerShell Command Execution), our fourth test.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-11b-the-results-of-that-query-look-shall-we-say-a-bit-suspicious&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/id1-cmd-events.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 11.&amp;lt;/b&amp;gt; The results of that query look, shall we say, a bit suspicious.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/id1-cmd-events.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 11.&lt;/b&gt; The results of that query look, shall we say, a bit suspicious.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;It&amp;rsquo;s high time we made some rules.&lt;/p&gt;
+&lt;h2 id=&#34;detection-in-azure-sentinel&#34;&gt;Detection in Azure Sentinel&lt;/h2&gt;
+&lt;p&gt;To configure Azure Sentinel for threat detection, we first need to enable it for the Log Analytics workspace. This can be done by running the &lt;code&gt;Connect-AzLogAnalyticsToSentinel&lt;/code&gt; function.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    This function (as well as the one discussed next) can be found in the &lt;a href=&#34;https://github.com/ahadjinicolaou/azure-cloudlab/blob/master/AzLab.LogAnalytics.psm1&#34;&gt;&lt;code&gt;AzLab.LogAnalytics&lt;/code&gt;&lt;/a&gt; module. Both are wrappers whose sole job is to set convenient defaults for their official &lt;em&gt;Az.SecurityInsights&lt;/em&gt; counterparts.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Next, create the rules with the &lt;code&gt;New-AzSentinelScheduledAlertRule&lt;/code&gt; function. By default, rules are specified such that Sentinel will query the last 10 minutes of logs every 10 minutes. To confirm that the rules have been added properly, navigate to the Sentinel page within Azure Portal and click &lt;strong&gt;Analytics&lt;/strong&gt; in the sidebar. So far, so good (Fig. 12).&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;New-AzSentinelScheduledAlertRule -Severity &amp;quot;High&amp;quot; -DisplayName &amp;quot;T1059.001-1 (Mimikatz)&amp;quot; `
+    -Query &amp;quot;Sysmon | where EventID == 10 and TargetImage endswith &#39;lsass.exe&#39;&amp;quot; 
+
+New-AzSentinelScheduledAlertRule -Severity &amp;quot;High&amp;quot; -DisplayName &amp;quot;T1059.001-19 (PoSh Exec)&amp;quot; `
+    -Query &amp;quot;Sysmon | where EventID == 1 and ParentImage endswith &#39;cmd.exe&#39;&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-12b-two-azure-sentinel-rules-as-seen-from-the-portal-page&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/sentinel-rules.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 12.&amp;lt;/b&amp;gt; Two Azure Sentinel rules as seen from the portal page.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/sentinel-rules.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 12.&lt;/b&gt; Two Azure Sentinel rules as seen from the portal page.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Now all that&amp;rsquo;s left to do is trigger the rules and wait for Sentinel to take notice. An inspection of the &lt;strong&gt;Incidents&lt;/strong&gt; page will confirm that it most certainly has (Fig. 13).&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-13b-two-fresh-incidents&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/threatlab/sentinel-alerts.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 13.&amp;lt;/b&amp;gt; Two fresh incidents.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/threatlab/sentinel-alerts.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 13.&lt;/b&gt; Two fresh incidents.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;Well, that turned into an odyssey.&lt;/p&gt;
+&lt;p&gt;At some point I&amp;rsquo;ll come back and replace this section with an actual summary, but now is not the time for reflection. I need a beer.&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Or as others have put it, &amp;ldquo;finding a needle in a haystack of needles&amp;rdquo;.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
