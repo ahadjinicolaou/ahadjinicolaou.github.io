@@ -17,7 +17,7 @@
       <link>https://www.remotelycurious.net/post/activelab/</link>
       <pubDate>Sun, 11 Jul 2021 11:47:58 -0400</pubDate>
       <guid>https://www.remotelycurious.net/post/activelab/</guid>
-      <description>&lt;p&gt;Over the last couple of weeks, I decided that it would be good for my cybersecurity career ambitions to learn a little something about Windows administration. The phrase &amp;ldquo;active directory&amp;rdquo; is something that I&amp;rsquo;ve often heard popping up in discussions about Windows security in the context of both offensive and defensive activity. Since 
+      <description>&lt;p&gt;Over the last couple of weeks, I decided that it would be good to learn a little something about Windows administration. The phrase &amp;ldquo;active directory&amp;rdquo; is something that I&amp;rsquo;ve often heard popping up in discussions about Windows security in the context of both offensive and defensive activity. Since 
 &lt;a href=&#34;https://ww2.frost.com/frost-perspectives/active-directory-holds-the-keys-to-your-kingdom-but-is-it-secure/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;the vast majority of Fortune 500 companies&lt;/a&gt; make use of Active Directory in their corporate networks, perhaps it&amp;rsquo;s no small wonder.&lt;/p&gt;
 &lt;p&gt;To see what all the fuss is about (and maybe learn a thing or two), I built a virtualized Active Directory lab. As with 
 &lt;a href=&#34;https://www.remotelycurious.net/post/homelab&#34;&gt;my previous homelab writeup&lt;/a&gt;, I thought it would be good to write this up to consolidate all the loose bits of information that I picked up along the way. For the initial domain controller installation, I took some hints from The Cyber Mentor&amp;rsquo;s guide for 

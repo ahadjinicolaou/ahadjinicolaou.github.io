@@ -1,0 +1,1405 @@
+<!DOCTYPE html><html lang="en-us" >
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.8.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Alex Hadjinicolaou">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="When probability talks, you hear set theory.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.remotelycurious.net/post/probability-sets/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  <script src="/js/mathjax-config.js"></script>
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css" integrity="sha256-4w9DunooKSr3MFXHXWyFER38WmPdm361bQS/2KUWZbU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3V0ZLDM5G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url, target) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           if (target !== '_blank') {
+             document.location = url;
+           }
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target, event.target.getAttribute('target'));  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-Q3V0ZLDM5G', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+  
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="https://www.remotelycurious.net/post/probability-sets/">
+
+  
+  
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Remotely Curious">
+  <meta property="og:url" content="https://www.remotelycurious.net/post/probability-sets/">
+  <meta property="og:title" content="Probability, the art of counting things | Remotely Curious">
+  <meta property="og:description" content="When probability talks, you hear set theory."><meta property="og:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2022-01-12T11:53:38-05:00">
+    
+    <meta property="article:modified_time" content="2022-01-12T11:53:38-05:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.remotelycurious.net/post/probability-sets/"
+  },
+  "headline": "Probability, the art of counting things",
+  
+  "datePublished": "2022-01-12T11:53:38-05:00",
+  "dateModified": "2022-01-12T11:53:38-05:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Alex Hadjinicolaou"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Remotely Curious",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png"
+    }
+  },
+  "description": "When probability talks, you hear set theory."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Probability, the art of counting things | Remotely Curious</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+
+
+
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Remotely Curious</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#publications"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Probability, the art of counting things</h1>
+
+  
+  <p class="page-subtitle">When probability talks, you hear set theory.</p>
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Jan 12, 2022
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    18 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/category/analysis/">analysis</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      <p>You&rsquo;re walking down the street with your friend when a $50 bill floats down from the sky, flopping onto the sidewalk in front of you.</p>
+<p>A few hours later, the two of you are staring each other down over a small bar table. The rules are final: the winner of a first-to-ten game of Heads or Tails will take the money. You&rsquo;re up 8-7. As you prepare to flip the next coin, you hear a faint sound of screeching tires rapidly growing louder and louder. Suddenly, the room gets flooded with headlights and a car plows through the wall, sending bricks and beer everywhere. The game is abandoned without a winner. How do you share the money?<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<p>A slightly less dramatic version of this question was considered by two famous mathematicians, back in 1654. Through an exchange of 
+<a href="https://www.york.ac.uk/depts/maths/histstat/pascal.pdf" target="_blank" rel="noopener">letters</a>, Pascal and Pierre de Fermat reasoned that in this situation, it would make sense to imagine that the game continued to the end (and there <em>is</em> a winner), and give each player a fraction of the money proportional to the number of final outcomes that they would have won. In our example, with a score of 8-7, you would win more of those outcomes (11 out of 16) than your friend, and so you should get $ \$50 \times\frac{11}{16} = \$ 34.38. $</p>
+<p>These mathematicians basically reduced a philosophical problem (i.e., how to fairly redistribute the money) to one of <em>counting</em>, which turns out to be at the heart of all sorts of interesting problems in probability. Counting seems pretty straightforward in principle, but as with many things, the devil is in the details &mdash; depending on how and what you&rsquo;re counting, you might be in for some mental trauma. In this article, I&rsquo;ll go over the familiar idea of probability as <em>the frequency of something happening</em>, and introduce set theory as a language that allows for complex ideas to be modeled and manipulated in a very natural way. Nothing is assumed: we&rsquo;ll go through everything you need right here.</p>
+<h2>Table of Contents</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#the-meaning-of-probability">The meaning of probability</a></li>
+    <li><a href="#modeling-uncertainty">Modeling uncertainty</a></li>
+    <li><a href="#a-segue-into-set-theory">A segue into set theory</a>
+      <ul>
+        <li><a href="#set-operations">Set operations</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="#partitions-and-disjoint-sets">Partitions and disjoint sets</a></li>
+      </ul>
+    </li>
+    <li><a href="#naive-definition-of-probability">Naive definition of probability</a>
+      <ul>
+        <li>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#building-a-probability-model">Building a probability model</a>
+      <ul>
+        <li><a href="#a-quick-note-on-experiments">A quick note on experiments</a></li>
+        <li><a href="#choosing-your-sample-space">Choosing your sample space</a></li>
+      </ul>
+    </li>
+    <li><a href="#assigning-probability">Assigning probability</a>
+      <ul>
+        <li><a href="#probability-axioms">Probability axioms</a></li>
+        <li><a href="#properties-of-probability">Properties of probability</a>
+          <ul>
+            <li></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</nav>
+<h1 id="the-meaning-of-probability">The meaning of probability</h1>
+<p>What does it mean to talk about the &ldquo;probability&rdquo; of something happening? Take a moment and think about the meaning of the word in these two sentences:</p>
+<p>(a) the probability of your toast falling out of your plate and landing butter-side-up;<br>
+(b) the probability that the dog ate your homework.</p>
+<p>If you write the probability of (a) as $P(\textrm{falling toast lands butter-side-up}) = 0.3$, the usual interpretation might be something like, &ldquo;if I dropped my toast a thousand times, the percentage of times that it would land butter-side-up would be around 30%&rdquo;. In this situation, the meaning of probability is related to the <em>frequency</em> of something happening.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-1b-working-out-the-probability-of-buttered-side-up-as-a-frequency">
+
+
+  <a data-fancybox="" href="/probability-sets/toast-frequency.png" data-caption="&lt;b&gt;Fig. 1.&lt;/b&gt; Working out the probability of buttered-side-up as a frequency.">
+
+
+  <img src="/probability-sets/toast-frequency.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 1.</b> Working out the probability of buttered-side-up as a frequency.
+  </figcaption>
+
+
+</figure>
+
+<p>But what about (b)? It doesn&rsquo;t really make sense to imagine a thousand rounds of the dog eating your homework. Here, $P(\textrm{dog ate homework}) = 0.999$ is a statement of your <em>belief</em> that the dog, with bits of lined paper stuck to his mouth, almost certainly had his way with your homework.</p>
+<p>As you can see, the choice of interpretation depends on what you&rsquo;re trying to model. In either case, by assigning a probability to something, we&rsquo;re trying to describe a situation whose outcome is uncertain. We&rsquo;ll start talking about the essential ingredients for such a description, and get you acquainted with a handful of terms that are common in probability.</p>
+<h1 id="modeling-uncertainty">Modeling uncertainty</h1>
+<p>To model an uncertain situation, or an <em>experiment</em>, we need to work out:</p>
+<ol>
+<li>every possible thing that can happen, and</li>
+<li>the probability of each thing happening.</li>
+</ol>
+<p>The set of &ldquo;every possible thing that can happen&rdquo; is better known as the <em>sample space</em>, written as $\Omega$. In our &ldquo;falling toast&rdquo; situation, we could imagine that there are only two possible outcomes: (1) the toast lands butter-side-up (or &ldquo;face-up&rdquo;), denoted as $U$, or (2) it lands face-down, $D$. Then the sample space is the set of possibilities, $\Omega = \{U,D\}$.</p>
+<p>Now let&rsquo;s run through the probabilities for some &ldquo;things that can happen&rdquo;, which we define as <em>events</em>. We&rsquo;re really talking about subsets of the sample space. There are only two possible events in our experiment, and so they both have non-zero probabilities. Since $P(\{U\}) = 0.3$, we know intuitively that $P(\{D\}) = P(\{\textrm{not }U\}) = 1-0.3 = 0.7$. There&rsquo;s the (absolutely certain) event $\{U\textrm{ or } D\}$ that the toast lands either face-up <strong>or</strong> face-down, whose certainty is expressed as $P(\{U\textrm{ or } D\}) = 1$. We can also talk about impossible events, like the event that the toast lands simultaneously face-up <strong>and</strong> face-down, $\{U\textrm{ and } D\}$. This event is not in our sample space $\Omega$, so $P(\{U\textrm{ and } D\}) = 0$.</p>
+<div class="alert alert-note">
+  <div>
+    When expressing the probability of an event, the curly braces are often left out to keep the notation clean. Just keep in mind that whenever you see something like $P(U)$, and $U$ is not a set, it really means $P(\{U\})$.
+  </div>
+</div>
+<p>Let&rsquo;s take a step back and ask ourselves: what is an event, really? And what does it mean exactly to say things like &ldquo;and&rdquo;, &ldquo;or&rdquo; and &ldquo;not&rdquo;? We&rsquo;ve described events as being subsets of the sample space. This means that we can use the language of <em>set theory</em> to play around with events and express complex probabilistic situations with very little effort.</p>
+<h1 id="a-segue-into-set-theory">A segue into set theory</h1>
+<p>A <em>set</em> is an unordered, unique collection of items. Let&rsquo;s say we have an experiment that involves drawing a card from a standard, shuffled 52-card 
+<a href="https://en.wikipedia.org/wiki/Standard_52-card_deck" target="_blank" rel="noopener">deck</a>, with four suits (Clubs, Spades, Hearts, Diamonds) and thirteen ranks. In this case, the sample space $\Omega$ (the set of all cards in the deck) is one such set. Another set could be the collection of Heart and Diamond face cards,</p>
+<p>$$ S = \left\{ K\heartsuit, Q\heartsuit, J\heartsuit, K\diamondsuit, Q\diamondsuit, J\diamondsuit  \right\}. $$</p>
+<p>We would say that this is a 6-element <em>subset</em> of the 52-element sample space $\Omega$, because every element in $S$ can be found in $\Omega$. The number of elements in $S$ is written as $|S| = 6$. A set that has no elements is equivalent to the empty set, denoted by the $ \emptyset $ symbol.</p>
+<p>Take note of the definition: a set is an <em>unordered</em> and <em>unique</em> collection of items. That means the order in which you list the items of a set doesn&rsquo;t matter, and there can be no duplicates of an element.</p>
+<h2 id="set-operations">Set operations</h2>
+<p>Now we can start talking about manipulating sets. Although there are many ways to model an uncertain situation, some are more convenient than others. Generally, we like to play with sets that can be expressed concisely, and more importantly, allow us to avoid hard probability computations. Set operations are the tools that allow us to sculpt exactly the kinds of sets we want.</p>
+<div class="alert alert-note">
+  <div>
+    In this writeup, we deal with <em>countable</em> sets that have a finite number of elements. Countable sets are easier to play with, letting you focus on learning the fundamentals of probability. There can also be <em>infinite</em> countable sets, like the set of integers $\mathbb{Z}$, and <em>uncountable</em> sets (e.g., the set of real numbers $\mathbb{R}$). These species are trickier to deal with, but allow for the description of many more probabilistic experiments.
+  </div>
+</div>
+<p>The <em>complement</em> (&ldquo;not&rdquo;) operation is as simple as it is useful. With respect to the sample space $\Omega$, the complement of $S$ (written as $S^\complement$), is the set of all elements in $\Omega$ that are not in $S$. Imagine if you wanted to find the probability of &ldquo;anything other than a black King&rdquo;. You would probably much prefer to write this as $P(\{\textrm{black king}\}^\complement)$ or $P(\textrm{not black king})$, rather than listing every non-black-King card in a set. The complement of $\Omega$ is the empty set, $\emptyset$. Likewise, $\emptyset^\complement = \Omega$.</p>
+<p>The <em>union</em> of two sets $A$ and $B$ is the set of all elements in $\Omega$ that belong to either $A$ or $B$, inclusive. Using a little notation, we would write</p>
+<p>$$ A \cup B = \{x | x \textrm{ is in } A \textbf{ or } x \textrm{ is in } B\}, $$</p>
+<p>where the vertical line reads &ldquo;such that&rdquo;.</p>
+<p>The <em>intersection</em> of $A$ and $B$ is the set of all elements in $\Omega$ that are in both $A$ and $B$.</p>
+<p>$$ A \cap B = \{x | x \textrm{ is in } A \textbf{ and } x \textrm{ is in } B\} $$</p>
+<p>We can visualize the union and intersection sets with a couple of examples: $A$, the set of face cards, and $B$, the set of all Hearts and Clubs. The figure below shows cards that only belong to $A$ in yellow, and those exclusive to $B$ in blue. The cards common to both sets, shown in green, are the elements of the intersection $A \cap B$. The union of the two sets, $A \cup B$ is the set of all yellow, green, and blue cards.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-2b-the-two-sets-a-and-b-with-their-intersection-indicated-by-the-green-cards">
+
+
+  <a data-fancybox="" href="/probability-sets/deck-union-intersection.png" data-caption="&lt;b&gt;Fig. 2.&lt;/b&gt; The two sets $A$ and $B$, with their intersection indicated by the green cards.">
+
+
+  <img src="/probability-sets/deck-union-intersection.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 2.</b> The two sets $A$ and $B$, with their intersection indicated by the green cards.
+  </figcaption>
+
+
+</figure>
+
+<h4 id="de-morgans-laws">De Morgan&rsquo;s laws</h4>
+<p>In the last example we can express the cards that do not belong to either set (grey cards in Fig. 2) as $(A \cup B)^\complement$. Depending on the problem, you might find it easier to work out the probability of an intersection (or a union). We can alternate between intersections and unions using <em>De Morgan&rsquo;s laws</em>:</p>
+<p>$$ (A_{1} \cup A_{2} \cup &hellip; \cup A_{n})^\complement = A_{1}^\complement \cap A_{2}^\complement \cap &hellip; \cap A_{n}^\complement $$
+$$ (A_{1} \cap A_{2} \cap &hellip; \cap A_{n})^\complement = A_{1}^\complement \cup A_{2}^\complement \cup &hellip; \cup A_{n}^\complement $$</p>
+<p>What are these saying in English? $(A \cup B)^\complement$ is translated as &ldquo;everything other than $A$ or $B$&rdquo;, whereas $A^\complement \cap B^\complement$ can be read as &ldquo;not A and not B&rdquo;. Of course, these two are logically equivalent.</p>
+<div class="alert alert-note">
+  <div>
+    Try translating $(A \cap B)^\complement$ and its De Morgan counterpart. Sketch the fraction of $\Omega$ that the sets $(A \cap B)^\complement$ and $(A \cup B)^\complement$ represent in Fig. 2.
+  </div>
+</div>
+<p>So, we can use De Morgan&rsquo;s laws to switch between different representations of the same set. Don&rsquo;t worry if this seems a bit abstract right now &mdash; we&rsquo;ll see later on how this can be useful.</p>
+<h2 id="partitions-and-disjoint-sets">Partitions and disjoint sets</h2>
+<p>We&rsquo;ll round out our whirlwind tour of set theory with a brief discussion about <em>partitions</em>, which are a collection of subsets of some set that (a) have nothing in common with each other, and (b) completely exhaust (or account for) that set. You will often find yourself carving the sample space into partitions to work out the probability of some event. They also help in making sure your probability math checks out.</p>
+<p>The sample space of our card-drawing experiment can be split into a few different partitions. Here are a few examples:</p>
+<p>$$
+\begin{align}
+\Omega &amp;= \{\textrm{red suits}\} \cup \{\textrm{black suits}\} \\\<br>
+&amp;= \{\textrm{clubs}\} \cup \{\textrm{spades}\} \cup \{\textrm{hearts}\} \cup \{\textrm{diamonds}\} \\\<br>
+&amp;= \{\textrm{even rank}\} \cup \{\textrm{odd rank}\} \\\<br>
+&amp;= \{\textrm{rank } \leq 4\} \cup \{\textrm{rank } &gt; 4\}
+\end{align}
+$$</p>
+<p>We can see that in each partition, the intersection of any two sets is the empty set, and all elements of $\Omega$ are accounted for by their union. Note that when $A \cap B = \emptyset$, we say that $A$ and $B$ are <em>disjoint</em>, or mutually exclusive.</p>
+<p>There&rsquo;s nothing stopping us from making useless partitions &mdash; any collection of sets that satisfies the two listed restrictions can be a partition. That said, you&rsquo;ll usually want to split the sample space in a way that makes solving your problem easier.</p>
+<p>With some set theory under our belt, we&rsquo;re ready to return to the world of probability. Counting the number of things in sets is at the heart of probability, and naturally leads to its oldest and most familiar definition.</p>
+<h1 id="naive-definition-of-probability">Naive definition of probability</h1>
+<p>The probability of an event, <em>if each experiment outcome is equally likely</em>, can be worked out by counting the number of ways it could happen, and then dividing by the total number of outcomes.</p>
+<p>$$ P(E) = \frac{\textrm{number of favorable outcomes}}{\textrm{total number of outcomes}} $$</p>
+<p>When our assumption that every outcome has equal probability is justified (as when drawing a card from a well-shuffled, standard deck of cards), we can compute probabilities very easily. The probability of drawing a Diamond becomes $P(\textrm{diamond}) = \frac{\textrm{number of diamonds}}{\textrm{number of cards in deck}} = \frac{13}{52}$. In general, when there are $n$ elements in the sample space $\Omega$, and event $E$ is a k-element subset of $\Omega$,</p>
+<p>$$P(E) = \frac{|E|}{|\Omega|} = \frac{k}{n},$$</p>
+<p>where $|S|$ is the number of elements in set $S$.</p>
+<h4 id="about-that-assumption">About that assumption</h4>
+<p>It&rsquo;s easy to see how the naive definition breaks down when our &ldquo;all outcomes have equal likelihood&rdquo; assumption is not valid. Going back to our falling toast experiment, we have two outcomes: butter-side up, with $P(U) = 0.3$, and butter-side-down, with $P(D) = 0.7$. If we wanted to calculate $P(U)$ using the naive definition, we&rsquo;d get 1/2, which we know to be wrong.</p>
+<p>A more fundamental limitation is that this definition relies on events that are finite and countable. It wouldn&rsquo;t make sense to count the number of elements in an &ldquo;all even integers&rdquo; event, for example.</p>
+<div class="alert alert-note">
+  <div>
+    Ultimately, there are many situations in which it is perfectly reasonable to use the naive definition to compute your probabilities. Just keep in mind the limitations.
+  </div>
+</div>
+<h1 id="building-a-probability-model">Building a probability model</h1>
+<p>Here&rsquo;s a (mostly familiar) list of what we need to build a probability model:</p>
+<ol>
+<li>An <em>experiment</em>, a process that results in some kind of outcome,</li>
+<li>The <em>sample space</em>, containing all possible outcomes of the experiment,</li>
+<li>A <em>probability law</em> that assigns probability to each possible outcome.</li>
+</ol>
+<p>Our &ldquo;falling toast&rdquo; example has all of these: (1) an experiment (e.g., you knock the plate and the toast falls off the table), (2) a sample space $\Omega = \{U,D\}$, and the probability of each outcome.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-3b-components-of-a-probability-model-for-the-falling-toast-experiment">
+
+
+  <a data-fancybox="" href="/probability-sets/model-ingredients.png" data-caption="&lt;b&gt;Fig. 3.&lt;/b&gt; Components of a probability model for the falling toast experiment.">
+
+
+  <img src="/probability-sets/model-ingredients.png" alt=""  >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 3.</b> Components of a probability model for the falling toast experiment.
+  </figcaption>
+
+
+</figure>
+
+<p>Take a look at the sketch of the sample space above: it looks like the two possible outcomes are taking up different amounts of the sample space, in proportion to their probability. In fact, it&rsquo;s useful to think about the outcomes as taking up some amount of the total available probability. We&rsquo;ll explore this idea very soon.</p>
+<h2 id="a-quick-note-on-experiments">A quick note on experiments</h2>
+<p>Up until now our experiments have involved single, one-shot happenings: drawing a card, and dropping a slice of toast. But there&rsquo;s nothing stopping us from using more complicated experiments. For <em>sequential</em> experiments, like flipping a coin five times, each outcome is the result of multiple sub-outcomes chained together. Here, each element of $\Omega$ will look like $(c_{1},c_{2},c_{3},c_{4},c_{5})$, or $c_{1}c_{2}c_{3}c_{4}c_{5}$, where $c_{n}$ stands for the sub-outcome of the $n$th coin flip. We could then talk about the probability of an outcome like &ldquo;getting four Heads in a row&rdquo;, $P(HHHHT \textrm{ or } THHHH)$.</p>
+<div class="alert alert-note">
+  <div>
+    We&rsquo;ll introduce a little notation here: if element $k$ is an element of set $S$, then we write $k \in S$. In the last example, we have $HTTHT \in \Omega$.
+  </div>
+</div>
+<p>The sample spaces for sequential experiments tend to be quite a lot larger than their one-shot counterparts. To give you an idea, a single coin flip has only two possible outcomes, Heads and Tails, while the sample space for the &ldquo;five coin flips&rdquo; experiment has $|\Omega| = 2^5 = 32$ outcomes.</p>
+<h2 id="choosing-your-sample-space">Choosing your sample space</h2>
+<p>When deciding how to model your sample space, you need to ensure three things:</p>
+<ol>
+<li>the sample space is <em>collectively exhaustive</em> (accounts for every possible outcome),</li>
+<li>the elements are <em>mutually exclusive</em> (each element in the sample space is unique),</li>
+<li>the sample space is appropriately &ldquo;granular&rdquo;.</li>
+</ol>
+<p>That last point could do with some explanation. Let&rsquo;s dial it up to 11 for a second<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>.</p>
+<p>In our falling toast experiment, we chose a sample space of $\Omega = \{U,D\}$ because we were interested in whether the slice lands face-up or face-down. But imagine a situation in which a mischievous spirit has possessed our toaster. Now, the toaster launches buttered bread, out of the toaster and onto the floor. Not only that, the spirit has taken control of the toaster&rsquo;s heat setting, randomly using one of three heat levels for each slice of bread.</p>
+<p>Assuming you had a (slightly bizarre) interest in modeling this new experiment, you could choose a sample space $\Omega^{*}$ that has elements like $(r,h)$, where $r \in \{U,D\}$ is the face-up-or-down result, and $h \in \{H_{1}, H_{2}, H_{3}\}$ represents the heat level.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<figure id="figure-bfig-4b-two-different-sample-spaces">
+
+
+  <a data-fancybox="" href="/probability-sets/sample-spaces.png" data-caption="&lt;b&gt;Fig. 4.&lt;/b&gt; Two different sample spaces.">
+
+
+  <img src="/probability-sets/sample-spaces.png" alt="" width="360" >
+</a>
+
+
+  
+  
+  <figcaption>
+    <b>Fig. 4.</b> Two different sample spaces.
+  </figcaption>
+
+
+</figure>
+
+<p>Since $\Omega^{*}$ has just enough complexity to be used in our heat investigation, this sample space has the right level of granularity. On the other hand, the original $\Omega$ is not granular enough. You should choose a sample space that captures what you&rsquo;re interested in &mdash; and nothing more.</p>
+<h1 id="assigning-probability">Assigning probability</h1>
+<p>A probability law allocates probability to experiment outcomes. What are the rules for how this can be done? Up until now we&rsquo;ve tiptoed around these rules, abiding by them but never really mentioning them. It&rsquo;s time to change that. This section will go over the three fundamental axioms that underlie all of probability, and what this means for our calculations.</p>
+<h2 id="probability-axioms">Probability axioms</h2>
+<p>Imagine that the sample space is a cake whose weight is measured as <strong>one unit of probability</strong>. Each event $E$ is a slice of cake that has weight $P(E)$. This leads us to our first axiom, which says that this weight cannot be negative:</p>
+<p>$$\textbf{A1. } P(E) \geq 0 \textrm{ for event } E.$$</p>
+<p>The second axiom says that for two disjoint events (or two separate pieces of cake), their total weight is the sum of their individual weights:</p>
+<p>$$\textbf{A2. } P(E_{1} \cup E_{2}) = P(E_{1}) + P(E_{2}).$$</p>
+<p>The third and final axiom says that the total weight of the sample space (cake) is one probability unit:</p>
+<p>$$\textbf{A3. } P(\Omega) = 1.$$</p>
+<h2 id="properties-of-probability">Properties of probability</h2>
+<p>We can use the three axioms to derive all sorts of intuitive findings about probability, which we&rsquo;ll explore using some examples. It&rsquo;s worth spending some time with these to make sure you understand them, as they will crop up over and over again as you work with probability models.</p>
+<p>One of the most useful (and familiar) findings states that if the sample space consists of a finite number of unique elements $e_{i}$, we can work out the probability of any event $E = \{e_{1} \cup e_{2} \cup &hellip; \cup e_{n}\}$ by summing the probabilities of its elements:</p>
+<p>$$P(E) = P(e_{1}) + P(e_{2}) + &hellip; + P(e_{n}) = \sum_{i=1}^{n} P(e_{i})$$</p>
+<div class="alert alert-note">
+  <div>
+    Don&rsquo;t be intimidated by the big Greek letter! The notation on the right-hand side is just shorthand that lets us avoid writing big, clunky expressions. If we wanted the total probability of the second, third, and fourth elements, we&rsquo;d write $\sum_{i=2}^{4} P(e_{i}) = P(e_{2}) + P(e_{3}) + P(e_{4})$.
+  </div>
+</div>
+<div class="alert alert-note">
+  <div>
+    Remember that $P(e_{i})$ really means $P(\{e_{i}\})$, the probability of an event that consists of only one element, $e_{i}$.
+  </div>
+</div>
+<p>As a quick example, you can work out the probability of drawing a Spade face card by applying Axiom 2 and summing the individual probabilities,</p>
+<p>$$P(J\spadesuit \cup Q\spadesuit \cup K\spadesuit) = P(J\spadesuit) + P(Q\spadesuit) + P(K\spadesuit) = \frac{3}{52}.$$</p>
+<h4 id="model-a-flipping-a-fair-coin">Model A: flipping a fair coin</h4>
+<p>Here we&rsquo;re dealing with two equally likely outcomes, Heads or Tails, and so the sample space consists of two elements, $\Omega = \{H,T\}$. The set of all possible events is</p>
+<p>$$\{H\}, \{T\}, \{H \cup T\}, \emptyset$$</p>
+<p>Let&rsquo;s work out the probability of each event using the axioms.</p>
+<ul>
+<li>By definition, $P(H) = P(T) = 0.5$.</li>
+<li>We know that a coin cannot show both Heads and Tails, which means $H$ and $T$ are disjoint and $P(H \cup T) = P(H) + P(T)$.</li>
+<li>Since $H$ and $T$ are the only outcomes, the sets $\{H\}$ and $\{T\}$ are a partition for $\Omega$. That means $P(H \cup T) = P(\Omega) = 1$.</li>
+</ul>
+<p>What about $P(\emptyset)$? Since $\emptyset$ and $\Omega$ are disjoint, we can work out</p>
+<p>$$P(\emptyset \cup \Omega) = P(\emptyset) + P(\Omega) = P(\emptyset) + 1.$$</p>
+<p>Since probability can&rsquo;t be negative (or larger than 1), this tells us that $P(\emptyset) = 0$.</p>
+<p>The probability law (i.e., the assignment of probability for every event) thus falls out from a straightforward application of the axioms:</p>
+<p>$$P(H) = 0.5, P(T) = 0.5, P(\Omega) = P(H \cup T) = 1, P(\emptyset) = 0$$</p>
+<h4 id="model-b-flipping-an-unfair-toast-twice">Model B: flipping an unfair toast, twice</h4>
+<p>We return to our falling toast experiment, but with a wrinkle: we&rsquo;re interested in the outcome of two consecutive toast &lsquo;flips&rsquo;. That means we&rsquo;re now dealing with a sequential model, with sample space</p>
+<p>$$\Omega = \{DD, DU, UD, UU\}.$$</p>
+<p>How do we compute $P\{DU\}$? The outcome $DU$ means that we got face-down on the first flip and face-up on the second. We know that $P(U) = 0.3$ and $P(D) = 0.7$. Since the outcome of the first flip <em>has nothing to do with the outcome of the second</em> (and vice versa), we can compute the probability like this:</p>
+<p>$$P(DU) = P(D) \times P(U) = 0.7 \times 0.3 = 0.21.$$</p>
+<p>Similarly, we can work out all the other probabilities, making sure that their sum accounts for the entire weight of the sample space,</p>
+<p>$$
+\begin{align}
+\sum_{i=1}^{4} P(e_{i}) &amp;= P(DD) + P(DU) + P(UD) + P(UU) \\\<br>
+&amp;= 0.09 + 0.21 + 0.21 + 0.49 = 1 = P(\Omega).
+\end{align}
+$$</p>
+<p>How would we compute the probability of ending up with at least one face-up slice of toast? We&rsquo;re interested in the probability that we get one face-up slice <strong>or</strong> two face-up slices. That&rsquo;s just a matter of summing the probability of all outcomes that lead to this particular result:</p>
+<p>$$
+\begin{align}
+P(\textrm{at least one face-up}) &amp;= P(DU \cup UD \cup UU) \\\<br>
+&amp;= P(DU) + P(UD) + P(UU) \\\<br>
+&amp;= 0.21 + 0.21 + 0.09 = 0.51.
+\end{align}\\\\\\\\$$</p>
+<h1 id="summary">Summary</h1>
+<p>And there you have it: an introduction to set theory as the language of probability. Playing around with sets might seem a little dry, but remember: you&rsquo;re dealing with a language, and fluency in this language will allow you to better express and reason about all sorts of interesting probabilistic situations.</p>
+<p>What kinds of situations, you ask? That&rsquo;s for you to decide!</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>Or you could just pick up where you left off once you leave the bar&hellip;&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tag/probability/">probability</a>
+  
+  <a class="badge badge-light" href="/tag/set-theory/">set-theory</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=https://www.remotelycurious.net/post/probability-sets/&amp;text=Probability,%20the%20art%20of%20counting%20things" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=https://www.remotelycurious.net/post/probability-sets/&amp;t=Probability,%20the%20art%20of%20counting%20things" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Probability,%20the%20art%20of%20counting%20things&amp;body=https://www.remotelycurious.net/post/probability-sets/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=https://www.remotelycurious.net/post/probability-sets/&amp;title=Probability,%20the%20art%20of%20counting%20things" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="whatsapp://send?text=Probability,%20the%20art%20of%20counting%20things%20https://www.remotelycurious.net/post/probability-sets/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=https://www.remotelycurious.net/post/probability-sets/&amp;title=Probability,%20the%20art%20of%20counting%20things" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+    
+    
+    
+      
+    
+    
+    
+    <div class="media author-card content-widget-hr">
+      
+
+      <div class="media-body">
+        <h5 class="card-title"><a href="https://www.remotelycurious.net/">Alex Hadjinicolaou</a></h5>
+        <h6 class="card-subtitle">Scientist | Developer | Pun Advocate</h6>
+        <p class="card-text">&ldquo;I can't write five words but that I change seven&rdquo; &ndash; Dorothy Parker</p>
+        <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+    <li>
+      <a href="mailto:a.e.hadjinicolaou@gmail.com" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/alex-hadjinicolaou-a1b21aa0/" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.com/citations?user=V_M9AEAAAAAJ" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ahadjinicolaou" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+      </div>
+    </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/ml-doc-01-2-learning-as-optimization/">ml.doc (1.2): Learning as optimization</a></li>
+      
+      <li><a href="/post/ml-doc-01-1-learning-from-data/">ml.doc (1.1): Learning from data</a></li>
+      
+      <li><a href="/post/beware-linear-regression/">Beware those bearing linear regression models</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/python.min.js"></script>
+        
+      
+
+    
+
+    
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    <script>const isSiteThemeDark = false;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks",
+        'slides' : "Slides"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.b2ed8054531fc8b77a9c500d5dfef876.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+
+  <p class="powered-by">
+    
+  </p>
+
+  
+  
+
+
+
+
+
+
+  <p class="powered-by">
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

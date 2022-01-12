@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>set-theory | Remotely Curious</title>
+    <link>https://www.remotelycurious.net/tag/set-theory/</link>
+      <atom:link href="https://www.remotelycurious.net/tag/set-theory/index.xml" rel="self" type="application/rss+xml" />
+    <description>set-theory</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Wed, 12 Jan 2022 11:53:38 -0500</lastBuildDate>
+    <image>
+      <url>https://www.remotelycurious.net/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>set-theory</title>
+      <link>https://www.remotelycurious.net/tag/set-theory/</link>
+    </image>
+    
+    <item>
+      <title>Probability, the art of counting things</title>
+      <link>https://www.remotelycurious.net/post/probability-sets/</link>
+      <pubDate>Wed, 12 Jan 2022 11:53:38 -0500</pubDate>
+      <guid>https://www.remotelycurious.net/post/probability-sets/</guid>
+      <description>&lt;p&gt;You&amp;rsquo;re walking down the street with your friend when a $50 bill floats down from the sky, flopping onto the sidewalk in front of you.&lt;/p&gt;
+&lt;p&gt;A few hours later, the two of you are staring each other down over a small bar table. The rules are final: the winner of a first-to-ten game of Heads or Tails will take the money. You&amp;rsquo;re up 8-7. As you prepare to flip the next coin, you hear a faint sound of screeching tires rapidly growing louder and louder. Suddenly, the room gets flooded with headlights and a car plows through the wall, sending bricks and beer everywhere. The game is abandoned without a winner. How do you share the money?&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;A slightly less dramatic version of this question was considered by two famous mathematicians, back in 1654. Through an exchange of 
+&lt;a href=&#34;https://www.york.ac.uk/depts/maths/histstat/pascal.pdf&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;letters&lt;/a&gt;, Pascal and Pierre de Fermat reasoned that in this situation, it would make sense to imagine that the game continued to the end (and there &lt;em&gt;is&lt;/em&gt; a winner), and give each player a fraction of the money proportional to the number of final outcomes that they would have won. In our example, with a score of 8-7, you would win more of those outcomes (11 out of 16) than your friend, and so you should get $ \$50 \times\frac{11}{16} = \$ 34.38. $&lt;/p&gt;
+&lt;p&gt;These mathematicians basically reduced a philosophical problem (i.e., how to fairly redistribute the money) to one of &lt;em&gt;counting&lt;/em&gt;, which turns out to be at the heart of all sorts of interesting problems in probability. Counting seems pretty straightforward in principle, but as with many things, the devil is in the details &amp;mdash; depending on how and what you&amp;rsquo;re counting, you might be in for some mental trauma. In this article, I&amp;rsquo;ll go over the familiar idea of probability as &lt;em&gt;the frequency of something happening&lt;/em&gt;, and introduce set theory as a language that allows for complex ideas to be modeled and manipulated in a very natural way. Nothing is assumed: we&amp;rsquo;ll go through everything you need right here.&lt;/p&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#the-meaning-of-probability&#34;&gt;The meaning of probability&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#modeling-uncertainty&#34;&gt;Modeling uncertainty&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#a-segue-into-set-theory&#34;&gt;A segue into set theory&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#set-operations&#34;&gt;Set operations&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#partitions-and-disjoint-sets&#34;&gt;Partitions and disjoint sets&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#naive-definition-of-probability&#34;&gt;Naive definition of probability&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#building-a-probability-model&#34;&gt;Building a probability model&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#a-quick-note-on-experiments&#34;&gt;A quick note on experiments&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#choosing-your-sample-space&#34;&gt;Choosing your sample space&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#assigning-probability&#34;&gt;Assigning probability&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#probability-axioms&#34;&gt;Probability axioms&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#properties-of-probability&#34;&gt;Properties of probability&lt;/a&gt;
+          &lt;ul&gt;
+            &lt;li&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 id=&#34;the-meaning-of-probability&#34;&gt;The meaning of probability&lt;/h1&gt;
+&lt;p&gt;What does it mean to talk about the &amp;ldquo;probability&amp;rdquo; of something happening? Take a moment and think about the meaning of the word in these two sentences:&lt;/p&gt;
+&lt;p&gt;(a) the probability of your toast falling out of your plate and landing butter-side-up;&lt;br&gt;
+(b) the probability that the dog ate your homework.&lt;/p&gt;
+&lt;p&gt;If you write the probability of (a) as $P(\textrm{falling toast lands butter-side-up}) = 0.3$, the usual interpretation might be something like, &amp;ldquo;if I dropped my toast a thousand times, the percentage of times that it would land butter-side-up would be around 30%&amp;rdquo;. In this situation, the meaning of probability is related to the &lt;em&gt;frequency&lt;/em&gt; of something happening.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-1b-working-out-the-probability-of-buttered-side-up-as-a-frequency&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/probability-sets/toast-frequency.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 1.&amp;lt;/b&amp;gt; Working out the probability of buttered-side-up as a frequency.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/probability-sets/toast-frequency.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 1.&lt;/b&gt; Working out the probability of buttered-side-up as a frequency.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;But what about (b)? It doesn&amp;rsquo;t really make sense to imagine a thousand rounds of the dog eating your homework. Here, $P(\textrm{dog ate homework}) = 0.999$ is a statement of your &lt;em&gt;belief&lt;/em&gt; that the dog, with bits of lined paper stuck to his mouth, almost certainly had his way with your homework.&lt;/p&gt;
+&lt;p&gt;As you can see, the choice of interpretation depends on what you&amp;rsquo;re trying to model. In either case, by assigning a probability to something, we&amp;rsquo;re trying to describe a situation whose outcome is uncertain. We&amp;rsquo;ll start talking about the essential ingredients for such a description, and get you acquainted with a handful of terms that are common in probability.&lt;/p&gt;
+&lt;h1 id=&#34;modeling-uncertainty&#34;&gt;Modeling uncertainty&lt;/h1&gt;
+&lt;p&gt;To model an uncertain situation, or an &lt;em&gt;experiment&lt;/em&gt;, we need to work out:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;every possible thing that can happen, and&lt;/li&gt;
+&lt;li&gt;the probability of each thing happening.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The set of &amp;ldquo;every possible thing that can happen&amp;rdquo; is better known as the &lt;em&gt;sample space&lt;/em&gt;, written as $\Omega$. In our &amp;ldquo;falling toast&amp;rdquo; situation, we could imagine that there are only two possible outcomes: (1) the toast lands butter-side-up (or &amp;ldquo;face-up&amp;rdquo;), denoted as $U$, or (2) it lands face-down, $D$. Then the sample space is the set of possibilities, $\Omega = \{U,D\}$.&lt;/p&gt;
+&lt;p&gt;Now let&amp;rsquo;s run through the probabilities for some &amp;ldquo;things that can happen&amp;rdquo;, which we define as &lt;em&gt;events&lt;/em&gt;. We&amp;rsquo;re really talking about subsets of the sample space. There are only two possible events in our experiment, and so they both have non-zero probabilities. Since $P(\{U\}) = 0.3$, we know intuitively that $P(\{D\}) = P(\{\textrm{not }U\}) = 1-0.3 = 0.7$. There&amp;rsquo;s the (absolutely certain) event $\{U\textrm{ or } D\}$ that the toast lands either face-up &lt;strong&gt;or&lt;/strong&gt; face-down, whose certainty is expressed as $P(\{U\textrm{ or } D\}) = 1$. We can also talk about impossible events, like the event that the toast lands simultaneously face-up &lt;strong&gt;and&lt;/strong&gt; face-down, $\{U\textrm{ and } D\}$. This event is not in our sample space $\Omega$, so $P(\{U\textrm{ and } D\}) = 0$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    When expressing the probability of an event, the curly braces are often left out to keep the notation clean. Just keep in mind that whenever you see something like $P(U)$, and $U$ is not a set, it really means $P(\{U\})$.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Let&amp;rsquo;s take a step back and ask ourselves: what is an event, really? And what does it mean exactly to say things like &amp;ldquo;and&amp;rdquo;, &amp;ldquo;or&amp;rdquo; and &amp;ldquo;not&amp;rdquo;? We&amp;rsquo;ve described events as being subsets of the sample space. This means that we can use the language of &lt;em&gt;set theory&lt;/em&gt; to play around with events and express complex probabilistic situations with very little effort.&lt;/p&gt;
+&lt;h1 id=&#34;a-segue-into-set-theory&#34;&gt;A segue into set theory&lt;/h1&gt;
+&lt;p&gt;A &lt;em&gt;set&lt;/em&gt; is an unordered, unique collection of items. Let&amp;rsquo;s say we have an experiment that involves drawing a card from a standard, shuffled 52-card 
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Standard_52-card_deck&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;deck&lt;/a&gt;, with four suits (Clubs, Spades, Hearts, Diamonds) and thirteen ranks. In this case, the sample space $\Omega$ (the set of all cards in the deck) is one such set. Another set could be the collection of Heart and Diamond face cards,&lt;/p&gt;
+&lt;p&gt;$$ S = \left\{ K\heartsuit, Q\heartsuit, J\heartsuit, K\diamondsuit, Q\diamondsuit, J\diamondsuit  \right\}. $$&lt;/p&gt;
+&lt;p&gt;We would say that this is a 6-element &lt;em&gt;subset&lt;/em&gt; of the 52-element sample space $\Omega$, because every element in $S$ can be found in $\Omega$. The number of elements in $S$ is written as $|S| = 6$. A set that has no elements is equivalent to the empty set, denoted by the $ \emptyset $ symbol.&lt;/p&gt;
+&lt;p&gt;Take note of the definition: a set is an &lt;em&gt;unordered&lt;/em&gt; and &lt;em&gt;unique&lt;/em&gt; collection of items. That means the order in which you list the items of a set doesn&amp;rsquo;t matter, and there can be no duplicates of an element.&lt;/p&gt;
+&lt;h2 id=&#34;set-operations&#34;&gt;Set operations&lt;/h2&gt;
+&lt;p&gt;Now we can start talking about manipulating sets. Although there are many ways to model an uncertain situation, some are more convenient than others. Generally, we like to play with sets that can be expressed concisely, and more importantly, allow us to avoid hard probability computations. Set operations are the tools that allow us to sculpt exactly the kinds of sets we want.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    In this writeup, we deal with &lt;em&gt;countable&lt;/em&gt; sets that have a finite number of elements. Countable sets are easier to play with, letting you focus on learning the fundamentals of probability. There can also be &lt;em&gt;infinite&lt;/em&gt; countable sets, like the set of integers $\mathbb{Z}$, and &lt;em&gt;uncountable&lt;/em&gt; sets (e.g., the set of real numbers $\mathbb{R}$). These species are trickier to deal with, but allow for the description of many more probabilistic experiments.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The &lt;em&gt;complement&lt;/em&gt; (&amp;ldquo;not&amp;rdquo;) operation is as simple as it is useful. With respect to the sample space $\Omega$, the complement of $S$ (written as $S^\complement$), is the set of all elements in $\Omega$ that are not in $S$. Imagine if you wanted to find the probability of &amp;ldquo;anything other than a black King&amp;rdquo;. You would probably much prefer to write this as $P(\{\textrm{black king}\}^\complement)$ or $P(\textrm{not black king})$, rather than listing every non-black-King card in a set. The complement of $\Omega$ is the empty set, $\emptyset$. Likewise, $\emptyset^\complement = \Omega$.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;union&lt;/em&gt; of two sets $A$ and $B$ is the set of all elements in $\Omega$ that belong to either $A$ or $B$, inclusive. Using a little notation, we would write&lt;/p&gt;
+&lt;p&gt;$$ A \cup B = \{x | x \textrm{ is in } A \textbf{ or } x \textrm{ is in } B\}, $$&lt;/p&gt;
+&lt;p&gt;where the vertical line reads &amp;ldquo;such that&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;intersection&lt;/em&gt; of $A$ and $B$ is the set of all elements in $\Omega$ that are in both $A$ and $B$.&lt;/p&gt;
+&lt;p&gt;$$ A \cap B = \{x | x \textrm{ is in } A \textbf{ and } x \textrm{ is in } B\} $$&lt;/p&gt;
+&lt;p&gt;We can visualize the union and intersection sets with a couple of examples: $A$, the set of face cards, and $B$, the set of all Hearts and Clubs. The figure below shows cards that only belong to $A$ in yellow, and those exclusive to $B$ in blue. The cards common to both sets, shown in green, are the elements of the intersection $A \cap B$. The union of the two sets, $A \cup B$ is the set of all yellow, green, and blue cards.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-2b-the-two-sets-a-and-b-with-their-intersection-indicated-by-the-green-cards&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/probability-sets/deck-union-intersection.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 2.&amp;lt;/b&amp;gt; The two sets $A$ and $B$, with their intersection indicated by the green cards.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/probability-sets/deck-union-intersection.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 2.&lt;/b&gt; The two sets $A$ and $B$, with their intersection indicated by the green cards.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;h4 id=&#34;de-morgans-laws&#34;&gt;De Morgan&amp;rsquo;s laws&lt;/h4&gt;
+&lt;p&gt;In the last example we can express the cards that do not belong to either set (grey cards in Fig. 2) as $(A \cup B)^\complement$. Depending on the problem, you might find it easier to work out the probability of an intersection (or a union). We can alternate between intersections and unions using &lt;em&gt;De Morgan&amp;rsquo;s laws&lt;/em&gt;:&lt;/p&gt;
+&lt;p&gt;$$ (A_{1} \cup A_{2} \cup &amp;hellip; \cup A_{n})^\complement = A_{1}^\complement \cap A_{2}^\complement \cap &amp;hellip; \cap A_{n}^\complement $$
+$$ (A_{1} \cap A_{2} \cap &amp;hellip; \cap A_{n})^\complement = A_{1}^\complement \cup A_{2}^\complement \cup &amp;hellip; \cup A_{n}^\complement $$&lt;/p&gt;
+&lt;p&gt;What are these saying in English? $(A \cup B)^\complement$ is translated as &amp;ldquo;everything other than $A$ or $B$&amp;rdquo;, whereas $A^\complement \cap B^\complement$ can be read as &amp;ldquo;not A and not B&amp;rdquo;. Of course, these two are logically equivalent.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Try translating $(A \cap B)^\complement$ and its De Morgan counterpart. Sketch the fraction of $\Omega$ that the sets $(A \cap B)^\complement$ and $(A \cup B)^\complement$ represent in Fig. 2.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;So, we can use De Morgan&amp;rsquo;s laws to switch between different representations of the same set. Don&amp;rsquo;t worry if this seems a bit abstract right now &amp;mdash; we&amp;rsquo;ll see later on how this can be useful.&lt;/p&gt;
+&lt;h2 id=&#34;partitions-and-disjoint-sets&#34;&gt;Partitions and disjoint sets&lt;/h2&gt;
+&lt;p&gt;We&amp;rsquo;ll round out our whirlwind tour of set theory with a brief discussion about &lt;em&gt;partitions&lt;/em&gt;, which are a collection of subsets of some set that (a) have nothing in common with each other, and (b) completely exhaust (or account for) that set. You will often find yourself carving the sample space into partitions to work out the probability of some event. They also help in making sure your probability math checks out.&lt;/p&gt;
+&lt;p&gt;The sample space of our card-drawing experiment can be split into a few different partitions. Here are a few examples:&lt;/p&gt;
+&lt;p&gt;$$
+\begin{align}
+\Omega &amp;amp;= \{\textrm{red suits}\} \cup \{\textrm{black suits}\} \\\&lt;br&gt;
+&amp;amp;= \{\textrm{clubs}\} \cup \{\textrm{spades}\} \cup \{\textrm{hearts}\} \cup \{\textrm{diamonds}\} \\\&lt;br&gt;
+&amp;amp;= \{\textrm{even rank}\} \cup \{\textrm{odd rank}\} \\\&lt;br&gt;
+&amp;amp;= \{\textrm{rank } \leq 4\} \cup \{\textrm{rank } &amp;gt; 4\}
+\end{align}
+$$&lt;/p&gt;
+&lt;p&gt;We can see that in each partition, the intersection of any two sets is the empty set, and all elements of $\Omega$ are accounted for by their union. Note that when $A \cap B = \emptyset$, we say that $A$ and $B$ are &lt;em&gt;disjoint&lt;/em&gt;, or mutually exclusive.&lt;/p&gt;
+&lt;p&gt;There&amp;rsquo;s nothing stopping us from making useless partitions &amp;mdash; any collection of sets that satisfies the two listed restrictions can be a partition. That said, you&amp;rsquo;ll usually want to split the sample space in a way that makes solving your problem easier.&lt;/p&gt;
+&lt;p&gt;With some set theory under our belt, we&amp;rsquo;re ready to return to the world of probability. Counting the number of things in sets is at the heart of probability, and naturally leads to its oldest and most familiar definition.&lt;/p&gt;
+&lt;h1 id=&#34;naive-definition-of-probability&#34;&gt;Naive definition of probability&lt;/h1&gt;
+&lt;p&gt;The probability of an event, &lt;em&gt;if each experiment outcome is equally likely&lt;/em&gt;, can be worked out by counting the number of ways it could happen, and then dividing by the total number of outcomes.&lt;/p&gt;
+&lt;p&gt;$$ P(E) = \frac{\textrm{number of favorable outcomes}}{\textrm{total number of outcomes}} $$&lt;/p&gt;
+&lt;p&gt;When our assumption that every outcome has equal probability is justified (as when drawing a card from a well-shuffled, standard deck of cards), we can compute probabilities very easily. The probability of drawing a Diamond becomes $P(\textrm{diamond}) = \frac{\textrm{number of diamonds}}{\textrm{number of cards in deck}} = \frac{13}{52}$. In general, when there are $n$ elements in the sample space $\Omega$, and event $E$ is a k-element subset of $\Omega$,&lt;/p&gt;
+&lt;p&gt;$$P(E) = \frac{|E|}{|\Omega|} = \frac{k}{n},$$&lt;/p&gt;
+&lt;p&gt;where $|S|$ is the number of elements in set $S$.&lt;/p&gt;
+&lt;h4 id=&#34;about-that-assumption&#34;&gt;About that assumption&lt;/h4&gt;
+&lt;p&gt;It&amp;rsquo;s easy to see how the naive definition breaks down when our &amp;ldquo;all outcomes have equal likelihood&amp;rdquo; assumption is not valid. Going back to our falling toast experiment, we have two outcomes: butter-side up, with $P(U) = 0.3$, and butter-side-down, with $P(D) = 0.7$. If we wanted to calculate $P(U)$ using the naive definition, we&amp;rsquo;d get 1/2, which we know to be wrong.&lt;/p&gt;
+&lt;p&gt;A more fundamental limitation is that this definition relies on events that are finite and countable. It wouldn&amp;rsquo;t make sense to count the number of elements in an &amp;ldquo;all even integers&amp;rdquo; event, for example.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Ultimately, there are many situations in which it is perfectly reasonable to use the naive definition to compute your probabilities. Just keep in mind the limitations.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;building-a-probability-model&#34;&gt;Building a probability model&lt;/h1&gt;
+&lt;p&gt;Here&amp;rsquo;s a (mostly familiar) list of what we need to build a probability model:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;An &lt;em&gt;experiment&lt;/em&gt;, a process that results in some kind of outcome,&lt;/li&gt;
+&lt;li&gt;The &lt;em&gt;sample space&lt;/em&gt;, containing all possible outcomes of the experiment,&lt;/li&gt;
+&lt;li&gt;A &lt;em&gt;probability law&lt;/em&gt; that assigns probability to each possible outcome.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Our &amp;ldquo;falling toast&amp;rdquo; example has all of these: (1) an experiment (e.g., you knock the plate and the toast falls off the table), (2) a sample space $\Omega = \{U,D\}$, and the probability of each outcome.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-3b-components-of-a-probability-model-for-the-falling-toast-experiment&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/probability-sets/model-ingredients.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 3.&amp;lt;/b&amp;gt; Components of a probability model for the falling toast experiment.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/probability-sets/model-ingredients.png&#34; alt=&#34;&#34;  &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 3.&lt;/b&gt; Components of a probability model for the falling toast experiment.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Take a look at the sketch of the sample space above: it looks like the two possible outcomes are taking up different amounts of the sample space, in proportion to their probability. In fact, it&amp;rsquo;s useful to think about the outcomes as taking up some amount of the total available probability. We&amp;rsquo;ll explore this idea very soon.&lt;/p&gt;
+&lt;h2 id=&#34;a-quick-note-on-experiments&#34;&gt;A quick note on experiments&lt;/h2&gt;
+&lt;p&gt;Up until now our experiments have involved single, one-shot happenings: drawing a card, and dropping a slice of toast. But there&amp;rsquo;s nothing stopping us from using more complicated experiments. For &lt;em&gt;sequential&lt;/em&gt; experiments, like flipping a coin five times, each outcome is the result of multiple sub-outcomes chained together. Here, each element of $\Omega$ will look like $(c_{1},c_{2},c_{3},c_{4},c_{5})$, or $c_{1}c_{2}c_{3}c_{4}c_{5}$, where $c_{n}$ stands for the sub-outcome of the $n$th coin flip. We could then talk about the probability of an outcome like &amp;ldquo;getting four Heads in a row&amp;rdquo;, $P(HHHHT \textrm{ or } THHHH)$.&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    We&amp;rsquo;ll introduce a little notation here: if element $k$ is an element of set $S$, then we write $k \in S$. In the last example, we have $HTTHT \in \Omega$.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;The sample spaces for sequential experiments tend to be quite a lot larger than their one-shot counterparts. To give you an idea, a single coin flip has only two possible outcomes, Heads and Tails, while the sample space for the &amp;ldquo;five coin flips&amp;rdquo; experiment has $|\Omega| = 2^5 = 32$ outcomes.&lt;/p&gt;
+&lt;h2 id=&#34;choosing-your-sample-space&#34;&gt;Choosing your sample space&lt;/h2&gt;
+&lt;p&gt;When deciding how to model your sample space, you need to ensure three things:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;the sample space is &lt;em&gt;collectively exhaustive&lt;/em&gt; (accounts for every possible outcome),&lt;/li&gt;
+&lt;li&gt;the elements are &lt;em&gt;mutually exclusive&lt;/em&gt; (each element in the sample space is unique),&lt;/li&gt;
+&lt;li&gt;the sample space is appropriately &amp;ldquo;granular&amp;rdquo;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;That last point could do with some explanation. Let&amp;rsquo;s dial it up to 11 for a second&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;In our falling toast experiment, we chose a sample space of $\Omega = \{U,D\}$ because we were interested in whether the slice lands face-up or face-down. But imagine a situation in which a mischievous spirit has possessed our toaster. Now, the toaster launches buttered bread, out of the toaster and onto the floor. Not only that, the spirit has taken control of the toaster&amp;rsquo;s heat setting, randomly using one of three heat levels for each slice of bread.&lt;/p&gt;
+&lt;p&gt;Assuming you had a (slightly bizarre) interest in modeling this new experiment, you could choose a sample space $\Omega^{*}$ that has elements like $(r,h)$, where $r \in \{U,D\}$ is the face-up-or-down result, and $h \in \{H_{1}, H_{2}, H_{3}\}$ represents the heat level.&lt;/p&gt;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;figure id=&#34;figure-bfig-4b-two-different-sample-spaces&#34;&gt;
+
+
+  &lt;a data-fancybox=&#34;&#34; href=&#34;https://www.remotelycurious.net/probability-sets/sample-spaces.png&#34; data-caption=&#34;&amp;lt;b&amp;gt;Fig. 4.&amp;lt;/b&amp;gt; Two different sample spaces.&#34;&gt;
+
+
+  &lt;img src=&#34;https://www.remotelycurious.net/probability-sets/sample-spaces.png&#34; alt=&#34;&#34; width=&#34;360&#34; &gt;
+&lt;/a&gt;
+
+
+  
+  
+  &lt;figcaption&gt;
+    &lt;b&gt;Fig. 4.&lt;/b&gt; Two different sample spaces.
+  &lt;/figcaption&gt;
+
+
+&lt;/figure&gt;
+
+&lt;p&gt;Since $\Omega^{*}$ has just enough complexity to be used in our heat investigation, this sample space has the right level of granularity. On the other hand, the original $\Omega$ is not granular enough. You should choose a sample space that captures what you&amp;rsquo;re interested in &amp;mdash; and nothing more.&lt;/p&gt;
+&lt;h1 id=&#34;assigning-probability&#34;&gt;Assigning probability&lt;/h1&gt;
+&lt;p&gt;A probability law allocates probability to experiment outcomes. What are the rules for how this can be done? Up until now we&amp;rsquo;ve tiptoed around these rules, abiding by them but never really mentioning them. It&amp;rsquo;s time to change that. This section will go over the three fundamental axioms that underlie all of probability, and what this means for our calculations.&lt;/p&gt;
+&lt;h2 id=&#34;probability-axioms&#34;&gt;Probability axioms&lt;/h2&gt;
+&lt;p&gt;Imagine that the sample space is a cake whose weight is measured as &lt;strong&gt;one unit of probability&lt;/strong&gt;. Each event $E$ is a slice of cake that has weight $P(E)$. This leads us to our first axiom, which says that this weight cannot be negative:&lt;/p&gt;
+&lt;p&gt;$$\textbf{A1. } P(E) \geq 0 \textrm{ for event } E.$$&lt;/p&gt;
+&lt;p&gt;The second axiom says that for two disjoint events (or two separate pieces of cake), their total weight is the sum of their individual weights:&lt;/p&gt;
+&lt;p&gt;$$\textbf{A2. } P(E_{1} \cup E_{2}) = P(E_{1}) + P(E_{2}).$$&lt;/p&gt;
+&lt;p&gt;The third and final axiom says that the total weight of the sample space (cake) is one probability unit:&lt;/p&gt;
+&lt;p&gt;$$\textbf{A3. } P(\Omega) = 1.$$&lt;/p&gt;
+&lt;h2 id=&#34;properties-of-probability&#34;&gt;Properties of probability&lt;/h2&gt;
+&lt;p&gt;We can use the three axioms to derive all sorts of intuitive findings about probability, which we&amp;rsquo;ll explore using some examples. It&amp;rsquo;s worth spending some time with these to make sure you understand them, as they will crop up over and over again as you work with probability models.&lt;/p&gt;
+&lt;p&gt;One of the most useful (and familiar) findings states that if the sample space consists of a finite number of unique elements $e_{i}$, we can work out the probability of any event $E = \{e_{1} \cup e_{2} \cup &amp;hellip; \cup e_{n}\}$ by summing the probabilities of its elements:&lt;/p&gt;
+&lt;p&gt;$$P(E) = P(e_{1}) + P(e_{2}) + &amp;hellip; + P(e_{n}) = \sum_{i=1}^{n} P(e_{i})$$&lt;/p&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Don&amp;rsquo;t be intimidated by the big Greek letter! The notation on the right-hand side is just shorthand that lets us avoid writing big, clunky expressions. If we wanted the total probability of the second, third, and fourth elements, we&amp;rsquo;d write $\sum_{i=2}^{4} P(e_{i}) = P(e_{2}) + P(e_{3}) + P(e_{4})$.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;alert alert-note&#34;&gt;
+  &lt;div&gt;
+    Remember that $P(e_{i})$ really means $P(\{e_{i}\})$, the probability of an event that consists of only one element, $e_{i}$.
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;As a quick example, you can work out the probability of drawing a Spade face card by applying Axiom 2 and summing the individual probabilities,&lt;/p&gt;
+&lt;p&gt;$$P(J\spadesuit \cup Q\spadesuit \cup K\spadesuit) = P(J\spadesuit) + P(Q\spadesuit) + P(K\spadesuit) = \frac{3}{52}.$$&lt;/p&gt;
+&lt;h4 id=&#34;model-a-flipping-a-fair-coin&#34;&gt;Model A: flipping a fair coin&lt;/h4&gt;
+&lt;p&gt;Here we&amp;rsquo;re dealing with two equally likely outcomes, Heads or Tails, and so the sample space consists of two elements, $\Omega = \{H,T\}$. The set of all possible events is&lt;/p&gt;
+&lt;p&gt;$$\{H\}, \{T\}, \{H \cup T\}, \emptyset$$&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s work out the probability of each event using the axioms.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;By definition, $P(H) = P(T) = 0.5$.&lt;/li&gt;
+&lt;li&gt;We know that a coin cannot show both Heads and Tails, which means $H$ and $T$ are disjoint and $P(H \cup T) = P(H) + P(T)$.&lt;/li&gt;
+&lt;li&gt;Since $H$ and $T$ are the only outcomes, the sets $\{H\}$ and $\{T\}$ are a partition for $\Omega$. That means $P(H \cup T) = P(\Omega) = 1$.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;What about $P(\emptyset)$? Since $\emptyset$ and $\Omega$ are disjoint, we can work out&lt;/p&gt;
+&lt;p&gt;$$P(\emptyset \cup \Omega) = P(\emptyset) + P(\Omega) = P(\emptyset) + 1.$$&lt;/p&gt;
+&lt;p&gt;Since probability can&amp;rsquo;t be negative (or larger than 1), this tells us that $P(\emptyset) = 0$.&lt;/p&gt;
+&lt;p&gt;The probability law (i.e., the assignment of probability for every event) thus falls out from a straightforward application of the axioms:&lt;/p&gt;
+&lt;p&gt;$$P(H) = 0.5, P(T) = 0.5, P(\Omega) = P(H \cup T) = 1, P(\emptyset) = 0$$&lt;/p&gt;
+&lt;h4 id=&#34;model-b-flipping-an-unfair-toast-twice&#34;&gt;Model B: flipping an unfair toast, twice&lt;/h4&gt;
+&lt;p&gt;We return to our falling toast experiment, but with a wrinkle: we&amp;rsquo;re interested in the outcome of two consecutive toast &amp;lsquo;flips&amp;rsquo;. That means we&amp;rsquo;re now dealing with a sequential model, with sample space&lt;/p&gt;
+&lt;p&gt;$$\Omega = \{DD, DU, UD, UU\}.$$&lt;/p&gt;
+&lt;p&gt;How do we compute $P\{DU\}$? The outcome $DU$ means that we got face-down on the first flip and face-up on the second. We know that $P(U) = 0.3$ and $P(D) = 0.7$. Since the outcome of the first flip &lt;em&gt;has nothing to do with the outcome of the second&lt;/em&gt; (and vice versa), we can compute the probability like this:&lt;/p&gt;
+&lt;p&gt;$$P(DU) = P(D) \times P(U) = 0.7 \times 0.3 = 0.21.$$&lt;/p&gt;
+&lt;p&gt;Similarly, we can work out all the other probabilities, making sure that their sum accounts for the entire weight of the sample space,&lt;/p&gt;
+&lt;p&gt;$$
+\begin{align}
+\sum_{i=1}^{4} P(e_{i}) &amp;amp;= P(DD) + P(DU) + P(UD) + P(UU) \\\&lt;br&gt;
+&amp;amp;= 0.09 + 0.21 + 0.21 + 0.49 = 1 = P(\Omega).
+\end{align}
+$$&lt;/p&gt;
+&lt;p&gt;How would we compute the probability of ending up with at least one face-up slice of toast? We&amp;rsquo;re interested in the probability that we get one face-up slice &lt;strong&gt;or&lt;/strong&gt; two face-up slices. That&amp;rsquo;s just a matter of summing the probability of all outcomes that lead to this particular result:&lt;/p&gt;
+&lt;p&gt;$$
+\begin{align}
+P(\textrm{at least one face-up}) &amp;amp;= P(DU \cup UD \cup UU) \\\&lt;br&gt;
+&amp;amp;= P(DU) + P(UD) + P(UU) \\\&lt;br&gt;
+&amp;amp;= 0.21 + 0.21 + 0.09 = 0.51.
+\end{align}\\\\\\\\$$&lt;/p&gt;
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+&lt;p&gt;And there you have it: an introduction to set theory as the language of probability. Playing around with sets might seem a little dry, but remember: you&amp;rsquo;re dealing with a language, and fluency in this language will allow you to better express and reason about all sorts of interesting probabilistic situations.&lt;/p&gt;
+&lt;p&gt;What kinds of situations, you ask? That&amp;rsquo;s for you to decide!&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;Or you could just pick up where you left off once you leave the bar&amp;hellip;&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

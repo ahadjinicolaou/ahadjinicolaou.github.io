@@ -2,13 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://www.remotelycurious.net/category/analysis/</loc>
+    <lastmod>2022-01-12T11:53:38-05:00</lastmod>
+  </url><url>
+    <loc>https://www.remotelycurious.net/categories/</loc>
+    <lastmod>2022-01-12T11:53:38-05:00</lastmod>
+  </url><url>
+    <loc>https://www.remotelycurious.net/post/</loc>
+    <lastmod>2022-01-12T11:53:38-05:00</lastmod>
+  </url><url>
+    <loc>https://www.remotelycurious.net/tag/probability/</loc>
+    <lastmod>2022-01-12T11:53:38-05:00</lastmod>
+  </url><url>
+    <loc>https://www.remotelycurious.net/post/probability-sets/</loc>
+    <lastmod>2022-01-12T11:53:38-05:00</lastmod>
+  </url><url>
+    <loc>https://www.remotelycurious.net/</loc>
+    <lastmod>2022-01-12T11:53:38-05:00</lastmod>
+  </url><url>
+    <loc>https://www.remotelycurious.net/tag/set-theory/</loc>
+    <lastmod>2022-01-12T11:53:38-05:00</lastmod>
+  </url><url>
+    <loc>https://www.remotelycurious.net/tags/</loc>
+    <lastmod>2022-01-12T11:53:38-05:00</lastmod>
+  </url><url>
     <loc>https://www.remotelycurious.net/tag/atomic-red-team/</loc>
     <lastmod>2021-08-21T20:32:25-04:00</lastmod>
   </url><url>
     <loc>https://www.remotelycurious.net/tag/azure/</loc>
-    <lastmod>2021-08-21T20:32:25-04:00</lastmod>
-  </url><url>
-    <loc>https://www.remotelycurious.net/categories/</loc>
     <lastmod>2021-08-21T20:32:25-04:00</lastmod>
   </url><url>
     <loc>https://www.remotelycurious.net/category/cybersecurity/</loc>
@@ -20,13 +41,7 @@
     <loc>https://www.remotelycurious.net/tag/mitre-attck/</loc>
     <lastmod>2021-08-21T20:32:25-04:00</lastmod>
   </url><url>
-    <loc>https://www.remotelycurious.net/post/</loc>
-    <lastmod>2021-08-21T20:32:25-04:00</lastmod>
-  </url><url>
     <loc>https://www.remotelycurious.net/tag/powershell/</loc>
-    <lastmod>2021-08-21T20:32:25-04:00</lastmod>
-  </url><url>
-    <loc>https://www.remotelycurious.net/</loc>
     <lastmod>2021-08-21T20:32:25-04:00</lastmod>
   </url><url>
     <loc>https://www.remotelycurious.net/tag/sentinel/</loc>
@@ -36,9 +51,6 @@
     <lastmod>2021-08-21T20:32:25-04:00</lastmod>
   </url><url>
     <loc>https://www.remotelycurious.net/tag/sysmon/</loc>
-    <lastmod>2021-08-21T20:32:25-04:00</lastmod>
-  </url><url>
-    <loc>https://www.remotelycurious.net/tags/</loc>
     <lastmod>2021-08-21T20:32:25-04:00</lastmod>
   </url><url>
     <loc>https://www.remotelycurious.net/post/threatlab/</loc>
@@ -106,9 +118,6 @@
   </url><url>
     <loc>https://www.remotelycurious.net/tag/systemd/</loc>
     <lastmod>2020-12-26T10:11:54-05:00</lastmod>
-  </url><url>
-    <loc>https://www.remotelycurious.net/category/analysis/</loc>
-    <lastmod>2020-12-01T19:36:40-04:00</lastmod>
   </url><url>
     <loc>https://www.remotelycurious.net/tag/bias-variance-tradeoff/</loc>
     <lastmod>2020-12-01T19:36:40-04:00</lastmod>
